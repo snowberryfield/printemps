@@ -9,6 +9,10 @@
 #include "../../abstract_solver_controller.h"
 #include "../core/tabu_search_core.h"
 
+#include "initial_solution_mode.h"
+#include "penalty_coefficient_update_mode.h"
+#include "search_mode.h"
+
 #include "tabu_search_controller_state.h"
 #include "tabu_search_controller_state_manager.h"
 #include "tabu_search_controller_logger.h"
@@ -738,20 +742,41 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_penalty_coefficient(const bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
+        const auto& STATE    = m_state_manager.state();
+        const auto  MODE_STR = PenaltyCoefficientUpdateModeInverseMap.at(
+            STATE.penalty_coefficient_update_mode);
 
-        if (STATE.penalty_coefficient_reset_flag) {
-            utility::print_message(                                           //
-                "Penalty coefficients were reset due to search stagnation.",  //
-                a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_relaxing) {
-            utility::print_message(                    //
-                "Penalty coefficients were relaxed.",  //
-                a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_tightening) {
-            utility::print_message(                      //
-                "Penalty coefficients were tightened.",  //
-                a_IS_ENABLED_PRINT);
+        switch (STATE.penalty_coefficient_update_mode) {
+            case PenaltyCoefficientUpdateMode::Keep: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Relax: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Tighten: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Reset: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified penalty coefficient update mode is "
+                    "invalid."));
+            }
         }
 
         utility::print_info(  //
@@ -786,30 +811,33 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_improvability_screening_mode(
         bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
+        const auto& STATE    = m_state_manager.state();
+        const auto  MODE_STR = option::improvability_screening_mode::
+                                  ImprovabilityScreeningModeInverseMap.at(
+                                      STATE.improvability_screening_mode);
 
         switch (STATE.improvability_screening_mode) {
             case option::improvability_screening_mode::Off: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: off",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Soft: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: soft",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Aggressive: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: aggressive",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Intensive: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: intensive",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
@@ -824,16 +852,34 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_initial_solution(const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE = m_state_manager.state();
-
-        if (STATE.employing_global_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: global incumbent", a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_local_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: local incumbent", a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_previous_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: previous initial", a_IS_ENABLED_PRINT);
+        const auto  MODE_STR =
+            InitialSolutionModeInverseMap.at(STATE.initial_solution_mode);
+        switch (STATE.initial_solution_mode) {
+            case InitialSolutionMode::Global: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Local: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Previous: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Pending: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified initial solution mode is invalid."));
+            }
         }
     }
 

@@ -74,6 +74,14 @@ class TabuSearchControllerStateManager {
                 .to_sparse();
 
         /**
+         * Initialize the pending solution. The pending solution is a solution
+         * to be employed as the initial solution for the next loop if the
+         * employing_pending_solution_flag is set to true. By default, it is set
+         * to the current global augmented incumbent solution.
+         */
+        m_state.pending_solution = m_state.global_augmented_incumbent_solution;
+
+        /**
          * Initialize the option values.
          */
         m_state.initial_tabu_tenure = m_option.tabu_search.initial_tabu_tenure;
@@ -242,14 +250,15 @@ class TabuSearchControllerStateManager {
         this->keep_previous_solution();
 
         /**
-         * Update the status of outer stagnation.
-         */
-        this->update_is_outer_stagnation();
-
-        /**
          * Update the status of improvement in the last tabu search.
          */
         this->update_is_improved();
+
+        /**
+         * Update the status of stagnation.
+         */
+        this->update_is_inner_stagnation();
+        this->update_is_outer_stagnation();
 
         /**
          * Turn off the flags for parameter control.
@@ -287,39 +296,39 @@ class TabuSearchControllerStateManager {
         }
 
         /**
-         * Update the status of inner stagnation. This method must be called
-         * after updating penalty coefficient flags.
-         */
-        this->update_is_inner_stagnation();
-
-        /**
          * Additional processes for cases when the penalty coefficients are
          * relaxed.
          */
-        if (m_option.penalty.is_enabled_outer_stagnation_breaker &&
-            m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_state.penalty_coefficient_update_mode ==
+            PenaltyCoefficientUpdateMode::Relax) {
             this->update_penalty_coefficient_relaxing_rate();
-        }
-
-        /**
-         * Additional processes for cases when the penalty coefficients are
-         * tightened: Reset penalty coefficients if inner stagnation is
-         * detected.
-         */
-        if (m_option.penalty.is_enabled_inner_stagnation_breaker &&
-            m_state.is_enabled_penalty_coefficient_tightening) {
-            this->update_penalty_coefficient_reset_flag();
         }
 
         /**
          * Update the local penalty coefficients.
          */
-        if (m_state.penalty_coefficient_reset_flag) {
-            this->reset_local_penalty_coefficient();
-        } else if (m_state.is_enabled_penalty_coefficient_tightening) {
-            this->tighten_local_penalty_coefficient();
-        } else if (m_state.is_enabled_penalty_coefficient_relaxing) {
-            this->relax_local_penalty_coefficient();
+        switch (m_state.penalty_coefficient_update_mode) {
+            case PenaltyCoefficientUpdateMode::Keep: {
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Relax: {
+                this->relax_local_penalty_coefficient();
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Tighten: {
+                this->tighten_local_penalty_coefficient();
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Reset: {
+                this->reset_local_penalty_coefficient();
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified penalty coefficient update mode is "
+                    "invalid."));
+            }
         }
 
         /**
@@ -359,7 +368,6 @@ class TabuSearchControllerStateManager {
              * updated.
              */
             this->disable_special_neighborhood_moves();
-
         } else {
             /**
              * Enable the special neighborhood moves if the incumbent was
@@ -451,6 +459,8 @@ class TabuSearchControllerStateManager {
                 m_global_state_ptr->incumbent_holder
                     .global_augmented_incumbent_solution()
                     .to_sparse();
+            m_state.pending_solution =
+                m_state.global_augmented_incumbent_solution;
         } else {
             m_state.iteration_after_global_augmented_incumbent_update++;
         }
@@ -507,6 +517,15 @@ class TabuSearchControllerStateManager {
         m_state.distance_from_global_solution =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE.distance(
                 m_state.global_augmented_incumbent_solution);
+
+        /**
+         * If the search mode is "Diversify", the pending solution is set to the
+         * local augmented incumbent solution to diversify the search.
+         */
+        if (m_state.search_mode == SearchMode::Diversify) {
+            m_state.pending_solution =
+                LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE;
+        }
     }
 
     /*************************************************************************/
@@ -521,8 +540,7 @@ class TabuSearchControllerStateManager {
          * proper adjustment of the penalty coefficients.
          */
         m_state.is_inner_stagnation =
-            (m_state.is_exceeded_initial_penalty_coefficient ||
-             !m_state.is_improved) &&
+            !m_state.is_improved &&
             m_state.iteration_after_relaxation >
                 m_option.penalty.inner_stagnation_threshold;
     }
@@ -535,10 +553,8 @@ class TabuSearchControllerStateManager {
          * less than m_option.penalty.outer_stagnation_threshold.
          */
         m_state.is_outer_stagnation =
-            !m_global_state_ptr->incumbent_holder
-                 .is_found_feasible_solution() &&
             m_state.iteration_after_global_augmented_incumbent_update >=
-                m_option.penalty.outer_stagnation_threshold;
+            m_option.penalty.outer_stagnation_threshold;
     }
 
     /*************************************************************************/
@@ -559,14 +575,8 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void turn_flags_off(void) {
-        m_state.employing_local_solution_flag             = false;
-        m_state.employing_global_solution_flag            = false;
-        m_state.employing_previous_solution_flag          = false;
-        m_state.is_enabled_penalty_coefficient_tightening = false;
-        m_state.is_enabled_penalty_coefficient_relaxing   = false;
-        m_state.is_enabled_forcibly_initial_modification  = false;
-        m_state.penalty_coefficient_reset_flag            = false;
-        m_state.is_enabled_special_neighborhood_move      = false;
+        m_state.is_enabled_forcibly_initial_modification = false;
+        m_state.is_enabled_special_neighborhood_move     = false;
     }
 
     /*************************************************************************/
@@ -578,35 +588,51 @@ class TabuSearchControllerStateManager {
             return;
         }
 
-        if (m_state.is_global_augmented_incumbent_updated) {
-            /**
-             * If the incumbent solution was updated in the last loop, the
-             * improvability screening mode is set to "Intensive" to search
-             * better solutions by intensive search.
-             */
-            m_state.improvability_screening_mode =
-                option::improvability_screening_mode::Intensive;
-            return;
-        }
-
-        if (m_state.tabu_search_result.is_few_permissible_neighborhood) {
-            /**
-             * If the last loop encountered a situation where there is no
-             * permissible solution, the improvability screening mode is set to
-             * "Soft" for search diversity.
-             */
+        /**
+         * If the number of evaluated moves is less than 1% of the total
+         * neighborhood size, it is likely that the search is trapped in a
+         * local optimum. In this case, the improvability screening mode is
+         * set to "Soft" for search diversity.
+         */
+        if (m_state.tabu_search_result.number_of_evaluated_moves <
+            m_state.tabu_search_result.number_of_iterations *
+                m_model_ptr->reference().number_of_mutable_variables() * 0.01) {
             m_state.improvability_screening_mode =
                 option::improvability_screening_mode::Soft;
             return;
         }
 
+        /**
+         * If the incumbent solution was updated in the last loop, the
+         * improvability screening mode is set to "Intensive" to search better
+         * solutions by intensive search.
+         */
+        if (m_state.is_global_augmented_incumbent_updated) {
+            m_state.improvability_screening_mode =
+                option::improvability_screening_mode::Intensive;
+            return;
+        }
+
+        /**
+         * If the last loop encountered a situation where there is no
+         * permissible solution, the improvability screening mode is set to
+         * "Soft" for search diversity.
+         */
+        if (m_state.tabu_search_result.is_few_permissible_neighborhood) {
+            m_state.improvability_screening_mode =
+                option::improvability_screening_mode::Soft;
+            return;
+        }
+
+        /**
+         * If the last loop failed to find any feasible solution, the
+         * improvability screening mode is set to "Aggressive" or "Intensive" to
+         * prioritize the search for feasible solutions.
+         */
         if (!m_state.tabu_search_result.is_found_new_feasible_solution) {
-            /**
-             * If the last loop failed to find any feasible solution, the
-             * improvability screening mode is set to "Aggressive" or
-             * "Intensive" to prioritize the search for feasible solutions.
-             */
-            if (m_state.is_outer_stagnation) {
+            if (m_state.is_outer_stagnation &&
+                !m_global_state_ptr->incumbent_holder
+                     .is_found_feasible_solution()) {
                 if (m_state.relaxation_count % 2 == 0) {
                     m_state.improvability_screening_mode =
                         option::improvability_screening_mode::Intensive;
@@ -636,29 +662,34 @@ class TabuSearchControllerStateManager {
                      std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
-        m_state.employing_local_solution_flag = true;
+        m_state.initial_solution_mode = InitialSolutionMode::Local;
         if (m_state.is_global_augmented_incumbent_updated) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (m_state.is_not_updated) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (m_global_state_ptr->incumbent_holder
                 .local_augmented_incumbent_score()
                 .is_feasible) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
                                  RELATIVE_RANGE_THRESHOLD) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
         } else {
-            m_state.is_enabled_penalty_coefficient_tightening = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Tighten;
         }
     }
 
@@ -686,105 +717,90 @@ class TabuSearchControllerStateManager {
                      std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
-        if (m_state.is_global_augmented_incumbent_updated) {
-            /**
-             * If the global incumbent solution was updated in the last loop,
-             * the global incumbent is employed as the initial solution for the
-             * next loop. The penalty coefficients are to be relaxed.
-             */
-            m_state.employing_global_solution_flag          = true;
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
-            return;
-        }
-
-        if (m_state.is_not_updated) {
-            /**
-             * If the last loop failed to find any local/global incumbent
-             * solution, the global incumbent solution is employed as the
-             * initial solution for the next loop with some initial
-             * modifications. The penalty coefficients are to be relaxed.
-             */
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-            m_state.is_enabled_penalty_coefficient_relaxing  = true;
-
-            return;
-        }
-
         /**
-         * If a local incumbent solution was updated the last loop, the initial
-         * solution for the next loop and flags to tighten or relax the penalty
-         * coefficients will be determined by complex rules below.
+         * If the global incumbent solution was updated in the last loop, the
+         * global incumbent is employed as the initial solution for the next
+         * loop. The penalty coefficients are to be relaxed.
          */
-        if (GAP < TabuSearchControllerStateManagerConstant::GAP_TOLERANCE) {
-            /**
-             * The fact that the gap is negative implies that the obtained local
-             * incumbent solution is worse than the global incumbent solution.
-             * For this case, the initial solution for the next loop is reset by
-             * the global incumbent solution with some initial modifications.
-             * The penalty coefficients are to be relaxed or tightened according
-             * to the feasibility of the local incumbent solution.
-             */
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-
-            if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
-                m_state.is_enabled_penalty_coefficient_relaxing = true;
-            } else {
-                m_state.is_enabled_penalty_coefficient_tightening = true;
-            }
-            return;
-        }
-
-        if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
-            /**
-             * If the gap is positive and the local incumbent solution is
-             * feasible, the local incumbent solution is employed as the initial
-             * solution for the next loop. The penalty coefficients are to be
-             * relaxed.
-             */
-            m_state.employing_local_solution_flag           = true;
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
-            return;
-        }
-
-        if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
-                                 RELATIVE_RANGE_THRESHOLD) {
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-            m_state.is_enabled_penalty_coefficient_relaxing  = true;
+        if (m_state.is_global_augmented_incumbent_updated) {
+            m_state.initial_solution_mode = InitialSolutionMode::Global;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         /**
-         * For the case that the gap is positive and the local incumbent
-         * solution is not feasible, the following rules will be applied:
-         * (1) If no feasible solution has been found in the previous loops:
-         * -> The obtained local incumbent solution is employed as the initial
-         * solution for the next loop.
-         * (2) If a feasible solution has been found in the previous loops:
-         * (2.1) If the obtained local incumbent solution improves the objective
-         * function value or global penalty than those of global incumbent
-         * solution: -> The obtained local incumbent solution is employed as the
-         * initial solution for the next loop.
-         *  (2.2) Otherwise; if the obtained local incumbent solution does not
-         * improve either objective function value or global penalty:
-         * -> The previous initial solution is employed as the initial solution
-         * for the next loop.
-         *
-         * For all cases, penalty coefficients are to be tightened.
+         * If the search stagnates (no updates or improvement below threshold):
+         * - Periodically alternate between Intensify (employing the global
+         *   incumbent with modifications) and Diversify (pending initial
+         * solution) to break out of local optima.
+         * - Relax the penalty coefficients to expand the search space.
+         */
+        if (m_state.is_not_updated ||
+            GAP < TabuSearchControllerStateManagerConstant::GAP_TOLERANCE ||
+            RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
+                                 RELATIVE_RANGE_THRESHOLD) {
+            if (m_state.restart_count % 4 != 0) {
+                m_state.initial_solution_mode = InitialSolutionMode::Global;
+                m_state.is_enabled_forcibly_initial_modification = true;
+                m_state.search_mode = SearchMode::Intensify;
+
+            } else {
+                m_state.initial_solution_mode = InitialSolutionMode::Pending;
+                m_state.search_mode           = SearchMode::Diversify;
+            }
+
+            m_state.restart_count++;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
+
+            return;
+        }
+
+        /**
+         * If the local incumbent is feasible, employ it as the initial solution
+         * for the next loop, and relax the penalty coefficients.
+         */
+        if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
+            m_state.initial_solution_mode = InitialSolutionMode::Local;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
+            return;
+        }
+
+        /**
+         * If the local incumbent is infeasible:
+         * - If a feasible solution was already found but no improvement was
+         * made, revert to the previous initial solution with forced
+         * modifications.
+         * - Otherwise, employ the local incumbent as the next initial solution.
+         * - Tighten the penalty coefficients to guide the search toward
+         * feasibility.
          */
         if (m_global_state_ptr->incumbent_holder.is_found_feasible_solution()) {
             if (m_state.is_improved) {
-                m_state.employing_local_solution_flag = true;
+                m_state.initial_solution_mode = InitialSolutionMode::Local;
             } else {
-                m_state.employing_previous_solution_flag = true;
+                m_state.initial_solution_mode = InitialSolutionMode::Previous;
+                m_state.is_enabled_forcibly_initial_modification = true;
             }
         } else {
-            m_state.employing_local_solution_flag            = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
+            m_state.initial_solution_mode = InitialSolutionMode::Local;
         }
-        m_state.is_enabled_penalty_coefficient_tightening = true;
+        m_state.penalty_coefficient_update_mode =
+            PenaltyCoefficientUpdateMode::Tighten;
+
+        /**
+         * If the search is stagnating in terms of both objective and
+         * feasibility (indicated by small gap and relative range) and both
+         * inner and outer stagnation are detected, reset the penalty
+         * coefficients to escape from the stagnation.
+         */
+        if (m_state.search_mode != SearchMode::Diversify &&
+            m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Reset;
+        }
     }
 
     /*************************************************************************/
@@ -794,8 +810,7 @@ class TabuSearchControllerStateManager {
          * diversification is detected. This applies only if no feasible
          * solution has been found.
          */
-        if (m_state.is_outer_stagnation &&
-            ((m_state.current_primal_intensity >
+        if (((m_state.current_primal_intensity >
               m_state.current_primal_intensity_before_relaxation) &&
              (m_state.current_dual_intensity >
               m_state.current_dual_intensity_before_relaxation))) {
@@ -819,7 +834,8 @@ class TabuSearchControllerStateManager {
 
         /**
          * Increase penalty coefficient relaxing rate if previous solutions are
-         * employed as initial solutions, which indicates overrelaxation.
+         * employed as initial solution frequently, which indicates
+         * overrelaxation.
          */
         if (m_state.employing_previous_solution_count_after_relaxation >
             std::max(
@@ -839,15 +855,6 @@ class TabuSearchControllerStateManager {
             m_option.penalty.penalty_coefficient_relaxing_rate_increase_rate *
             (m_option.penalty.penalty_coefficient_relaxing_rate -
              m_state.penalty_coefficient_relaxing_rate);
-    }
-
-    /*************************************************************************/
-    inline void update_penalty_coefficient_reset_flag(void) {
-        if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
-            m_state.penalty_coefficient_reset_flag           = true;
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-        }
     }
 
     /*************************************************************************/
@@ -1016,7 +1023,7 @@ class TabuSearchControllerStateManager {
          * coefficient specified in option.
          */
         const double INITIAL_PENALTY_COEFFICIENT =
-            m_option.penalty.initial_penalty_coefficient;
+            m_model_ptr->global_penalty_coefficient();
         const auto& enabled_constraint_ptrs =
             m_model_ptr->reference().constraint.enabled_constraint_ptrs;
         for (auto&& constraint_ptr : enabled_constraint_ptrs) {
@@ -1255,31 +1262,45 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void update_current_solution(void) {
-        if (m_state.employing_global_solution_flag) {
-            m_state.current_solution =  //
-                m_global_state_ptr->incumbent_holder
-                    .global_augmented_incumbent_solution()
-                    .to_sparse();
-            m_state.employing_global_solution_count_after_relaxation++;
-        } else if (m_state.employing_local_solution_flag) {
-            m_state.current_solution =  //
-                m_global_state_ptr->incumbent_holder
-                    .local_augmented_incumbent_solution()
-                    .to_sparse();
-            m_state.employing_local_solution_count_after_relaxation++;
-        } else if (m_state.employing_previous_solution_flag) {
-            m_state.current_solution = m_state.previous_solution;
-            m_state.employing_previous_solution_count_after_relaxation++;
-        } else {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "An error ocurred in determining the next initial solution."));
+        switch (m_state.initial_solution_mode) {
+            case InitialSolutionMode::Global: {
+                m_state.current_solution =  //
+                    m_global_state_ptr->incumbent_holder
+                        .global_augmented_incumbent_solution()
+                        .to_sparse();
+                m_state.employing_global_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Local: {
+                m_state.current_solution =  //
+                    m_global_state_ptr->incumbent_holder
+                        .local_augmented_incumbent_solution()
+                        .to_sparse();
+                m_state.employing_local_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Previous: {
+                m_state.current_solution = m_state.previous_solution;
+                m_state.employing_previous_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Pending: {
+                m_state.current_solution = m_state.pending_solution;
+                m_state.employing_pending_solution_count_after_relaxation++;
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified initial solution mode is invalid."));
+            }
         }
     }
 
     /*************************************************************************/
     inline void update_relaxation_status(void) {
-        if (m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_state.penalty_coefficient_update_mode ==
+            PenaltyCoefficientUpdateMode::Relax) {
             m_state.previous_primal_intensity_before_relaxation =
                 m_state.current_primal_intensity_before_relaxation;
             m_state.current_primal_intensity_before_relaxation =
@@ -1294,6 +1315,7 @@ class TabuSearchControllerStateManager {
             m_state.employing_previous_solution_count_after_relaxation = 0;
             m_state.employing_global_solution_count_after_relaxation   = 0;
             m_state.employing_local_solution_count_after_relaxation    = 0;
+            m_state.employing_pending_solution_count_after_relaxation  = 0;
             m_state.relaxation_count++;
         } else {
             m_state.iteration_after_relaxation++;
