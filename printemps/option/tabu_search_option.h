@@ -23,9 +23,8 @@ struct TabuSearchOptionConstant {
     static constexpr double DEFAULT_LAGRANGIAN_PENALTY_COEFFICIENT  = 1.0;
     static constexpr double DEFAULT_PRUNING_RATE_THRESHOLD          = 1.0;
 
-    static constexpr bool DEFAULT_IS_ENABLED_SHUFFLE         = true;
-    static constexpr bool DEFAULT_IS_ENABLED_MOVE_CURTAIL    = false;
-    static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_BREAK = true;
+    static constexpr bool DEFAULT_IS_ENABLED_SHUFFLE      = true;
+    static constexpr bool DEFAULT_IS_ENABLED_MOVE_CURTAIL = false;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT =
         true;
     static constexpr bool DEFAULT_IS_ENABLED_AUTOMATIC_ITERATION_ADJUSTMENT =
@@ -57,7 +56,6 @@ struct TabuSearchOption {
     double              pruning_rate_threshold;
     bool                is_enabled_shuffle;
     bool                is_enabled_move_curtail;
-    bool                is_enabled_automatic_break;
     bool                is_enabled_automatic_tabu_tenure_adjustment;
     bool                is_enabled_automatic_iteration_adjustment;
     bool                is_enabled_initial_modification;
@@ -106,8 +104,6 @@ struct TabuSearchOption {
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_SHUFFLE;
         this->is_enabled_move_curtail =
             TabuSearchOptionConstant::DEFAULT_IS_ENABLED_MOVE_CURTAIL;
-        this->is_enabled_automatic_break =
-            TabuSearchOptionConstant::DEFAULT_IS_ENABLED_AUTOMATIC_BREAK;
         this->is_enabled_automatic_tabu_tenure_adjustment =
             TabuSearchOptionConstant::
                 DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT;
@@ -206,11 +202,6 @@ struct TabuSearchOption {
             " -- tabu_search.is_enabled_move_curtail: " +  //
             utility::to_true_or_false(                     //
                 this->is_enabled_move_curtail));
-
-        utility::print(                                       //
-            " -- tabu_search.is_enabled_automatic_break: " +  //
-            utility::to_true_or_false(                        //
-                this->is_enabled_automatic_break));
 
         utility::print(  //
             " -- tabu_search.is_enabled_automatic_tabu_tenure_adjustment: " +  //
@@ -327,10 +318,6 @@ struct TabuSearchOption {
             &this->is_enabled_move_curtail,  //
             "is_enabled_move_curtail", a_OBJECT);
 
-        read_json(                              //
-            &this->is_enabled_automatic_break,  //
-            "is_enabled_automatic_break", a_OBJECT);
-
         read_json(                                               //
             &this->is_enabled_automatic_tabu_tenure_adjustment,  //
             "is_enabled_automatic_tabu_tenure_adjustment", a_OBJECT);
@@ -434,10 +421,6 @@ struct TabuSearchOption {
         obj.emplace_back(               //
             "is_enabled_move_curtail",  //
             this->is_enabled_move_curtail);
-
-        obj.emplace_back(                  //
-            "is_enabled_automatic_break",  //
-            this->is_enabled_automatic_break);
 
         obj.emplace_back(                                   //
             "is_enabled_automatic_tabu_tenure_adjustment",  //

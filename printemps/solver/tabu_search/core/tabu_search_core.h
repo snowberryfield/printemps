@@ -201,57 +201,6 @@ class TabuSearchCore {
     }
 
     /*************************************************************************/
-    inline bool satisfy_penalty_coefficient_too_large_terminate_condition(
-        const std::vector<solution::SolutionScore>& a_TRIAL_SOLUTION_SCORES) {
-        const auto& STATE = m_state_manager.state();
-
-        constexpr int    ITERATION_MIN = 10;
-        constexpr double MARGIN        = 100.0;
-
-        if (STATE.iteration <= ITERATION_MIN) {
-            return false;
-        }
-
-        if (!STATE.current_solution_score.is_feasible) {
-            return false;
-        }
-
-        double min_infeasible_local_penalty  = HUGE_VALF;
-        bool   has_infeasible_trial_solution = false;
-
-        for (const auto& score : a_TRIAL_SOLUTION_SCORES) {
-            if (!score.is_feasible) {
-                min_infeasible_local_penalty =
-                    std::min(min_infeasible_local_penalty, score.local_penalty);
-                has_infeasible_trial_solution = true;
-            }
-        }
-
-        if (!has_infeasible_trial_solution) {
-            return false;
-        }
-
-        const auto SCORE_PTR_PAIR = std::minmax_element(
-            a_TRIAL_SOLUTION_SCORES.begin(), a_TRIAL_SOLUTION_SCORES.end(),
-            [](const auto& a_FIRST, const auto& a_SECOND) {
-                return a_FIRST.objective_improvement <
-                       a_SECOND.objective_improvement;
-            });
-
-        const double MAX_OBJECTIVE_SENSITIVITY =
-            std::max(SCORE_PTR_PAIR.second->objective_improvement,
-                     -SCORE_PTR_PAIR.first->objective_improvement);
-
-        if (MAX_OBJECTIVE_SENSITIVITY * MARGIN < min_infeasible_local_penalty) {
-            m_state_manager.set_termination_status(
-                TabuSearchCoreTerminationStatus::PENALTY_COEFFICIENT_TOO_LARGE);
-            return true;
-        }
-
-        return false;
-    }
-
-    /*************************************************************************/
     inline void initial_modification(void) {
         const auto& STATE = m_state_manager.state();
 
@@ -303,9 +252,10 @@ class TabuSearchCore {
                 }
 
                 const double WEIGHT =
-                    1.0 / (move_evaluator.compute_minimum_update_count(
-                               *trial_move_ptrs[j]) +
-                           1.0);
+                    std::pow(1.0 / (move_evaluator.compute_minimum_update_count(
+                                        *trial_move_ptrs[j]) +
+                                    1.0),
+                             2.0);
 
                 candidate_move_ptrs.push_back(trial_move_ptrs[j]);
                 candidate_move_weights.push_back(WEIGHT);
@@ -977,7 +927,7 @@ class TabuSearchCore {
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel                                \
                                  .is_enabled_move_evaluation_parallelization) \
-    schedule(static)                                                          \
+    schedule(static, 16)                                                      \
     num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
@@ -1132,18 +1082,6 @@ class TabuSearchCore {
                 STATE.update_status > 0) {
                 print_table_body(m_option.output.verbose >=
                                  option::verbose::Inner);
-            }
-
-            /**
-             * If the local penalty us sufficiently larger than objective
-             * sensitivity, the current loop will be terminated and the local
-             * penalty coefficients will be adjusted.
-             */
-            if (m_option.tabu_search.is_enabled_automatic_break) {
-                if (this->satisfy_penalty_coefficient_too_large_terminate_condition(
-                        trial_solution_scores)) {
-                    break;
-                }
             }
 
             m_state_manager.next_iteration();

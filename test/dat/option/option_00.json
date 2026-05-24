@@ -142,7 +142,6 @@
         "pruning_rate_threshold": 0.1,
         "is_enabled_shuffle": false,
         "is_enabled_move_curtail": true,
-        "is_enabled_automatic_break": false,
         "is_enabled_automatic_tabu_tenure_adjustment": false,
         "is_enabled_automatic_iteration_adjustment": false,
         "is_enabled_initial_modification": false,

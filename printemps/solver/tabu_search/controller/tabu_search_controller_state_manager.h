@@ -797,6 +797,7 @@ class TabuSearchControllerStateManager {
          * coefficients to escape from the stagnation.
          */
         if (m_state.search_mode != SearchMode::Diversify &&
+            m_option.penalty.is_enabled_inner_stagnation_breaker &&
             m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
             m_state.penalty_coefficient_update_mode =
                 PenaltyCoefficientUpdateMode::Reset;

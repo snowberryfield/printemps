@@ -531,10 +531,6 @@ TEST_F(TestOption, setup) {
             true,   //
             option.tabu_search.is_enabled_move_curtail);
 
-        EXPECT_EQ(  //
-            false,  //
-            option.tabu_search.is_enabled_automatic_break);
-
         EXPECT_EQ(
             false,
             option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment);
@@ -1047,10 +1043,6 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         true,   //
         to_bool(tabu_search.at("is_enabled_move_curtail")));
-
-    EXPECT_EQ(  //
-        false,  //
-        to_bool(tabu_search.at("is_enabled_automatic_break")));
 
     EXPECT_EQ(  //
         false,  //
