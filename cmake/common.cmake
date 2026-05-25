@@ -1,20 +1,20 @@
-# ==============================================================================
+# ##############################################################################
 # Common configuration for Printemps projects
 # This file sets up compiler options, OpenMP, static linking, and helper functions
-# ==============================================================================
+# ##############################################################################
 cmake_minimum_required(VERSION 3.15)
 project(printemps LANGUAGES C CXX)
 
-# ------------------------------------------------------------------------------
+# ##############################################################################
 # C++ language standard
-# ------------------------------------------------------------------------------
+# ##############################################################################
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ------------------------------------------------------------------------------
+# ##############################################################################
 # OpenMP support
-# ------------------------------------------------------------------------------
+# ##############################################################################
 find_package(OpenMP)
 
 if(OpenMP_FOUND)
@@ -26,15 +26,20 @@ else()
 endif()
 
 
-# ------------------------------------------------------------------------------
+# ##############################################################################
 # CPU architecture setting (Release builds only)
-# ------------------------------------------------------------------------------
+# ##############################################################################
+
+# CPU_ARCH controls architecture-specific compiler flags in Release builds.
+#   "native"        (default) — -mcpu=native (arm64/aarch64) or -march=native -mtune=native (x86_64)
+#   "none"          — no architecture flags
+#   any other value — passed directly as -mcpu=<value> (arm64/aarch64) or -march=<value> -mtune=generic (x86_64)
 set(CPU_ARCH "native" CACHE STRING
     "Target CPU architecture: 'native' (default), 'none', or a value such as x86-64-v2 / armv8-a")
 
-# ------------------------------------------------------------------------------
-# Common compiler options
-# ------------------------------------------------------------------------------
+# ##############################################################################
+# switch compiler options according to CMAKE_BUILD_TYPE
+# ##############################################################################
 if(MSVC)
     if(CMAKE_BUILD_TYPE STREQUAL "Release")
         set(COMMON_COMPILE_OPTIONS /W3 /O2 /permissive- /utf-8 /bigobj /EHsc /D_USE_MATH_DEFINES /DNOMINMAX /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305 /wd4996 /wd4056 /wd4756 /wd4129 /wd5051)
@@ -72,10 +77,10 @@ else()
     endif()
 endif()
 
-# ------------------------------------------------------------------------------
-# Helper function to configure a target for Printemps
-# Sets include directories, compiler options, OpenMP linking, and optional static linking
-# ------------------------------------------------------------------------------
+# ##############################################################################
+# executable (Helper function to configure a target for Printemps)
+# Sets include directories, compiler options, OpenMP linking, and static linking
+# ##############################################################################
 function(configure_printemps_target target)
     # Include Printemps headers
     target_include_directories(${target}

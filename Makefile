@@ -3,6 +3,17 @@
 # ==============================================================================
 CONFIG ?= Release
 STATIC ?= OFF
+CPU_ARCH ?= native
+JOBS ?= 4
+
+# Support JOBS=max or JOBS=all to use all CPU cores
+ifeq ($(JOBS),max)
+  override JOBS :=
+endif
+ifeq ($(JOBS),all)
+  override JOBS :=
+endif
+
 CXX ?= g++
 CC  ?= gcc
 TOP_DIR := $(CURDIR)
@@ -31,11 +42,12 @@ $(TARGETS):
 	    -DCMAKE_BUILD_TYPE=$(CONFIG) \
 	    -DCMAKE_CXX_COMPILER=$(CXX) \
 	    -DCMAKE_C_COMPILER=$(CC) \
+	    -DCPU_ARCH=$(CPU_ARCH) \
 	    -DTOP_DIR=$(TOP_DIR) \
 	    -DLINK_STATIC=$(STATIC) \
 	    $(TOP_DIR)/cmake/$@
 	@echo "Building..."
-	cmake --build $(BUILD_DIR) -- -j4
+	cmake --build $(BUILD_DIR) --parallel $(JOBS)
 
 # ==============================================================================
 # Run all test executables (without changing directory)
