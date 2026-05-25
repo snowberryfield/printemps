@@ -85,6 +85,7 @@ class Model {
     model_handler::ModelPrinter<T_Variable, T_Expression>   m_printer;
     model_handler::ModelMPSHandler<T_Variable, T_Expression>  m_mps_handler;
     model_handler::ModelOPBHandler<T_Variable, T_Expression>  m_opb_handler;
+    model_handler::ModelWCNFHandler<T_Variable, T_Expression> m_wcnf_handler;
     model_handler::ModelJSONHandler<T_Variable, T_Expression> m_json_handler;
     model_handler::ModelLinearProgrammingHandler<T_Variable, T_Expression>
         m_linear_programming_handler;
@@ -165,6 +166,7 @@ class Model {
         m_printer.setup(this);
         m_mps_handler.setup(this);
         m_opb_handler.setup(this);
+        m_wcnf_handler.setup(this);
         m_json_handler.setup(this);
         m_linear_programming_handler.setup(this);
         m_initial_solution_handler.setup(this);
@@ -635,6 +637,12 @@ class Model {
     inline model_handler::ModelOPBHandler<T_Variable, T_Expression> &
     opb_handler(void) noexcept {
         return m_opb_handler;
+    }
+
+    /*************************************************************************/
+    inline model_handler::ModelWCNFHandler<T_Variable, T_Expression> &
+    wcnf_handler(void) noexcept {
+        return m_wcnf_handler;
     }
 
     /*************************************************************************/

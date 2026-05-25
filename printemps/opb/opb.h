@@ -208,13 +208,13 @@ struct OPB {
                 }
             } else if (token == "mincost=") {
                 if (stream >> token) {
-                    metadata.mincost = std::stoi(token);
+                    metadata.mincost = std::stoll(token);
                 } else {
                     is_valid = false;
                 }
             } else if (token == "maxcost=") {
                 if (stream >> token) {
-                    metadata.maxcost = std::stoi(token);
+                    metadata.maxcost = std::stoll(token);
                 } else {
                     is_valid = false;
                 }
@@ -256,10 +256,10 @@ struct OPB {
         }
         if (tokens.size() == 0) {
             top_cost.is_defined = false;
-            top_cost.value      = std::numeric_limits<int>::max();
+            top_cost.value      = std::numeric_limits<int64_t>::max();
         } else if (tokens.size() == 1) {
             top_cost.is_defined = true;
-            top_cost.value      = std::stoi(tokens[0]);
+            top_cost.value      = std::stoll(tokens[0]);
         } else {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -302,12 +302,12 @@ struct OPB {
         const size_t SQUARE_BRACKET_START = a_LINE.find('[');
         const size_t SQUARE_BRACKET_END   = a_LINE.find(']');
 
-        double weight = 0.0;
+        int64_t weight = 0;
 
         if (SQUARE_BRACKET_START != std::string::npos &&
             SQUARE_BRACKET_END != std::string::npos &&
             SQUARE_BRACKET_START < SQUARE_BRACKET_END) {
-            weight = std::stoi(
+            weight = std::stoll(
                 a_LINE.substr(SQUARE_BRACKET_START + 1,
                               SQUARE_BRACKET_END - SQUARE_BRACKET_START - 1));
         } else {
@@ -330,7 +330,7 @@ struct OPB {
     inline static OPBConstraint parse_hard_constraint(const std::string &a_LINE,
                                                       const int a_INDEX) {
         OPBConstraint hard_constraint = OPB::parse_constraint(a_LINE);
-        hard_constraint.weight        = std::numeric_limits<int>::max();
+        hard_constraint.weight        = std::numeric_limits<int64_t>::max();
         hard_constraint.name = "hard_constraint_" + std::to_string(a_INDEX);
         return hard_constraint;
     }
@@ -362,11 +362,11 @@ struct OPB {
         const std::string RHS_STRING =
             a_CONSTRAINT_STRING.substr(pos + op.size());
         OPBConstraint constraint;
-        constraint.weight = std::numeric_limits<int>::max();
+        constraint.weight = std::numeric_limits<int64_t>::max();
         constraint.sense  = sense;
         constraint.name   = "";
         constraint.terms  = OPB::parse_terms(LHS_STRING);
-        constraint.rhs    = std::stoi(RHS_STRING);
+        constraint.rhs    = std::stoll(RHS_STRING);
         return constraint;
     }
 
@@ -384,9 +384,9 @@ struct OPB {
         OPBTerm              term;
         std::vector<OPBTerm> terms;
 
-        bool   is_number_last_read  = false;
-        double previous_coefficient = 0.0;
-        double current_coefficient  = 0.0;
+        bool    is_number_last_read  = false;
+        int64_t previous_coefficient = 0;
+        int64_t current_coefficient  = 0;
 
         std::unordered_set<std::string> variable_names_set;
 
@@ -408,7 +408,7 @@ struct OPB {
                         "coefficients."));
                 }
                 previous_coefficient = current_coefficient;
-                current_coefficient  = std::stoi(tokens[i]);
+                current_coefficient  = std::stoll(tokens[i]);
                 is_number_last_read  = true;
             }
 
@@ -617,6 +617,42 @@ struct OPB {
         }
 
         this->setup_variable_information();
+    }
+
+    inline void augment_solution(
+        std::unordered_map<std::string, int> &a_VARIABLES) {
+        // augment negated variables
+        for (const auto &variable_name : negated_variable_names) {
+            const auto &negated_variable_name = "~" + variable_name;
+            if (a_VARIABLES.find(negated_variable_name) == a_VARIABLES.end() &&
+                a_VARIABLES.find(variable_name) != a_VARIABLES.end()) {
+                a_VARIABLES[negated_variable_name] =
+                    1 - a_VARIABLES[variable_name];
+            }
+        }
+
+        // augment product variables
+        for (const auto &product_variable_name : product_variable_names) {
+            if (a_VARIABLES.find(product_variable_name.first) !=
+                a_VARIABLES.end()) {
+                continue;
+            }
+
+            int  value     = 1;
+            bool not_found = false;
+            for (const auto &variable_name : product_variable_name.second) {
+                if (a_VARIABLES.find(variable_name) == a_VARIABLES.end()) {
+                    not_found = true;
+                    break;
+                } else {
+                    value *= a_VARIABLES[variable_name];
+                }
+            }
+
+            if (!not_found) {
+                a_VARIABLES[product_variable_name.first] = value;
+            }
+        }
     }
 };
 }  // namespace printemps::opb

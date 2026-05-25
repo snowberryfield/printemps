@@ -47,7 +47,7 @@ TEST_F(TestOPB, initialize) {
     EXPECT_EQ(0, pb.metadata.sumcost);
 
     EXPECT_FALSE(pb.top_cost.is_defined);
-    EXPECT_EQ(std::numeric_limits<int>::max(), pb.top_cost.value);
+    EXPECT_EQ(std::numeric_limits<int64_t>::max(), pb.top_cost.value);
 
     EXPECT_TRUE(pb.variable_names.empty());
     EXPECT_TRUE(pb.negated_variable_names.empty());
@@ -108,13 +108,13 @@ TEST_F(TestOPB, parse_top_cost) {
     {
         const auto TOP_COST = opb::OPB::parse_top_cost("soft:");
         EXPECT_FALSE(TOP_COST.is_defined);
-        EXPECT_EQ(std::numeric_limits<int>::max(), TOP_COST.value);
+        EXPECT_EQ(std::numeric_limits<int64_t>::max(), TOP_COST.value);
     }
 
     {
         const auto TOP_COST = opb::OPB::parse_top_cost("Soft:");
         EXPECT_FALSE(TOP_COST.is_defined);
-        EXPECT_EQ(std::numeric_limits<int>::max(), TOP_COST.value);
+        EXPECT_EQ(std::numeric_limits<int64_t>::max(), TOP_COST.value);
     }
 
     {

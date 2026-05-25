@@ -14,6 +14,7 @@
 #include <chrono>
 #include <cmath>
 #include <csignal>
+#include <cstdint>
 #include <cstdlib>
 #include <ctime>
 #include <deque>

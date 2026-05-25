@@ -19,10 +19,10 @@ struct OPBMetadata {
     /**
      * The following members are for WBO.
      */
-    int       number_of_soft_constraints;
-    int       mincost;
-    int       maxcost;
-    long long sumcost;
+    int     number_of_soft_constraints;
+    int64_t mincost;
+    int64_t maxcost;
+    int64_t sumcost;
 
     /*************************************************************************/
     OPBMetadata(void) {

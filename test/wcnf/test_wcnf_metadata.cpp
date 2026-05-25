@@ -8,8 +8,9 @@
 
 namespace {
 using namespace printemps;
+
 /*****************************************************************************/
-class TestOPBTopCost : public ::testing::Test {
+class TestWCNFMetadata : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,10 +21,14 @@ class TestOPBTopCost : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestOPBTopCost, initialize) {
-    opb::OPBTopCost top_cost;
-    EXPECT_FALSE(top_cost.is_defined);
-    EXPECT_EQ(std::numeric_limits<int64_t>::max(), top_cost.value);
+TEST_F(TestWCNFMetadata, initialize) {
+    wcnf::WCNFMetadata metadata;
+    EXPECT_EQ(0, metadata.number_of_variables);
+    EXPECT_EQ(0, metadata.number_of_clauses);
+    EXPECT_EQ(0, metadata.number_of_hard_clauses);
+    EXPECT_EQ(0, metadata.number_of_soft_clauses);
+    EXPECT_EQ(0u, metadata.weight_sum);
+    EXPECT_EQ(0u, metadata.max_weight);
 }
 
 }  // namespace

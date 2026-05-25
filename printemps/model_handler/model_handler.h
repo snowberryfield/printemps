@@ -22,6 +22,7 @@ class Model;
 #include "model_linear_programming_handler.h"
 #include "model_mps_handler.h"
 #include "model_opb_handler.h"
+#include "model_wcnf_handler.h"
 #include "model_printer.h"
 #include "model_state_inspector.h"
 

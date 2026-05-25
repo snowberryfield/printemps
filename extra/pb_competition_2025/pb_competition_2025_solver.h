@@ -134,7 +134,7 @@ class PBCompetition2025Solver {
          * Check the metadata of the specified OPB file.
          */
         auto metadata = opb::OPB::check_metadata(m_argparser.pb_file_name);
-        if (metadata.intsize >= 32) {
+        if (metadata.intsize > 53) {
             std::cout << "s UNSUPPORTED" << std::endl;
             exit(0);
         }

@@ -24,9 +24,5 @@ foreach(target printemps mps_solver opb_solver)
     add_executable(${target} ${MAIN_SRC})
 
     # Apply common Printemps configuration
-    # - Include directories
-    # - Compiler options (warnings, C++17 standard, optimizations)
-    # - OpenMP linking
-    # - Optional static linking on Linux
     configure_printemps_target(${target})
 endforeach()

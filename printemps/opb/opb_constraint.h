@@ -12,11 +12,11 @@
 namespace printemps::opb {
 /*****************************************************************************/
 struct OPBConstraint {
-    int                  weight;
+    int64_t              weight;
     OPBConstraintSense   sense;
     std::string          name;
     std::vector<OPBTerm> terms;
-    int                  rhs;
+    int64_t              rhs;
 
     /*************************************************************************/
     OPBConstraint(void) {
@@ -25,11 +25,11 @@ struct OPBConstraint {
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->weight = std::numeric_limits<int>::max();
+        this->weight = std::numeric_limits<int64_t>::max();
         this->sense  = OPBConstraintSense::Less;
         this->name   = "";
         this->terms.clear();
-        this->rhs = 0.0;
+        this->rhs = 0;
     }
 
     /*************************************************************************/

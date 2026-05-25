@@ -8,8 +8,9 @@
 
 namespace {
 using namespace printemps;
+
 /*****************************************************************************/
-class TestOPBTopCost : public ::testing::Test {
+class TestWCNFClause : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,10 +21,25 @@ class TestOPBTopCost : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestOPBTopCost, initialize) {
-    opb::OPBTopCost top_cost;
-    EXPECT_FALSE(top_cost.is_defined);
-    EXPECT_EQ(std::numeric_limits<int64_t>::max(), top_cost.value);
+TEST_F(TestWCNFClause, initialize) {
+    wcnf::WCNFClause clause;
+    EXPECT_TRUE(clause.literals.empty());
+    EXPECT_EQ(0u, clause.weight);
+    EXPECT_FALSE(clause.is_hard);
+    EXPECT_EQ("", clause.name);
+}
+
+/*****************************************************************************/
+TEST_F(TestWCNFClause, number_of_negative_literals) {
+    wcnf::WCNFClause clause;
+    clause.literals = {1, -2, 3, -4, -5};
+    EXPECT_EQ(3, clause.number_of_negative_literals());
+
+    clause.literals = {1, 2, 3};
+    EXPECT_EQ(0, clause.number_of_negative_literals());
+
+    clause.literals = {-1, -2};
+    EXPECT_EQ(2, clause.number_of_negative_literals());
 }
 
 }  // namespace

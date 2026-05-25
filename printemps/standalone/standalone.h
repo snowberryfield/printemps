@@ -20,6 +20,7 @@ class Standalone {
     Argparser           m_argparser;
     mps::MPS            m_mps;
     opb::OPB            m_opb;
+    wcnf::WCNF          m_wcnf;
     model::IPModel      m_model;
     option::Option      m_option;
     utility::TimeKeeper m_time_keeper;
@@ -41,6 +42,7 @@ class Standalone {
         m_argparser.initialize();
         m_mps.initialize();
         m_opb.initialize();
+        m_wcnf.initialize();
         m_model.initialize();
         m_option.initialize();
         m_time_keeper.initialize();
@@ -106,6 +108,9 @@ class Standalone {
                    EXTENSION == "pb") {
             m_opb.read_opb(m_argparser.instance_file_name);
             m_model.opb_handler().import(m_opb);
+        } else if (EXTENSION == "wcnf") {
+            m_wcnf.read_wcnf(m_argparser.instance_file_name);
+            m_model.wcnf_handler().import(m_wcnf);
         } else {
             throw std::runtime_error(printemps::utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -204,9 +209,11 @@ class Standalone {
          * values will be used.
          */
         if (!m_argparser.initial_solution_file_name.empty()) {
-            const auto INITIAL_SOLUTION =
-                printemps::helper::read_names_and_values(
-                    m_argparser.initial_solution_file_name);
+            auto INITIAL_SOLUTION = printemps::helper::read_names_and_values(
+                m_argparser.initial_solution_file_name);
+            if (EXTENSION == "opb" || EXTENSION == "wbo") {
+                m_opb.augment_solution(INITIAL_SOLUTION);
+            }
             m_model.initial_solution_handler().import_solution(INITIAL_SOLUTION,
                                                                false);
         }

@@ -9,7 +9,7 @@
 namespace printemps::opb {
 /*****************************************************************************/
 struct OPBTerm {
-    int                      coefficient;
+    int64_t                  coefficient;
     std::vector<std::string> variable_names;
 
     /*************************************************************************/

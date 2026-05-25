@@ -6,6 +6,10 @@
 #ifndef PRINTEMPS_PREPROCESS_PARTIAL_FEASIBLE_ENUMERATOR_H__
 #define PRINTEMPS_PREPROCESS_PARTIAL_FEASIBLE_ENUMERATOR_H__
 
+#include <vector>
+#include <map>
+#include <algorithm>
+
 namespace printemps::preprocess {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

@@ -9,8 +9,8 @@
 namespace printemps::opb {
 /*****************************************************************************/
 struct OPBTopCost {
-    bool is_defined;
-    int  value;
+    bool    is_defined;
+    int64_t value;
 
     /*************************************************************************/
     OPBTopCost(void) {
@@ -20,7 +20,7 @@ struct OPBTopCost {
     /*************************************************************************/
     inline void initialize(void) {
         this->is_defined = false;
-        this->value      = std::numeric_limits<int>::max();
+        this->value      = std::numeric_limits<int64_t>::max();
     }
 };
 }  // namespace printemps::opb

@@ -27,26 +27,48 @@ endif()
 
 
 # ------------------------------------------------------------------------------
-# Common compiler options
-# -Wall, -Wextra for warnings
-# -Wno-error=missing-field-initializers to allow aggregate initialization without error
-# Release builds: optimization flags and CPU-specific tuning
+# CPU architecture setting (Release builds only)
 # ------------------------------------------------------------------------------
-set(COMMON_COMPILE_OPTIONS
-    -Wall
-    -Wextra
-    -Wno-error=missing-field-initializers
-)
+set(CPU_ARCH "native" CACHE STRING
+    "Target CPU architecture: 'native' (default), 'none', or a value such as x86-64-v2 / armv8-a")
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    # Optimize for speed
-    list(APPEND COMMON_COMPILE_OPTIONS -O3)
+# ------------------------------------------------------------------------------
+# Common compiler options
+# ------------------------------------------------------------------------------
+if(MSVC)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(COMMON_COMPILE_OPTIONS /W3 /O2 /permissive- /utf-8 /bigobj /EHsc /D_USE_MATH_DEFINES /DNOMINMAX /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305 /wd4996 /wd4056 /wd4756 /wd4129 /wd5051)
+    else() # Debug
+        set(COMMON_COMPILE_OPTIONS /W3 /Od /Zi /permissive- /utf-8 /bigobj /EHsc /D_USE_MATH_DEFINES /DNOMINMAX /D_CRT_SECURE_NO_WARNINGS /wd4244 /wd4267 /wd4305 /wd4996 /wd4056 /wd4756 /wd4129 /wd5051)
+    endif()
+else()
+    set(COMMON_COMPILE_OPTIONS
+        -Wall
+        -Wextra
+        -Wno-error=missing-field-initializers
+        -pthread
+    )
 
-    # CPU-specific tuning
-    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
-        list(APPEND COMMON_COMPILE_OPTIONS -mcpu=native)
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64")
-        list(APPEND COMMON_COMPILE_OPTIONS -march=native -mtune=native)
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        # Optimize for speed
+        list(APPEND COMMON_COMPILE_OPTIONS -O3)
+
+        # CPU-specific tuning
+        if(CPU_ARCH STREQUAL "none")
+            # no architecture flags
+        elseif(CPU_ARCH STREQUAL "native")
+            if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+                list(APPEND COMMON_COMPILE_OPTIONS -mcpu=native)
+            else()
+                list(APPEND COMMON_COMPILE_OPTIONS -march=native -mtune=native)
+            endif()
+        else()
+            if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+                list(APPEND COMMON_COMPILE_OPTIONS -mcpu=${CPU_ARCH})
+            else()
+                list(APPEND COMMON_COMPILE_OPTIONS -march=${CPU_ARCH} -mtune=generic)
+            endif()
+        endif()
     endif()
 endif()
 
@@ -58,6 +80,7 @@ function(configure_printemps_target target)
     # Include Printemps headers
     target_include_directories(${target}
         PRIVATE ${TOP_DIR}/printemps
+        PRIVATE ${TOP_DIR}/external/include
     )
 
     # Apply common compiler options
@@ -67,10 +90,14 @@ function(configure_printemps_target target)
         target_link_libraries(${target} PRIVATE OpenMP::OpenMP_CXX)
     endif()
 
-    # On Linux, optionally enable full static linking
-    if(LINK_STATIC AND UNIX AND NOT APPLE)
-        target_link_options(${target}
-            PRIVATE -static -static-libgcc -static-libstdc++
-        )
+    # Optionally enable full static linking
+    if(LINK_STATIC)
+        if(MSVC)
+            set_property(TARGET ${target} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        elseif(UNIX AND NOT APPLE)
+            target_link_options(${target}
+                PRIVATE -static -static-libgcc -static-libstdc++
+            )
+        endif()
     endif()
 endfunction()

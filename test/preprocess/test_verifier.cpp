@@ -212,8 +212,17 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         verifier.verify_and_correct_selection_variables_initial_values(true,
                                                                        false);
 
-        EXPECT_EQ(0, x(0).value());
-        EXPECT_EQ(0, x(1).value());
+        /// The invalid values of x(0) and x(1) must be corrected to be in
+        /// [0, 1], and exactly one variable in the selection must be 1.
+        /// Which variable is chosen as the selected one depends on the
+        /// iteration order of std::unordered_map, which is implementation
+        /// defined; do not assert on a specific index.
+        int sum = 0;
+        for (int i = 0; i < 10; i++) {
+            EXPECT_TRUE(x(i).value() == 0 || x(i).value() == 1);
+            sum += x(i).value();
+        }
+        EXPECT_EQ(1, sum);
     }
 
     /// There are two variables with invalid initial values.

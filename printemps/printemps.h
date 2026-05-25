@@ -15,6 +15,7 @@
 #include "helper/helper.h"
 #include "mps/mps.h"
 #include "opb/opb.h"
+#include "wcnf/wcnf.h"
 #include "option/option.h"
 #include "model_component/model_component.h"
 #include "neighborhood/neighborhood.h"

@@ -2,7 +2,7 @@
 
 int main(void) {
     /**
-     * This program solves the following simple liner integer optimization
+     * This program solves the following simple linear integer optimization
      * problem [1]:
      * (P):  minimize       x_1 + 10 x_2
      *          x
@@ -10,7 +10,7 @@ int main(void) {
      *                  -82 x_1 + 28 x_2 >= 1306,
      *                      x_1 and x_2 are integer.
      *
-     * The problem (P) has an optimal solution (x_1, x_2) = (7, 10) with
+     * The problem (P) has an optimal solution (x_1, x_2) = (7, 70) with
      * objective function value 707.
      *
      * [1] R.Fletcher: Practical Methods of Optimization, Second Edition,
