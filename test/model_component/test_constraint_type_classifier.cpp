@@ -129,6 +129,8 @@ TEST_F(TestConstraintTypeClassifier, check_exclusive_nor) {
 TEST_F(TestConstraintTypeClassifier, check_inverted_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
+    x(0).set_name("x_0");
+    x(1).set_name("x_1");
 
     {
         auto constraint =
@@ -165,6 +167,8 @@ TEST_F(TestConstraintTypeClassifier, check_inverted_integers) {
 TEST_F(TestConstraintTypeClassifier, check_balanced_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
+    x(0).set_name("x_0");
+    x(1).set_name("x_1");
 
     {
         auto constraint =
@@ -201,6 +205,8 @@ TEST_F(TestConstraintTypeClassifier, check_balanced_integers) {
 TEST_F(TestConstraintTypeClassifier, check_constant_sum_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
+    x(0).set_name("x_0");
+    x(1).set_name("x_1");
     {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
@@ -238,6 +244,8 @@ TEST_F(TestConstraintTypeClassifier, check_constant_sum_integers) {
 TEST_F(TestConstraintTypeClassifier, check_constant_difference_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
+    x(0).set_name("x_0");
+    x(1).set_name("x_1");
     {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
@@ -275,6 +283,8 @@ TEST_F(TestConstraintTypeClassifier, check_constant_difference_integers) {
 TEST_F(TestConstraintTypeClassifier, check_constant_ratio_integers) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 2, 0, 10);
+    x(0).set_name("x_0");
+    x(1).set_name("x_1");
     {
         auto constraint =
             model_component::Constraint<int, double>::create_instance();
