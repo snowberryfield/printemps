@@ -16,6 +16,9 @@ include(${TOP_DIR}/cmake/common.cmake)
 # ------------------------------------------------------------------------------
 enable_testing()
 
+# Find Threads package (cross-platform thread support matching master branch)
+find_package(Threads REQUIRED)
+
 # ------------------------------------------------------------------------------
 # Directory for GoogleTest XML results
 # ------------------------------------------------------------------------------
@@ -65,11 +68,11 @@ foreach(group ${TEST_GROUP_DIRS})
     # Apply common Printemps configuration (include dirs, compile options, OpenMP, static linking)
     configure_printemps_target(${test_target})
 
-    # Link GoogleTest libraries
+    # Link GoogleTest libraries (Threads::Threads resolves pthread on Unix and native threads on Windows)
     target_link_libraries(${test_target}
         PRIVATE
             GTest::gtest_main
-            pthread
+            Threads::Threads
     )
 
     # Register test with CTest
