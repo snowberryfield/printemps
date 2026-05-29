@@ -47,7 +47,7 @@ struct Selection {
         this->constraint_ptr = a_constraint_ptr;
 
         for (const auto &sensitivity :
-             constraint_ptr->expression().sensitivities()) {
+             this->constraint_ptr->expression().sensitivities()) {
             this->variable_ptrs.push_back(sensitivity.first);
         }
     }
