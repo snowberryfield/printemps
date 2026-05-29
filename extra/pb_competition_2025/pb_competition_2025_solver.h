@@ -148,6 +148,30 @@ class PBCompetition2025Solver {
         m_model.set_name(
             printemps::utility::base_name(m_argparser.pb_file_name));
 
+        /**
+         * If the initial solution file is given, the values of the variables
+         * in the file will be used as the initial values. Otherwise, the
+         * default values will be used.
+         */
+        if (!m_argparser.initial_solution_file_name.empty()) {
+            auto INITIAL_SOLUTION = printemps::helper::read_names_and_values(
+                m_argparser.initial_solution_file_name);
+            m_opb.augment_solution(INITIAL_SOLUTION);
+            m_model.import_solution(INITIAL_SOLUTION);
+        }
+
+        /**
+         * If the fixed variable file is given, the values of the variables will
+         * be fixed at the specified values.
+         */
+        if (!m_argparser.fixed_variable_file_name.empty()) {
+            auto FIXED_VARIABLES_AND_VALUES =
+                printemps::helper::read_names_and_values(
+                    m_argparser.fixed_variable_file_name);
+            m_opb.augment_solution(FIXED_VARIABLES_AND_VALUES);
+            m_model.fix_variables(FIXED_VARIABLES_AND_VALUES);
+        }
+
         if (m_argparser.is_specified_iteration_max) {
             m_option.general.iteration_max = m_argparser.iteration_max;
         }
