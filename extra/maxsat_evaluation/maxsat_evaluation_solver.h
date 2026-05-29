@@ -127,6 +127,27 @@ class MaxSATEvaluationSolver {
     }
 
     /*************************************************************************/
+    /**
+     * Recompute the soft-clause cost exactly in uint64_t from the original
+     * WCNF weights and the per-clause violation flags carried by the
+     * "soft_slacks" proxy. The model's internal objective is accumulated in
+     * double, so for weight sums exceeding 2^53 the double value loses lower
+     * bits and the printed `o`-line would drift from the true integer cost
+     * (and for sums approaching 2^63, the long-long cast itself would be UB).
+     * Computing here from the uint64_t weights avoids both problems.
+     */
+    inline uint64_t exact_cost(const std::vector<int> &a_SLACKS) const {
+        const size_t N = m_wcnf.soft_clauses.size();
+        uint64_t cost = 0;
+        for (size_t i = 0; i < N && i < a_SLACKS.size(); ++i) {
+            if (a_SLACKS[i] != 0) {
+                cost += m_wcnf.soft_clauses[i].weight;
+            }
+        }
+        return cost;
+    }
+
+    /*************************************************************************/
     inline void emit_solution(const solution::IPDenseSolution &a_SOLUTION) {
         /**
          * The first variable proxy named "variables" holds x_1..x_n in
@@ -144,8 +165,15 @@ class MaxSATEvaluationSolver {
             }
         }
 
-        const long long COST = static_cast<long long>(
-            std::llround(static_cast<double>(a_SOLUTION.objective)));
+        /**
+         * In import_wcnf the "variables" proxy is created first and
+         * "soft_slacks" immediately after, so the slacks live at index 1.
+         */
+        const uint64_t COST =
+            a_SOLUTION.variable_value_proxies.size() >= 2
+                ? exact_cost(a_SOLUTION.variable_value_proxies[1]
+                                 .flat_indexed_values())
+                : 0;
         std::cout << "o " << COST << "\n";
         std::cout << "v " << v_line << std::endl;
 
@@ -179,8 +207,8 @@ class MaxSATEvaluationSolver {
                 for (auto i = 0; i < N; i++) {
                     v_line.push_back(VALUES[i] != 0 ? '1' : '0');
                 }
-                const long long COST =
-                    static_cast<long long>(std::llround(FINAL_COST));
+                const uint64_t COST = exact_cost(
+                    SOLUTION.variables("soft_slacks").flat_indexed_values());
                 std::cout << "o " << COST << "\n";
                 std::cout << "v " << v_line << std::endl;
                 m_have_emitted_solution = true;
