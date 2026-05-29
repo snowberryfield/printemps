@@ -4,7 +4,7 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <printemps.h>
-#include "pb_competition_2025_solver.h"
+#include "pb_competition_solver.h"
 
 static void print_comment_lines(const char *msg) {
     std::istringstream iss(msg);
@@ -16,8 +16,8 @@ static void print_comment_lines(const char *msg) {
 
 int main(const int argc, const char *argv[]) {
     try {
-        printemps::extra::pb_competition_2025::PBCompetition2025Solver(argc,
-                                                                       argv)
+        printemps::extra::pb_competition::PBCompetitionSolver(argc,
+                                                               argv)
             .run();
     } catch (const printemps::error_handler::InfeasibleError &e) {
         print_comment_lines(e.what());

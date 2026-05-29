@@ -1,6 +1,6 @@
 # ==============================================================================
 # CMakeLists for building extra solvers
-# Targets: pb_competition_2025_solver, maxsat_evaluation_solver
+# Targets: pb_competition_solver, maxsat_evaluation_solver
 # ==============================================================================
 cmake_minimum_required(VERSION 3.15)
 project(extra)
@@ -16,10 +16,10 @@ include(${TOP_DIR}/cmake/common.cmake)
 
 # pb_solver for Pseudo-Boolean Competition 2025
 add_executable(
-    pb_competition_2025_solver
-    ${TOP_DIR}/extra/pb_competition_2025/main.cpp
+    pb_competition_solver
+    ${TOP_DIR}/extra/pb_competition/main.cpp
 )
-configure_printemps_target(pb_competition_2025_solver)
+configure_printemps_target(pb_competition_solver)
 
 # maxsat_evaluation_solver for the MaxSAT Evaluation anytime tracks
 add_executable(

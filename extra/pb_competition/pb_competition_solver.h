@@ -3,21 +3,21 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_EXTRA_PB_COMPETITION_2025_PB_COMPETITION_2025_SOLVER_H__
-#define PRINTEMPS_EXTRA_PB_COMPETITION_2025_PB_COMPETITION_2025_SOLVER_H__
+#ifndef PRINTEMPS_EXTRA_PB_COMPETITION_PB_COMPETITION_SOLVER_H__
+#define PRINTEMPS_EXTRA_PB_COMPETITION_PB_COMPETITION_SOLVER_H__
 
-#include "pb_competition_2025_solver_argparser.h"
+#include "pb_competition_solver_argparser.h"
 
-namespace printemps::extra::pb_competition_2025 {
+namespace printemps::extra::pb_competition {
 inline bool interrupted = false;
 inline void interrupt_handler([[maybe_unused]] int signum) {
     interrupted = true;
 }
 
 /*****************************************************************************/
-class PBCompetition2025Solver {
+class PBCompetitionSolver {
    private:
-    PBCompetition2025SolverArgparser m_argparser;
+    PBCompetitionSolverArgparser m_argparser;
     opb::OPB                         m_opb;
     model::IPModel                   m_model;
     option::Option                   m_option;
@@ -91,12 +91,12 @@ class PBCompetition2025Solver {
 
    public:
     /*************************************************************************/
-    PBCompetition2025Solver(void) {
+    PBCompetitionSolver(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    PBCompetition2025Solver(const int argc, const char *argv[]) {
+    PBCompetitionSolver(const int argc, const char *argv[]) {
         this->initialize();
         this->setup(argc, argv);
     }
@@ -154,10 +154,11 @@ class PBCompetition2025Solver {
          * default values will be used.
          */
         if (!m_argparser.initial_solution_file_name.empty()) {
-            auto INITIAL_SOLUTION = printemps::helper::read_names_and_values(
+            auto initial_solution = printemps::helper::read_names_and_values(
                 m_argparser.initial_solution_file_name);
-            m_opb.augment_solution(INITIAL_SOLUTION);
-            m_model.import_solution(INITIAL_SOLUTION);
+            m_opb.augment_solution(&initial_solution);
+            m_model.initial_solution_handler().import_solution(initial_solution,
+                                                               false);
         }
 
         /**
@@ -165,11 +166,11 @@ class PBCompetition2025Solver {
          * be fixed at the specified values.
          */
         if (!m_argparser.fixed_variable_file_name.empty()) {
-            auto FIXED_VARIABLES_AND_VALUES =
+            auto fixed_variables_and_values =
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
-            m_opb.augment_solution(FIXED_VARIABLES_AND_VALUES);
-            m_model.fix_variables(FIXED_VARIABLES_AND_VALUES);
+            m_opb.augment_solution(&fixed_variables_and_values);
+            m_model.initial_solution_handler().fix_variables(fixed_variables_and_values);
         }
 
         if (m_argparser.is_specified_iteration_max) {
@@ -242,7 +243,7 @@ class PBCompetition2025Solver {
         this->solve();
     }
 };
-}  // namespace printemps::extra::pb_competition_2025
+}  // namespace printemps::extra::pb_competition
 #endif
 /*****************************************************************************/
 // END
