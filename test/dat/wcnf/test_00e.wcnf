@@ -1,0 +1,7 @@
+c precision stress: weights ~2^60. With x1=1 the violated soft cost is
+c 2^60 + 1 = 1152921504606846977, which rounds to 2^60 in double, so a
+c double-derived o-line would mis-report it.
+h 1 -1 0
+1152921504606846976 -1 0
+1 -1 0
+1152921504606846976 1 0
