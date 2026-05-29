@@ -172,14 +172,14 @@ class Standalone {
          * be fixed at the specified values.
          */
         if (!m_argparser.fixed_variable_file_name.empty()) {
-            auto FIXED_VARIABLES_AND_VALUES =
+            auto fixed_variables_and_values =
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
-            if (EXTENSION == "opb" || EXTENSION == "wbo") {
-                m_opb.augment_solution(FIXED_VARIABLES_AND_VALUES);
+            if (EXTENSION == "opb" || EXTENSION == "wbo" || EXTENSION == "pb") {
+                m_opb.augment_solution(fixed_variables_and_values);
             }
             m_model.initial_solution_handler().fix_variables(
-                FIXED_VARIABLES_AND_VALUES);
+                fixed_variables_and_values);
         }
 
         /**
