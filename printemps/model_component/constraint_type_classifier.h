@@ -36,12 +36,12 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline Variable<T_Variable, T_Expression> *determine_key_variable_ptr(
-        Variable<T_Variable, T_Expression> *a_FIRST,
-        Variable<T_Variable, T_Expression> *a_SECOND) const noexcept {
-        if (a_FIRST->name() < a_SECOND->name()) {
-            return a_FIRST;
+        Variable<T_Variable, T_Expression> *a_first_ptr,
+        Variable<T_Variable, T_Expression> *a_second_ptr) const noexcept {
+        if (a_first_ptr->name() < a_second_ptr->name()) {
+            return a_first_ptr;
         } else {
-            return a_SECOND;
+            return a_second_ptr;
         }
     }
 

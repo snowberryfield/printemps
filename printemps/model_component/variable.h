@@ -460,8 +460,8 @@ class Variable : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     inline void set_selection_ptr(
-        Selection<T_Variable, T_Expression> *a_SELECTION) {
-        m_extension->selection_ptr = a_SELECTION;
+        Selection<T_Variable, T_Expression> *a_selection_ptr) {
+        m_extension->selection_ptr = a_selection_ptr;
         m_extension->type          = VariableType::Selection;
     }
 
