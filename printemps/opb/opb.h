@@ -621,37 +621,37 @@ struct OPB {
 
     /*************************************************************************/
     inline void augment_solution(
-        std::unordered_map<std::string, int> &a_VARIABLES) {
+        std::unordered_map<std::string, int> *a_variables_ptr) {
         // augment negated variables
         for (const auto &variable_name : this->negated_variable_names) {
             const auto &negated_variable_name = "~" + variable_name;
-            if (a_VARIABLES.find(negated_variable_name) == a_VARIABLES.end() &&
-                a_VARIABLES.find(variable_name) != a_VARIABLES.end()) {
-                a_VARIABLES[negated_variable_name] =
-                    1 - a_VARIABLES[variable_name];
+            if (a_variables_ptr->find(negated_variable_name) == a_variables_ptr->end() &&
+                a_variables_ptr->find(variable_name) != a_variables_ptr->end()) {
+                (*a_variables_ptr)[negated_variable_name] =
+                    1 - (*a_variables_ptr)[variable_name];
             }
         }
 
         // augment product variables
         for (const auto &product_variable_name : this->product_variable_names) {
-            if (a_VARIABLES.find(product_variable_name.first) !=
-                a_VARIABLES.end()) {
+            if (a_variables_ptr->find(product_variable_name.first) !=
+                a_variables_ptr->end()) {
                 continue;
             }
 
             int  value     = 1;
             bool not_found = false;
             for (const auto &variable_name : product_variable_name.second) {
-                if (a_VARIABLES.find(variable_name) == a_VARIABLES.end()) {
+                if (a_variables_ptr->find(variable_name) == a_variables_ptr->end()) {
                     not_found = true;
                     break;
                 } else {
-                    value *= a_VARIABLES[variable_name];
+                    value *= (*a_variables_ptr)[variable_name];
                 }
             }
 
             if (!not_found) {
-                a_VARIABLES[product_variable_name.first] = value;
+                (*a_variables_ptr)[product_variable_name.first] = value;
             }
         }
     }
