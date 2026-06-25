@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -126,8 +126,8 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     inline const std::unordered_map<Variable<T_Variable, T_Expression> *,
-                                    T_Expression>
-        &sensitivities(void) const {
+                                    T_Expression> &
+    sensitivities(void) const {
         if (this->number_of_elements() != 1) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -219,14 +219,14 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline std::vector<Expression<T_Variable, T_Expression>>
-        &flat_indexed_expressions(void) {
+    inline std::vector<Expression<T_Variable, T_Expression>> &
+    flat_indexed_expressions(void) {
         return m_expressions;
     }
 
     /*************************************************************************/
-    inline const std::vector<Expression<T_Variable, T_Expression>>
-        &flat_indexed_expressions(void) const {
+    inline const std::vector<Expression<T_Variable, T_Expression>> &
+    flat_indexed_expressions(void) const {
         return m_expressions;
     }
 
@@ -346,7 +346,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
     template <class T_Array>
     inline Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
-        const T_Array &         a_COEFFICIENTS) {
+        const T_Array          &a_COEFFICIENTS) {
         const int MULTI_DIMENSIONAL_INDEX = a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX) {
             throw std::runtime_error(utility::format_error_location(

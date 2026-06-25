@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -22,8 +22,8 @@ inline bool read_json(double *a_parameter, const std::string &a_NAME,
 }
 
 /**************************************************************************/
-inline bool read_json(restart_mode::RestartMode *      a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(restart_mode::RestartMode       *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
@@ -45,8 +45,8 @@ inline bool read_json(restart_mode::RestartMode *      a_parameter,
 
 /*****************************************************************************/
 inline bool read_json(chain_move_reduce_mode::ChainMoveReduceMode *a_parameter,
-                      const std::string &                          a_NAME,
-                      const utility::json::JsonObject &            a_JSON) {
+                      const std::string                           &a_NAME,
+                      const utility::json::JsonObject             &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
             *a_parameter =
@@ -65,8 +65,8 @@ inline bool read_json(chain_move_reduce_mode::ChainMoveReduceMode *a_parameter,
 }
 
 /**************************************************************************/
-inline bool read_json(selection_mode::SelectionMode *  a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(selection_mode::SelectionMode   *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
@@ -131,8 +131,8 @@ inline bool read_json(verbose::Verbose *a_parameter, const std::string &a_NAME,
 }
 
 /**************************************************************************/
-inline bool read_json(tabu_mode::TabuMode *            a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(tabu_mode::TabuMode             *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -30,9 +30,8 @@ class TestMaxSATEvaluationSolver : public ::testing::Test {
     int run_and_capture(const std::string &a_INSTANCE_PATH,
                         const std::string &a_TIMEOUT,
                         std::string       *a_out_stdout) {
-        const char *FAKE_ARGV0 = "maxsat_evaluation_solver";
-        std::array<const char *, 3> argv = {FAKE_ARGV0,
-                                            a_INSTANCE_PATH.c_str(),
+        const char                 *FAKE_ARGV0 = "maxsat_evaluation_solver";
+        std::array<const char *, 3> argv = {FAKE_ARGV0, a_INSTANCE_PATH.c_str(),
                                             a_TIMEOUT.c_str()};
 
         std::stringstream     captured;
@@ -96,8 +95,7 @@ TEST_F(TestMaxSATEvaluationSolver, solve_test_00a) {
     ASSERT_NE(std::string::npos, V_POS);
     const auto LINE_END = captured.find('\n', V_POS + 1);
     ASSERT_NE(std::string::npos, LINE_END);
-    const std::string V_LINE =
-        captured.substr(V_POS + 1, LINE_END - V_POS - 1);
+    const std::string V_LINE = captured.substr(V_POS + 1, LINE_END - V_POS - 1);
     /// "v <bits>" -- 7 variables, so 7 chars after "v ".
     ASSERT_EQ(2u + 7u, V_LINE.size());
     for (size_t i = 2; i < V_LINE.size(); i++) {
@@ -140,11 +138,12 @@ TEST_F(TestMaxSATEvaluationSolver, solve_test_00e_precision) {
      */
     auto find_last_line_starting_with =
         [&captured](const std::string &a_PREFIX) -> size_t {
-        size_t pos     = std::string::npos;
-        size_t cursor  = 0;
+        size_t pos    = std::string::npos;
+        size_t cursor = 0;
         while (true) {
             const size_t HIT = captured.find(a_PREFIX, cursor);
-            if (HIT == std::string::npos) break;
+            if (HIT == std::string::npos)
+                break;
             if (HIT == 0 || captured[HIT - 1] == '\n') {
                 pos = HIT;
             }
@@ -171,7 +170,7 @@ TEST_F(TestMaxSATEvaluationSolver, solve_test_00e_precision) {
     ASSERT_EQ(1u, V_BITS.size());
     ASSERT_TRUE(V_BITS[0] == '0' || V_BITS[0] == '1');
 
-    const uint64_t W       = static_cast<uint64_t>(1) << 60;
+    const uint64_t W        = static_cast<uint64_t>(1) << 60;
     const uint64_t EXPECTED = (V_BITS[0] == '1') ? (W + 1) : W;
 
     EXPECT_EQ(std::to_string(EXPECTED), O_VALUE);

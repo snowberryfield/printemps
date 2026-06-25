@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -37,13 +37,11 @@ struct MaxSATEvaluationSolverArgparser {
                      "<input.wcnf> <timeout_seconds>"
                   << std::endl;
         std::cout << std::endl;
-        std::cout
-            << "  <input.wcnf>: Path to a WCNF instance (new format,"
-               " post-2022)."
-            << std::endl;
-        std::cout
-            << "  <timeout_seconds>: Wall-clock time limit in seconds."
-            << std::endl;
+        std::cout << "  <input.wcnf>: Path to a WCNF instance (new format,"
+                     " post-2022)."
+                  << std::endl;
+        std::cout << "  <timeout_seconds>: Wall-clock time limit in seconds."
+                  << std::endl;
     }
 
     /*************************************************************************/

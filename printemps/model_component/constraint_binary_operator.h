@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -77,7 +77,7 @@ inline auto operator<=(const T_Value                               a_TARGET,
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator<=(
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -91,7 +91,7 @@ template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator<=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -178,7 +178,7 @@ inline auto operator==(const T_Value                               a_TARGET,
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator==(
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -192,7 +192,7 @@ template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator==(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(
@@ -280,7 +280,7 @@ inline auto operator>=(const T_Value                               a_TARGET,
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator>=(
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.self() - a_EXPRESSION_LIKE.to_expression(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
@@ -294,7 +294,7 @@ template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator>=(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.self(),
                 model_component::Constraint<T_Variable, T_Expression>()) {
     return Constraint<T_Variable, T_Expression>::create_instance(

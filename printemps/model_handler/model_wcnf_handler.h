@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 // Modified by Antigravity (2026)
@@ -55,8 +55,8 @@ class ModelWCNFHandler {
          * Set up Boolean variables x_1, ..., x_n.
          */
         const int NUMBER_OF_VARIABLES = a_WCNF.number_of_variables;
-        auto     &variable_proxy =
-            model.component_creator().create_variables("variables", NUMBER_OF_VARIABLES);
+        auto     &variable_proxy = model.component_creator().create_variables(
+            "variables", NUMBER_OF_VARIABLES);
 
         VariableMap variable_ptrs;
         for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
@@ -75,23 +75,23 @@ class ModelWCNFHandler {
          */
         const int NUMBER_OF_HARD_CLAUSES = a_WCNF.hard_clauses.size();
         if (NUMBER_OF_HARD_CLAUSES > 0) {
-            auto &hard_clause_proxy = model.component_creator().create_constraints(
-                "hard_clauses", NUMBER_OF_HARD_CLAUSES);
+            auto &hard_clause_proxy =
+                model.component_creator().create_constraints(
+                    "hard_clauses", NUMBER_OF_HARD_CLAUSES);
 
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
             for (auto i = 0; i < NUMBER_OF_HARD_CLAUSES; i++) {
-                const auto &CLAUSE = a_WCNF.hard_clauses[i];
-                auto        expression =
-                    model_component::Expression<T_Variable,
-                                                T_Expression>::create_instance();
+                const auto &CLAUSE     = a_WCNF.hard_clauses[i];
+                auto        expression = model_component::Expression<
+                           T_Variable, T_Expression>::create_instance();
 
                 Sensitivities expression_sensitivities;
                 int           number_of_negative_literals = 0;
                 for (const auto literal : CLAUSE.literals) {
                     const int VAR_INDEX = std::abs(literal);
-                    auto      *VAR_PTR  = variable_ptrs.at(VAR_INDEX);
+                    auto     *VAR_PTR   = variable_ptrs.at(VAR_INDEX);
                     if (literal > 0) {
                         expression_sensitivities[VAR_PTR] +=
                             static_cast<T_Expression>(1);
@@ -120,8 +120,8 @@ class ModelWCNFHandler {
          * penalty.
          */
         const int NUMBER_OF_SOFT_CLAUSES = a_WCNF.soft_clauses.size();
-        auto     &soft_slack_proxy =
-            model.component_creator().create_variables("soft_slacks", NUMBER_OF_SOFT_CLAUSES);
+        auto     &soft_slack_proxy = model.component_creator().create_variables(
+            "soft_slacks", NUMBER_OF_SOFT_CLAUSES);
         for (auto i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
             soft_slack_proxy(i).set_bound(0, 1);
             soft_slack_proxy(i).set_name("s_" + std::to_string(i + 1));
@@ -132,23 +132,23 @@ class ModelWCNFHandler {
                                         T_Expression>::create_instance();
 
         if (NUMBER_OF_SOFT_CLAUSES > 0) {
-            auto &soft_clause_proxy = model.component_creator().create_constraints(
-                "soft_clauses", NUMBER_OF_SOFT_CLAUSES);
+            auto &soft_clause_proxy =
+                model.component_creator().create_constraints(
+                    "soft_clauses", NUMBER_OF_SOFT_CLAUSES);
 
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
             for (auto i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
-                const auto &CLAUSE = a_WCNF.soft_clauses[i];
-                auto        expression =
-                    model_component::Expression<T_Variable,
-                                                T_Expression>::create_instance();
+                const auto &CLAUSE     = a_WCNF.soft_clauses[i];
+                auto        expression = model_component::Expression<
+                           T_Variable, T_Expression>::create_instance();
 
                 Sensitivities expression_sensitivities;
                 int           number_of_negative_literals = 0;
                 for (const auto literal : CLAUSE.literals) {
                     const int VAR_INDEX = std::abs(literal);
-                    auto      *VAR_PTR  = variable_ptrs.at(VAR_INDEX);
+                    auto     *VAR_PTR   = variable_ptrs.at(VAR_INDEX);
                     if (literal > 0) {
                         expression_sensitivities[VAR_PTR] +=
                             static_cast<T_Expression>(1);
@@ -173,9 +173,8 @@ class ModelWCNFHandler {
                  * Cast uint64_t weight to T_Expression (typically double).
                  * Precision degrades when the weight sum exceeds 2^53.
                  */
-                objective_penalty +=
-                    static_cast<T_Expression>(CLAUSE.weight) *
-                    soft_slack_proxy(i);
+                objective_penalty += static_cast<T_Expression>(CLAUSE.weight) *
+                                     soft_slack_proxy(i);
             }
         }
 

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -18,10 +18,10 @@ inline void interrupt_handler([[maybe_unused]] int signum) {
 class PBCompetitionSolver {
    private:
     PBCompetitionSolverArgparser m_argparser;
-    opb::OPB                         m_opb;
-    model::IPModel                   m_model;
-    option::Option                   m_option;
-    utility::TimeKeeper              m_time_keeper;
+    opb::OPB                     m_opb;
+    model::IPModel               m_model;
+    option::Option               m_option;
+    utility::TimeKeeper          m_time_keeper;
 
     /*************************************************************************/
     inline void print_program_name(void) const {
@@ -170,7 +170,8 @@ class PBCompetitionSolver {
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
             m_opb.augment_solution(&fixed_variables_and_values);
-            m_model.initial_solution_handler().fix_variables(fixed_variables_and_values);
+            m_model.initial_solution_handler().fix_variables(
+                fixed_variables_and_values);
         }
 
         if (m_argparser.is_specified_iteration_max) {

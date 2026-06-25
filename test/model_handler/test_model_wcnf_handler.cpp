@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 // Modified by Antigravity (2026)
@@ -29,8 +29,11 @@ TEST_F(TestModelWCNFHandler, import) {
     model.wcnf_handler().import(wcnf);
     model.builder().update_derived_components();
 
-    EXPECT_EQ(10, model.reference().number_of_variables()); // 7 variables + 3 soft slacks
-    EXPECT_EQ(4, model.reference().number_of_constraints()); // 1 hard clause + 3 soft clauses
+    EXPECT_EQ(10, model.reference()
+                      .number_of_variables());  // 7 variables + 3 soft slacks
+    EXPECT_EQ(4,
+              model.reference()
+                  .number_of_constraints());  // 1 hard clause + 3 soft clauses
     EXPECT_TRUE(model.is_minimization());
 
     auto &variable_name_map   = model.reference().variable_name_map;

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -449,19 +449,22 @@ class ProblemSizeReducerBasic {
                         if (a_constraint_ptr->name() == "") {
                             utility::print_message(
                                 "The upper bound of the variable " +
-                                    variable_ptr->name() + " was tightened by " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
                                     std::to_string(bound_floor) + ".",
                                 a_IS_ENABLED_PRINT);
                         } else {
                             utility::print_message(
                                 "The constraint " + a_constraint_ptr->name() +
-                                    " was removed instead of tightening the upper "
+                                    " was removed instead of tightening the "
+                                    "upper "
                                     "bound of the variable " +
                                     variable_ptr->name() + " by " +
                                     std::to_string(bound_floor) + ".",
                                 a_IS_ENABLED_PRINT);
                         }
-                        variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                        variable_ptr->set_bound(variable_lower_bound,
+                                                bound_floor);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }
@@ -491,26 +494,28 @@ class ProblemSizeReducerBasic {
                  */
                 const double bound_ceil_d = std::ceil(bound_temp);
                 if (std::isfinite(bound_ceil_d) &&
-                    std::abs(bound_ceil_d) <
-                        static_cast<double>(BOUND_LIMIT)) {
+                    std::abs(bound_ceil_d) < static_cast<double>(BOUND_LIMIT)) {
                     auto bound_ceil = static_cast<T_Variable>(bound_ceil_d);
                     if (bound_ceil > variable_lower_bound) {
                         if (a_constraint_ptr->name() == "") {
                             utility::print_message(  //
                                 "The lower bound of the variable " +
-                                    variable_ptr->name() + " was tightened by " +
+                                    variable_ptr->name() +
+                                    " was tightened by " +
                                     std::to_string(bound_ceil) + ".",
                                 a_IS_ENABLED_PRINT);
                         } else {
                             utility::print_message(
                                 "The constraint " + a_constraint_ptr->name() +
-                                    " was removed instead of tightening the lower "
+                                    " was removed instead of tightening the "
+                                    "lower "
                                     "bound of the variable " +
                                     variable_ptr->name() + " by " +
                                     std::to_string(bound_ceil) + ".",
                                 a_IS_ENABLED_PRINT);
                         }
-                        variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                        variable_ptr->set_bound(bound_ceil,
+                                                variable_upper_bound);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }
@@ -544,13 +549,12 @@ class ProblemSizeReducerBasic {
             auto variable_upper_bound = variable_ptr->upper_bound();
 
             if (a_constraint_ptr->is_greater_or_equal()) {
-                auto         bound_temp    = -(constraint_upper_bound -
-                                     coefficient * variable_upper_bound) /
-                                   coefficient;
-                const double bound_ceil_d  = std::ceil(bound_temp);
+                auto bound_temp = -(constraint_upper_bound -
+                                    coefficient * variable_upper_bound) /
+                                  coefficient;
+                const double bound_ceil_d = std::ceil(bound_temp);
                 if (std::isfinite(bound_ceil_d) &&
-                    std::abs(bound_ceil_d) <
-                        static_cast<double>(BOUND_LIMIT)) {
+                    std::abs(bound_ceil_d) < static_cast<double>(BOUND_LIMIT)) {
                     auto bound_ceil = static_cast<T_Variable>(bound_ceil_d);
                     if (bound_ceil > variable_lower_bound) {
                         utility::print_message(  //
@@ -558,16 +562,17 @@ class ProblemSizeReducerBasic {
                                 variable_ptr->name() + " was tightened by " +
                                 std::to_string(bound_ceil) + ".",
                             a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                        variable_ptr->set_bound(bound_ceil,
+                                                variable_upper_bound);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }
                 }
             }
             if (a_constraint_ptr->is_less_or_equal()) {
-                auto         bound_temp    = -(constraint_lower_bound -
-                                     coefficient * variable_lower_bound) /
-                                   coefficient;
+                auto bound_temp = -(constraint_lower_bound -
+                                    coefficient * variable_lower_bound) /
+                                  coefficient;
                 const double bound_floor_d = std::floor(bound_temp);
                 if (std::isfinite(bound_floor_d) &&
                     std::abs(bound_floor_d) <
@@ -579,7 +584,8 @@ class ProblemSizeReducerBasic {
                                 variable_ptr->name() + " was tightened by " +
                                 std::to_string(bound_floor) + ".",
                             a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                        variable_ptr->set_bound(variable_lower_bound,
+                                                bound_floor);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }
@@ -596,9 +602,9 @@ class ProblemSizeReducerBasic {
             auto variable_upper_bound = variable_ptr->upper_bound();
 
             if (a_constraint_ptr->is_greater_or_equal()) {
-                auto         bound_temp    = -(constraint_upper_bound -
-                                     coefficient * variable_lower_bound) /
-                                   coefficient;
+                auto bound_temp = -(constraint_upper_bound -
+                                    coefficient * variable_lower_bound) /
+                                  coefficient;
                 const double bound_floor_d = std::floor(bound_temp);
                 if (std::isfinite(bound_floor_d) &&
                     std::abs(bound_floor_d) <
@@ -610,20 +616,20 @@ class ProblemSizeReducerBasic {
                                 variable_ptr->name() + " was tightened by " +
                                 std::to_string(bound_floor) + ".",
                             a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(variable_lower_bound, bound_floor);
+                        variable_ptr->set_bound(variable_lower_bound,
+                                                bound_floor);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }
                 }
             }
             if (a_constraint_ptr->is_less_or_equal()) {
-                auto         bound_temp   = -(constraint_lower_bound -
+                auto bound_temp = -(constraint_lower_bound -
                                     coefficient * variable_upper_bound) /
                                   coefficient;
                 const double bound_ceil_d = std::ceil(bound_temp);
                 if (std::isfinite(bound_ceil_d) &&
-                    std::abs(bound_ceil_d) <
-                        static_cast<double>(BOUND_LIMIT)) {
+                    std::abs(bound_ceil_d) < static_cast<double>(BOUND_LIMIT)) {
                     auto bound_ceil = static_cast<T_Variable>(bound_ceil_d);
                     if (bound_ceil > variable_lower_bound) {
                         utility::print_message(  //
@@ -631,7 +637,8 @@ class ProblemSizeReducerBasic {
                                 variable_ptr->name() + " was tightened by " +
                                 std::to_string(bound_ceil) + ".",
                             a_IS_ENABLED_PRINT);
-                        variable_ptr->set_bound(bound_ceil, variable_upper_bound);
+                        variable_ptr->set_bound(bound_ceil,
+                                                variable_upper_bound);
                         is_variable_bound_updated = true;
                         (*variable_bound_update_count_ptr)++;
                     }

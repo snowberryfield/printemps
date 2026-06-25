@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -19,8 +19,8 @@ class Constraint;
 template <class T_Variable, class T_Expression>
 struct Selection {
     std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
-    Variable<T_Variable, T_Expression> *              selected_variable_ptr;
-    Constraint<T_Variable, T_Expression> *            constraint_ptr;
+    Variable<T_Variable, T_Expression>               *selected_variable_ptr;
+    Constraint<T_Variable, T_Expression>             *constraint_ptr;
 
     std::vector<Constraint<T_Variable, T_Expression> *> related_constraint_ptrs;
 

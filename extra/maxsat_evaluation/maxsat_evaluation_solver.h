@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -71,7 +71,7 @@ class MaxSATEvaluationSolver {
          * Force PRINTEMPS to be silent so that only c/o/v/s lines appear on
          * stdout. Force single-threaded execution per MSE rules.
          */
-        m_option.output.verbose                             = option::verbose::Off;
+        m_option.output.verbose = option::verbose::Off;
         m_option.parallel.number_of_threads_move_evaluation = 1;
         m_option.parallel.number_of_threads_move_update     = 1;
 #ifdef _OPENMP
@@ -137,8 +137,8 @@ class MaxSATEvaluationSolver {
      * Computing here from the uint64_t weights avoids both problems.
      */
     inline uint64_t exact_cost(const std::vector<int> &a_SLACKS) const {
-        const size_t N = m_wcnf.soft_clauses.size();
-        uint64_t cost = 0;
+        const size_t N    = m_wcnf.soft_clauses.size();
+        uint64_t     cost = 0;
         for (size_t i = 0; i < N && i < a_SLACKS.size(); ++i) {
             if (a_SLACKS[i] != 0) {
                 cost += m_wcnf.soft_clauses[i].weight;

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -37,7 +37,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     /// Copy assignment
-    ConstraintProxy<T_Variable, T_Expression> &operator    =(
+    ConstraintProxy<T_Variable, T_Expression> &operator=(
         const ConstraintProxy<T_Variable, T_Expression> &) = delete;
 
     /*************************************************************************/
@@ -149,14 +149,14 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline std::vector<Constraint<T_Variable, T_Expression>>
-        &flat_indexed_constraints(void) {
+    inline std::vector<Constraint<T_Variable, T_Expression>> &
+    flat_indexed_constraints(void) {
         return m_constraints;
     }
 
     /*************************************************************************/
-    inline const std::vector<Constraint<T_Variable, T_Expression>>
-        &flat_indexed_constraints(void) const {
+    inline const std::vector<Constraint<T_Variable, T_Expression>> &
+    flat_indexed_constraints(void) const {
         return m_constraints;
     }
 

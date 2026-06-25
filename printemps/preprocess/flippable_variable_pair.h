@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -26,7 +26,7 @@ struct FlippableVariablePair {
         model_component::Variable<T_Variable, T_Expression>
             *a_variable_ptr_first,
         model_component::Variable<T_Variable, T_Expression>
-            *        a_variable_ptr_second,
+                    *a_variable_ptr_second,
         const int    a_NUMBER_OF_COMMON_ELEMENTS,  //
         const double a_OVERLAP_RATE)
         : variable_ptr_first(a_variable_ptr_first),

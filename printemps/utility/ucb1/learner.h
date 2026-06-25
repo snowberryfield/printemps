@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -14,7 +14,7 @@ template <class T_ActionBody>
 class Learner {
    private:
     std::vector<Action<T_ActionBody>> m_actions;
-    Action<T_ActionBody> *            m_best_action_ptr;
+    Action<T_ActionBody>             *m_best_action_ptr;
 
     long   m_total_number_of_samples;
     double m_decay_factor;
@@ -92,8 +92,8 @@ class Learner {
     }
 
     /*************************************************************************/
-    inline const std::vector<Action<T_ActionBody>> &actions(void) const
-        noexcept {
+    inline const std::vector<Action<T_ActionBody>> &actions(
+        void) const noexcept {
         return m_actions;
     }
 

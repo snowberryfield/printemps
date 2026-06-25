@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -273,7 +273,7 @@ inline bool operator!=(const ValueProxy<T_Value> &a_LEFT,
 template <class T_Value>
 inline void print_values(
     const std::unordered_map<std::string, ValueProxy<T_Value>> a_VALUE_PROXIES,
-    const std::string &                                        a_CATEGORY) {
+    const std::string                                         &a_CATEGORY) {
     for (const auto &item : a_VALUE_PROXIES) {
         auto &proxy              = item.second;
         int   number_of_elements = proxy.number_of_elements();
@@ -293,7 +293,7 @@ utility::json::JsonObject create_json_object(
     utility::json::JsonObject object;
 
     for (const auto &item : a_VALUE_PROXIES) {
-        auto &    proxy              = item.second;
+        auto     &proxy              = item.second;
         const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
         for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             object.emplace_back(proxy.flat_indexed_names(i),
@@ -318,7 +318,7 @@ utility::json::JsonObject create_json_array(
      */
     std::string str = " { ";
     for (const auto &item : a_VALUE_PROXIES) {
-        auto &    proxy                = item.second;
+        auto     &proxy                = item.second;
         const int NUMBER_OF_ELEMENTS   = proxy.number_of_elements();
         const int NUMBER_OF_DIMENSIONS = proxy.number_of_dimensions();
         int       dimension            = 0;

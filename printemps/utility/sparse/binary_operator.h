@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -70,12 +70,12 @@ inline Vector operator*(const SparseMatrix &a_SparseMatrix, const Vector &a_X) {
 
 /*****************************************************************************/
 inline SparseMatrix operator*(const SparseMatrix &a_SparseMatrix,
-                              const Diagonal &    a_DIAGONAL) {
+                              const Diagonal     &a_DIAGONAL) {
     return a_SparseMatrix.scale_column(a_DIAGONAL);
 }
 
 /*****************************************************************************/
-inline SparseMatrix operator*(const Diagonal &    a_DIAGONAL,
+inline SparseMatrix operator*(const Diagonal     &a_DIAGONAL,
                               const SparseMatrix &a_SparseMatrix) {
     return a_SparseMatrix.scale_row(a_DIAGONAL);
 }

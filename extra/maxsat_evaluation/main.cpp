@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -16,8 +16,8 @@ static void print_comment_lines(const char *msg) {
 
 int main(const int argc, const char *argv[]) {
     try {
-        return printemps::extra::maxsat_evaluation::MaxSATEvaluationSolver(
-                   argc, argv)
+        return printemps::extra::maxsat_evaluation::MaxSATEvaluationSolver(argc,
+                                                                           argv)
             .run();
     } catch (const printemps::error_handler::InfeasibleError &e) {
         print_comment_lines(e.what());

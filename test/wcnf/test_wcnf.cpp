@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -60,18 +60,15 @@ TEST_F(TestWCNF, parse_clause_soft) {
 
 /*****************************************************************************/
 TEST_F(TestWCNF, parse_clause_large_weight) {
-    const std::string LINE =
-        std::to_string((1ULL << 60)) + " 1 -2 0";
-    const auto CLAUSE = wcnf::WCNF::parse_clause(LINE, 0);
+    const std::string LINE   = std::to_string((1ULL << 60)) + " 1 -2 0";
+    const auto        CLAUSE = wcnf::WCNF::parse_clause(LINE, 0);
     EXPECT_FALSE(CLAUSE.is_hard);
     EXPECT_EQ((1ULL << 60), CLAUSE.weight);
 }
 
 /*****************************************************************************/
 TEST_F(TestWCNF, parse_clause_missing_terminator) {
-    EXPECT_THROW(
-        wcnf::WCNF::parse_clause("h 1 -2 3", 0),
-        std::runtime_error);
+    EXPECT_THROW(wcnf::WCNF::parse_clause("h 1 -2 3", 0), std::runtime_error);
 }
 
 /*****************************************************************************/
@@ -153,8 +150,7 @@ TEST_F(TestWCNF, read_wcnf_test_00d_with_comments_and_blanks) {
 /*****************************************************************************/
 TEST_F(TestWCNF, read_wcnf_missing_file) {
     wcnf::WCNF instance;
-    EXPECT_THROW(instance.read_wcnf("does_not_exist.wcnf"),
-                 std::runtime_error);
+    EXPECT_THROW(instance.read_wcnf("does_not_exist.wcnf"), std::runtime_error);
 }
 
 /*****************************************************************************/
