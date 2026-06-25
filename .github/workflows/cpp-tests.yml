@@ -93,21 +93,13 @@ jobs:
   build-msvc:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Set up MSVC dev environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v5
+      - uses: actions/checkout@v4
 
       - name: Configure tests (MSVC)
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/test -B build/test/Release -G "Ninja Multi-Config" `
+          cmake -S cmake/test -B build/test/Release -G "Visual Studio 17 2022" -A x64 `
                 -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
 
       - name: Build tests (MSVC)
@@ -122,7 +114,7 @@ jobs:
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/application -B build/application/Release -G "Ninja Multi-Config" `
+          cmake -S cmake/application -B build/application/Release -G "Visual Studio 17 2022" -A x64 `
                 -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
           cmake --build build/application/Release --config Release -j
 
@@ -130,6 +122,6 @@ jobs:
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/example -B build/example/Release -G "Ninja Multi-Config" `
+          cmake -S cmake/example -B build/example/Release -G "Visual Studio 17 2022" -A x64 `
                 -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
           cmake --build build/example/Release --config Release -j
