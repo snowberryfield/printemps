@@ -1,6 +1,6 @@
 # ==============================================================================
 # CMakeLists for building the standalone Printemps applications
-# Targets: printemps, mps_solver, opb_solver
+# Targets: printemps
 # ==============================================================================
 cmake_minimum_required(VERSION 3.15)
 project(application)
@@ -20,9 +20,7 @@ set(MAIN_SRC ${TOP_DIR}/application/standalone/main.cpp)
 # Create executables
 # For each target, add the executable and configure it using the common helper
 # ------------------------------------------------------------------------------
-foreach(target printemps mps_solver opb_solver)
-    add_executable(${target} ${MAIN_SRC})
+add_executable(printemps ${MAIN_SRC})
 
-    # Apply common Printemps configuration
-    configure_printemps_target(${target})
-endforeach()
+# Apply common Printemps configuration
+configure_printemps_target(printemps)
