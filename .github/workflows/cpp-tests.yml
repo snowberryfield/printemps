@@ -55,7 +55,7 @@ jobs:
       - { os: windows-2022, cc: gcc, cxx: g++, msys2_system: mingw64, msys2_arch: x86_64 }
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - uses: msys2/setup-msys2@v2
       id: msys2
@@ -93,7 +93,7 @@ jobs:
   build-msvc:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up MSVC dev environment
         uses: ilammy/msvc-dev-cmd@v1
