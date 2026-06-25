@@ -11,6 +11,7 @@ requires-python = ">=3.9"
 license = { text = "MIT" }
 authors = [
     { name = "Yuji KOGUMA" },
+    { name = "Masahiro Sakai" },
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
