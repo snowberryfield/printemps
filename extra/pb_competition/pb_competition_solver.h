@@ -134,9 +134,20 @@ class PBCompetitionSolver {
          * Check the metadata of the specified OPB file.
          */
         auto metadata = opb::OPB::check_metadata(m_argparser.pb_file_name);
-        if (metadata.intsize > 53) {
+        bool is_wbo = (metadata.number_of_soft_constraints > 0);
+        int max_allowed_intsize = is_wbo ? 52 : 53;
+
+        if (metadata.intsize > max_allowed_intsize) {
             std::cout << "s UNSUPPORTED" << std::endl;
             exit(0);
+        }
+
+        if (is_wbo) {
+            int64_t max_original_objective = (1LL << metadata.intsize);
+            if (max_original_objective + metadata.sumcost > 9007199254740992LL) {
+                std::cout << "s UNSUPPORTED" << std::endl;
+                exit(0);
+            }
         }
 
         /**
