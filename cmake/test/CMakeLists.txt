@@ -68,6 +68,10 @@ foreach(group ${TEST_GROUP_DIRS})
     # Apply common Printemps configuration (include dirs, compile options, OpenMP, static linking)
     configure_printemps_target(${test_target})
 
+    if(test_target STREQUAL "test_extra")
+        target_include_directories(${test_target} PRIVATE ${TOP_DIR})
+    endif()
+
     # Link GoogleTest libraries (Threads::Threads resolves pthread on Unix and native threads on Windows)
     target_link_libraries(${test_target}
         PRIVATE

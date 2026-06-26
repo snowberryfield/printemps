@@ -1,0 +1,2 @@
+* #variable= 2 #constraint= 1 intsize= 53
+2 x1 -3 x2 >= 0
