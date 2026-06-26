@@ -1,5 +1,25 @@
-name: GitHub Actions
-on: [push]
+name: C++ Tests
+
+on:
+  push:
+    paths:
+      - 'printemps/**'
+      - 'application/**'
+      - 'cmake/**'
+      - 'test/**'
+      - 'Makefile'
+      - 'CMakeLists.txt'
+      - '.github/workflows/cpp-tests.yml'
+  pull_request:
+    paths:
+      - 'printemps/**'
+      - 'application/**'
+      - 'cmake/**'
+      - 'test/**'
+      - 'Makefile'
+      - 'CMakeLists.txt'
+      - '.github/workflows/cpp-tests.yml'
+
 jobs:
   build:
     runs-on: ${{ matrix.cfg.os }}
@@ -9,7 +29,6 @@ jobs:
       cfg:
       # For Ubuntu 22.04, the available compilers are specified according to
       # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md
-      #- { os: ubuntu-22.04, cc: gcc-10, cxx: g++-10 } # 10.5.0
       - { os: ubuntu-22.04, cc: gcc-11, cxx: g++-11 } # 11.4.0
       - { os: ubuntu-22.04, cc: gcc-12, cxx: g++-12 } # 12.3.0
       - { os: ubuntu-22.04, cc: clang-13, cxx: clang++-13 } # 13.0.1
@@ -36,7 +55,7 @@ jobs:
       - { os: windows-2022, cc: gcc, cxx: g++, msys2_system: mingw64, msys2_arch: x86_64 }
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - uses: msys2/setup-msys2@v2
       id: msys2
@@ -47,15 +66,13 @@ jobs:
           make
           mingw-w64-${{matrix.cfg.msys2_arch}}-gcc
           mingw-w64-${{matrix.cfg.msys2_arch}}-cmake
-          mingw-w64-${{matrix.cfg.msys2_arch}}-python
-          mingw-w64-${{matrix.cfg.msys2_arch}}-python-pip
     - if: matrix.cfg.msys2_system != ''
       run: |
         Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\${{matrix.cfg.msys2_system}}\bin"
         Add-Content $env:GITHUB_PATH "${{ steps.msys2.outputs.msys2-location }}\usr\bin"
 
     - name: Run tests. 
-      run: make run-test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }}
+      run: make run-test CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }} CPU_ARCH=none
 
     - name: Upload test reports.
       if: always() 
@@ -73,48 +90,17 @@ jobs:
         reporter: java-junit
         fail-on-error: true
 
-    # For MSYS2-based builds, use the msys shell to avoid contamination with the system's Python.
-    # We want to write "shell: ${{ matrix.cfg.msys2_system && 'msys2 {0}' || 'bash' }}" to unify
-    # the following two steps, but 'matrix' is not available in the context.
-
-    - name: Test Python bindings
-      if: matrix.cfg.msys2_system == ''
-      run: |
-        python -m venv .venv
-        . .venv/bin/activate
-        CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }} python -m pip install ./python
-        python -m pip install pytest
-        pytest python/tests
-
-    - name: Test Python bindings (MSYS)
-      if: matrix.cfg.msys2_system != ''
-      run: |
-        python -m venv .venv
-        . .venv/bin/activate
-        CC=${{ matrix.cfg.cc }} CXX=${{ matrix.cfg.cxx }} python -m pip install ./python
-        python -m pip install pytest
-        pytest python/tests
-      shell: msys2 {0}
-
   build-msvc:
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up MSVC dev environment
-        uses: ilammy/msvc-dev-cmd@v1
-        with:
-          arch: x64
-
-      - name: Install Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v5
+      - uses: actions/checkout@v6
 
       - name: Configure tests (MSVC)
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/test -B build/test/Release -G "Ninja Multi-Config" `
-                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release
+          cmake -S cmake/test -B build/test/Release -G "Visual Studio 17 2022" -A x64 `
+                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
 
       - name: Build tests (MSVC)
         shell: pwsh
@@ -128,29 +114,14 @@ jobs:
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/application -B build/application/Release -G "Ninja Multi-Config" `
-                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release
+          cmake -S cmake/application -B build/application/Release -G "Visual Studio 17 2022" -A x64 `
+                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
           cmake --build build/application/Release --config Release -j
 
       - name: Build examples (MSVC, smoke)
         shell: pwsh
         run: |
           $top = "${{ github.workspace }}".Replace('\', '/')
-          cmake -S cmake/example -B build/example/Release -G "Ninja Multi-Config" `
-                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release
+          cmake -S cmake/example -B build/example/Release -G "Visual Studio 17 2022" -A x64 `
+                -DTOP_DIR="$top" -DCMAKE_BUILD_TYPE=Release -DCPU_ARCH=none
           cmake --build build/example/Release --config Release -j
-
-      - name: Set up Python (MSVC)
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Test Python bindings (MSVC)
-        shell: pwsh
-        run: |
-          python -m venv .venv
-          .\.venv\Scripts\Activate.ps1
-          python -m pip install --upgrade pip
-          python -m pip install ./python
-          python -m pip install pytest
-          pytest python/tests
