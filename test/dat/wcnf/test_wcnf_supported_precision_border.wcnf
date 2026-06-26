@@ -1,0 +1,5 @@
+c WCNF supported precision border case: weights sum close to 2^53.
+h 1 -1 0
+9007199254740984 -1 0
+1 -1 0
+9007199254740984 1 0

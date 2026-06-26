@@ -1,0 +1,5 @@
+c WCNF supported precision overflow case: weights sum close to 2^60.
+h 1 -1 0
+1152921504606846976 -1 0
+1 -1 0
+1152921504606846976 1 0

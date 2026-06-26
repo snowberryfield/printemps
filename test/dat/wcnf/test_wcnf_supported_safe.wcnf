@@ -1,0 +1,5 @@
+c WCNF supported safe case: weights well below 2^53.
+h 1 -1 0
+10 -1 0
+1 -1 0
+10 1 0
