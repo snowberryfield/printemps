@@ -9,6 +9,9 @@ project(application)
 # Include common Printemps configuration
 # Sets compiler options, OpenMP, and optional static linking
 # ------------------------------------------------------------------------------
+if(NOT DEFINED TOP_DIR)
+    get_filename_component(TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+endif()
 include(${TOP_DIR}/cmake/common.cmake)
 
 # ------------------------------------------------------------------------------

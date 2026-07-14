@@ -8,6 +8,9 @@ project(extra)
 # ------------------------------------------------------------------------------
 # Include common Printemps configuration
 # ------------------------------------------------------------------------------
+if(NOT DEFINED TOP_DIR)
+    get_filename_component(TOP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
+endif()
 include(${TOP_DIR}/cmake/common.cmake)
 
 # ------------------------------------------------------------------------------
