@@ -361,11 +361,11 @@ class TabuSearchController
     inline void print_distance(const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE = m_state_manager.state();
         utility::print_info(  //
-            " -- L0-Distance from the previous initial solution: " +
+            " -- L1-Distance from the previous initial solution: " +
                 utility::to_string(STATE.distance_from_current_solution, "%d"),
             a_IS_ENABLED_PRINT);
         utility::print_info(  //
-            " -- L0-Distance from the global incumbent solution: " +
+            " -- L1-Distance from the global incumbent solution: " +
                 utility::to_string(STATE.distance_from_global_solution, "%d"),
             a_IS_ENABLED_PRINT);
     }
@@ -423,7 +423,7 @@ class TabuSearchController
                     " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
-                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
+                    " L1-dist.: " + utility::to_string(solution.second, "%d"),
                 a_IS_ENABLED_PRINT);
         }
     }
@@ -453,7 +453,7 @@ class TabuSearchController
                     " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
-                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
+                    " L1-dist.: " + utility::to_string(solution.second, "%d"),
                 a_IS_ENABLED_PRINT);
         }
     }

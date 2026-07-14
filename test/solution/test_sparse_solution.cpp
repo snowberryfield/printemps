@@ -59,8 +59,8 @@ TEST_F(TestSparseSolution, distance) {
     solution_1.variables["z"] = 5;
     solution_1.variables["w"] = 4;
 
-    EXPECT_EQ(2, solution_0.distance(solution_1));
-    EXPECT_EQ(2, solution_1.distance(solution_0));
+    EXPECT_EQ(3, solution_0.distance(solution_1));
+    EXPECT_EQ(3, solution_1.distance(solution_0));
 }
 
 }  // namespace

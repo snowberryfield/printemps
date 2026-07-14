@@ -36,7 +36,7 @@ struct SparseSolution {
     /*************************************************************************/
     inline int distance(
         const SparseSolution<T_Variable, T_Expression> &a_SOLUTION) const {
-        return utility::distance_l0(this->variables, a_SOLUTION.variables);
+        return utility::distance_l1(this->variables, a_SOLUTION.variables);
     }
 };
 using IPSparseSolution = SparseSolution<int, double>;
