@@ -884,10 +884,8 @@ class TabuSearchCore {
             /**
              * Shuffle the moves.
              */
-            int offset = 0;
-            if (m_option.tabu_search.is_enabled_shuffle &&
-                STATE.number_of_moves > 1) {
-                offset = m_get_rand_mt() % STATE.number_of_moves;
+            if (m_option.tabu_search.is_enabled_shuffle) {
+                m_model_ptr->neighborhood().shuffle_moves(&m_get_rand_mt);
             }
 
             /**
@@ -921,21 +919,15 @@ class TabuSearchCore {
             const auto  ITERATION              = STATE.iteration;
             const auto  TABU_TENURE            = STATE.tabu_tenure;
             const auto  DURATION               = ITERATION - TABU_TENURE;
-
-            const auto& EVALUATOR = m_model_ptr->evaluator();
+            const auto& EVALUATOR              = m_model_ptr->evaluator();
 
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel                                \
                                  .is_enabled_move_evaluation_parallelization) \
-    schedule(static, 16)                                                      \
+    schedule(static)                                                          \
     num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
             for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
-                int index = (i + offset);
-                if (index >= NUMBER_OF_MOVES) {
-                    index -= NUMBER_OF_MOVES;
-                }
-
                 /**
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
@@ -943,55 +935,54 @@ class TabuSearchCore {
 #ifdef _PRINTEMPS_DISABLE_FAST_EVALUATION
                 if (m_option.general.is_enabled_fast_evaluation) {
 #endif
-                    if (TRIAL_MOVE_PTRS[index]->is_univariable_move) {
-                        EVALUATOR.evaluate_single(
-                            &trial_solution_scores[index],  //
-                            *TRIAL_MOVE_PTRS[index],        //
-                            CURRENT_SOLUTION_SCORE);
-                    } else if (TRIAL_MOVE_PTRS[index]->is_selection_move) {
-                        EVALUATOR.evaluate_selection(       //
-                            &trial_solution_scores[index],  //
-                            *TRIAL_MOVE_PTRS[index],        //
+                    if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
+                        EVALUATOR.evaluate_single(&trial_solution_scores[i],  //
+                                                  *TRIAL_MOVE_PTRS[i],        //
+                                                  CURRENT_SOLUTION_SCORE);
+                    } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
+                        EVALUATOR.evaluate_selection(   //
+                            &trial_solution_scores[i],  //
+                            *TRIAL_MOVE_PTRS[i],        //
                             CURRENT_SOLUTION_SCORE);
                     } else {
-                        EVALUATOR.evaluate_multi(           //
-                            &trial_solution_scores[index],  //
-                            *TRIAL_MOVE_PTRS[index],        //
+                        EVALUATOR.evaluate_multi(       //
+                            &trial_solution_scores[i],  //
+                            *TRIAL_MOVE_PTRS[i],        //
                             CURRENT_SOLUTION_SCORE);
                     }
 
 #ifdef _PRINTEMPS_DISABLE_FAST_EVALUATION
                 } else {
-                    EVALUATOR.evaluate(&trial_solution_scores[index],  //
-                                       *TRIAL_MOVE_PTRS[index]);
+                    EVALUATOR.evaluate(&trial_solution_scores[i],  //
+                                       *TRIAL_MOVE_PTRS[i]);
                 }
 #endif
-                move_evaluator.evaluate(&trial_move_scores[index],  //
-                                        *TRIAL_MOVE_PTRS[index],    //
-                                        ITERATION,                  //
+                move_evaluator.evaluate(&trial_move_scores[i],  //
+                                        *TRIAL_MOVE_PTRS[i],    //
+                                        ITERATION,              //
                                         DURATION);
 
-                total_scores[index] =
-                    trial_solution_scores[index].local_augmented_objective +
-                    trial_move_scores[index].frequency_penalty +
-                    trial_move_scores[index].lagrangian_penalty;
+                total_scores[i] =
+                    trial_solution_scores[i].local_augmented_objective +
+                    trial_move_scores[i].frequency_penalty +
+                    trial_move_scores[i].lagrangian_penalty;
 
                 /**
                  * If the move is "tabu", it will be set lower priorities in
                  * selecting a move for the next solution.
                  */
-                if (!trial_move_scores[index].is_permissible) {
-                    total_scores[index] += constant::LARGE_VALUE_50;
+                if (!trial_move_scores[i].is_permissible) {
+                    total_scores[i] += constant::LARGE_VALUE_50;
                 }
 
                 /**
                  * If the move is special neighborhood moves, it must improves
                  * objective or feasibility.
                  */
-                if (TRIAL_MOVE_PTRS[index]->is_special_neighborhood_move &&
-                    !(trial_solution_scores[index].is_objective_improvable ||
-                      trial_solution_scores[index].is_feasibility_improvable)) {
-                    total_scores[index] += constant::LARGE_VALUE_100;
+                if (TRIAL_MOVE_PTRS[i]->is_special_neighborhood_move &&
+                    !(trial_solution_scores[i].is_objective_improvable ||
+                      trial_solution_scores[i].is_feasibility_improvable)) {
+                    total_scores[i] += constant::LARGE_VALUE_100;
                 }
             }
             const double END_TIME = time_keeper.clock();
