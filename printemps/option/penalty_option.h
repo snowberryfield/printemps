@@ -11,6 +11,7 @@ namespace printemps::option {
 struct PenaltyOptionConstant {
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_RELAXING_RATE    = 0.9;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE  = 1.0;
+    static constexpr double DEFAULT_PENALTY_COEFFICIENT_PULLBACK_RATE    = 1E-4;
     static constexpr double DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE = 0.0;
     static constexpr double DEFAULT_INITIAL_PENALTY_COEFFICIENT          = 1E7;
 
@@ -36,6 +37,7 @@ struct PenaltyOptionConstant {
 struct PenaltyOption {
     double penalty_coefficient_relaxing_rate;
     double penalty_coefficient_tightening_rate;
+    double penalty_coefficient_pullback_rate;
     double penalty_coefficient_updating_balance;
     double initial_penalty_coefficient;
     double penalty_coefficient_relaxing_rate_min;
@@ -68,6 +70,9 @@ struct PenaltyOption {
         this->penalty_coefficient_tightening_rate  //
             = PenaltyOptionConstant::
                 DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE;
+
+        this->penalty_coefficient_pullback_rate  //
+            = PenaltyOptionConstant::DEFAULT_PENALTY_COEFFICIENT_PULLBACK_RATE;
 
         this->penalty_coefficient_updating_balance  //
             = PenaltyOptionConstant::
@@ -126,6 +131,11 @@ struct PenaltyOption {
             " -- penalty.penalty_coefficient_tightening_rate: " +  //
             utility::to_string(                                    //
                 this->penalty_coefficient_tightening_rate, "%f"));
+
+        utility::print(                                          //
+            " -- penalty.penalty_coefficient_pullback_rate: " +  //
+            utility::to_string(                                  //
+                this->penalty_coefficient_pullback_rate, "%f"));
 
         utility::print(                                             //
             " -- penalty.penalty_coefficient_updating_balance: " +  //
@@ -200,6 +210,10 @@ struct PenaltyOption {
             &this->penalty_coefficient_tightening_rate,  //
             "penalty_coefficient_tightening_rate", a_OBJECT);
 
+        read_json(                                     //
+            &this->penalty_coefficient_pullback_rate,  //
+            "penalty_coefficient_pullback_rate", a_OBJECT);
+
         read_json(                                        //
             &this->penalty_coefficient_updating_balance,  //
             "penalty_coefficient_updating_balance", a_OBJECT);
@@ -259,6 +273,10 @@ struct PenaltyOption {
         obj.emplace_back(                           //
             "penalty_coefficient_tightening_rate",  //
             this->penalty_coefficient_tightening_rate);
+
+        obj.emplace_back(                         //
+            "penalty_coefficient_pullback_rate",  //
+            this->penalty_coefficient_pullback_rate);
 
         obj.emplace_back(                            //
             "penalty_coefficient_updating_balance",  //

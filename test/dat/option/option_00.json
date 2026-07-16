@@ -10,6 +10,7 @@
     "penalty": {
         "penalty_coefficient_relaxing_rate": 0.1,
         "penalty_coefficient_tightening_rate": 0.1,
+        "penalty_coefficient_pullback_rate": 0.1,
         "penalty_coefficient_updating_balance": 0.1,
         "initial_penalty_coefficient": 0.1,
         "penalty_coefficient_relaxing_rate_min": 0.0,

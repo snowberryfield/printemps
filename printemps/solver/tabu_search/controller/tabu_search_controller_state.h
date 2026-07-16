@@ -62,7 +62,6 @@ struct TabuSearchControllerState {
     bool is_objective_improved;
     bool is_feasibility_improved;
     bool is_improved;
-    bool is_exceeded_initial_penalty_coefficient;
     bool is_inner_stagnation;
     bool is_outer_stagnation;
 
@@ -154,16 +153,15 @@ struct TabuSearchControllerState {
         this->distance_from_current_solution = 0;
         this->distance_from_global_solution  = 0;
 
-        this->is_global_augmented_incumbent_updated   = false;
-        this->previous_is_feasible_incumbent_updated  = false;
-        this->current_is_feasible_incumbent_updated   = false;
-        this->is_not_updated                          = false;
-        this->is_objective_improved                   = false;
-        this->is_feasibility_improved                 = false;
-        this->is_improved                             = false;
-        this->is_exceeded_initial_penalty_coefficient = false;
-        this->is_inner_stagnation                     = false;
-        this->is_outer_stagnation                     = false;
+        this->is_global_augmented_incumbent_updated  = false;
+        this->previous_is_feasible_incumbent_updated = false;
+        this->current_is_feasible_incumbent_updated  = false;
+        this->is_not_updated                         = false;
+        this->is_objective_improved                  = false;
+        this->is_feasibility_improved                = false;
+        this->is_improved                            = false;
+        this->is_inner_stagnation                    = false;
+        this->is_outer_stagnation                    = false;
 
         this->tabu_search_result.initialize();
 

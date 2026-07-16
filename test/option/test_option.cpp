@@ -63,6 +63,10 @@ TEST_F(TestOption, setup) {
 
         EXPECT_FLOAT_EQ(  //
             0.1,          //
+            option.penalty.penalty_coefficient_pullback_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
             option.penalty.penalty_coefficient_updating_balance);
 
         EXPECT_FLOAT_EQ(  //
