@@ -587,8 +587,7 @@ class ModelBuilder {
 
         auto      &model    = *m_model_ptr;
         const auto ORIGINAL = model.global_penalty_coefficient();
-        const auto MODIFIED =
-            2.0 * (model.objective().expression().range() + 1.0);
+        const auto MODIFIED = model.objective().expression().range() + 1.0;
 
         if (MODIFIED < ORIGINAL) {
             model.set_global_penalty_coefficient(MODIFIED);

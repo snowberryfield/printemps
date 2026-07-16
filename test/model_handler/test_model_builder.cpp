@@ -272,8 +272,8 @@ TEST_F(TestModelBuilder, shrink_global_penalty_coefficient) {
     const auto EXPECTED_LOWER_BOUND = 2.0 * (-1 - 1) + 1;  // -3
 
     EXPECT_FLOAT_EQ(
-        2 * (EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1),
-        model.global_penalty_coefficient());  // 2 * (5 - (-3) + 1) = 2 * 9 = 18
+        EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1,
+        model.global_penalty_coefficient());  // 5 - (-3) + 1 = 9
 }
 
 /*****************************************************************************/
