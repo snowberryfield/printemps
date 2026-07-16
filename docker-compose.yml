@@ -1,9 +1,0 @@
-version: "3"
-services:
-  develop:
-    build:
-      context: ./docker
-      dockerfile: Dockerfile
-    working_dir: /home/work
-    volumes:
-      - ${PWD}:/home/work
