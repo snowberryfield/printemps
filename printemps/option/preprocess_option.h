@@ -14,6 +14,8 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_DUPLICATED_CONSTRAINTS = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_REMOVE_IMPLICIT_FIXED_VARIABLES = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_VARIABLES = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_CONSTRAINTS = true;
@@ -24,13 +26,15 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_OR = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_NOR = false;
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_EXCLUSIVE_NOR = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INVERTED_INTEGERS = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_BALANCED_INTEGERS = false;
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_BALANCED_INTEGERS = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_SUM_INTEGERS = true;
     static constexpr bool  //
@@ -39,18 +43,27 @@ struct PreprocessOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_RATIO_INTEGERS = true;
     static constexpr bool  //
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_TRINOMIAL_EXCLUSIVE_NOR = true;
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING = true;
+    static constexpr bool  //
         DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE = true;
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_USING_PARTIAL_FEASIBLE_ENUMERATION =
+            true;
 };
 
 /*****************************************************************************/
 struct PreprocessOption {
     bool is_enabled_presolve;
     bool is_enabled_remove_duplicated_constraints;
+    bool is_enabled_remove_implicit_fixed_variables;
     bool is_enabled_remove_redundant_set_variables;
     bool is_enabled_remove_redundant_set_constraints;
     bool is_enabled_extract_implicit_equality_constraints;
     bool is_enabled_online_bounding;
     bool is_enabled_initial_value_correction;
+    bool is_enabled_partial_feasible_enumeration;
     bool is_enabled_extract_dependent_exclusive_or;
     bool is_enabled_extract_dependent_exclusive_nor;
     bool is_enabled_extract_dependent_inverted_integers;
@@ -58,7 +71,10 @@ struct PreprocessOption {
     bool is_enabled_extract_dependent_constant_sum_integers;
     bool is_enabled_extract_dependent_constant_difference_integers;
     bool is_enabled_extract_dependent_constant_ratio_integers;
+    bool is_enabled_extract_dependent_trinomial_exclusive_nor;
+    bool is_enabled_extract_dependent_all_or_nothing;
     bool is_enabled_extract_dependent_intermediate;
+    bool is_enabled_extract_dependent_using_partial_feasible_enumeration;
 
     /*************************************************************************/
     PreprocessOption(void) {
@@ -79,6 +95,10 @@ struct PreprocessOption {
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_REMOVE_DUPLICATED_CONSTRAINTS;
 
+        this->is_enabled_remove_implicit_fixed_variables =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_REMOVE_IMPLICIT_FIXED_VARIABLES;
+
         this->is_enabled_remove_redundant_set_variables =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_REMOVE_REDUNDANT_SET_VARIABLES;
@@ -96,6 +116,10 @@ struct PreprocessOption {
 
         this->is_enabled_initial_value_correction = PreprocessOptionConstant::
             DEFAULT_IS_ENABLED_INITIAL_VALUE_CORRECTION;
+
+        this->is_enabled_partial_feasible_enumeration =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_PARTIAL_FEASIBLE_ENUMERATION;
 
         this->is_enabled_extract_dependent_exclusive_or =
             PreprocessOptionConstant::
@@ -125,9 +149,21 @@ struct PreprocessOption {
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_CONSTANT_RATIO_INTEGERS;
 
+        this->is_enabled_extract_dependent_trinomial_exclusive_nor =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_TRINOMIAL_EXCLUSIVE_NOR;
+
+        this->is_enabled_extract_dependent_all_or_nothing =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_ALL_OR_NOTHING;
+
         this->is_enabled_extract_dependent_intermediate =
             PreprocessOptionConstant::
                 DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_INTERMEDIATE;
+
+        this->is_enabled_extract_dependent_using_partial_feasible_enumeration =
+            PreprocessOptionConstant::
+                DEFAULT_IS_ENABLED_EXTRACT_DEPENDENT_USING_PARTIAL_FEASIBLE_ENUMERATION;
     }
 
     /*************************************************************************/
@@ -141,6 +177,11 @@ struct PreprocessOption {
             " -- preprocess.is_enabled_remove_duplicated_constraints: " +  //
             utility::to_true_or_false(                                     //
                 this->is_enabled_remove_duplicated_constraints));
+
+        utility::print(                                                      //
+            " -- preprocess.is_enabled_remove_implicit_fixed_variables: " +  //
+            utility::to_true_or_false(                                       //
+                this->is_enabled_remove_implicit_fixed_variables));
 
         utility::print(                                                     //
             " -- preprocess.is_enabled_remove_redundant_set_variables: " +  //
@@ -169,6 +210,11 @@ struct PreprocessOption {
             utility::to_true_or_false(                                //
                 this->is_enabled_initial_value_correction));
 
+        utility::print(                                                   //
+            " -- preprocess.is_enabled_partial_feasible_enumeration: " +  //
+            utility::to_true_or_false(                                    //
+                this->is_enabled_partial_feasible_enumeration));
+
         utility::print(                                                     //
             " -- preprocess.is_enabled_extract_dependent_exclusive_or: " +  //
             utility::to_true_or_false(                                      //
@@ -191,7 +237,7 @@ struct PreprocessOption {
 
         utility::print(  //
             " -- "
-            "preprocess.is_enabled_extract_dependent_constant_sum_integers:"
+            "preprocess.is_enabled_extract_dependent_constant_sum_integers: "
             " " +                       //
             utility::to_true_or_false(  //
                 this->is_enabled_extract_dependent_constant_sum_integers));
@@ -210,10 +256,31 @@ struct PreprocessOption {
             utility::to_true_or_false(  //
                 this->is_enabled_extract_dependent_constant_ratio_integers));
 
+        utility::print(  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_trinomial_exclusive_nor:"
+            " " +                       //
+            utility::to_true_or_false(  //
+                this->is_enabled_extract_dependent_trinomial_exclusive_nor));
+
+        utility::print(  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_all_or_nothing:"
+            " " +                       //
+            utility::to_true_or_false(  //
+                this->is_enabled_extract_dependent_all_or_nothing));
+
         utility::print(                                                     //
             " -- preprocess.is_enabled_extract_dependent_intermediate: " +  //
             utility::to_true_or_false(                                      //
                 this->is_enabled_extract_dependent_intermediate));
+
+        utility::print(  //
+            " -- "
+            "preprocess.is_enabled_extract_dependent_using_partial_feasible_"
+            "enumeration: " +           //
+            utility::to_true_or_false(  //
+                this->is_enabled_extract_dependent_using_partial_feasible_enumeration));
     }
 
     /**************************************************************************/
@@ -227,6 +294,10 @@ struct PreprocessOption {
         read_json(                                            //
             &this->is_enabled_remove_duplicated_constraints,  //
             "is_enabled_remove_duplicated_constraints", a_OBJECT);
+
+        read_json(                                              //
+            &this->is_enabled_remove_implicit_fixed_variables,  //
+            "is_enabled_remove_implicit_fixed_variables", a_OBJECT);
 
         read_json(                                             //
             &this->is_enabled_remove_redundant_set_variables,  //
@@ -247,6 +318,10 @@ struct PreprocessOption {
         read_json(                                       //
             &this->is_enabled_initial_value_correction,  //
             "is_enabled_initial_value_correction", a_OBJECT);
+
+        read_json(                                           //
+            &this->is_enabled_partial_feasible_enumeration,  //
+            "is_enabled_partial_feasible_enumeration", a_OBJECT);
 
         read_json(                                             //
             &this->is_enabled_extract_dependent_exclusive_or,  //
@@ -277,38 +352,22 @@ struct PreprocessOption {
             &this->is_enabled_extract_dependent_constant_ratio_integers,  //
             "is_enabled_extract_dependent_constant_ratio_integers", a_OBJECT);
 
+        read_json(                                                        //
+            &this->is_enabled_extract_dependent_trinomial_exclusive_nor,  //
+            "is_enabled_extract_dependent_trinomial_exclusive_nor", a_OBJECT);
+
+        read_json(                                               //
+            &this->is_enabled_extract_dependent_all_or_nothing,  //
+            "is_enabled_extract_dependent_all_or_nothing", a_OBJECT);
+
         read_json(                                             //
             &this->is_enabled_extract_dependent_intermediate,  //
             "is_enabled_extract_dependent_intermediate", a_OBJECT);
-    }
 
-    /**************************************************************************/
-    inline bool is_enabled_extract_dependent(void) const {
-        if (is_enabled_extract_dependent_exclusive_or) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_exclusive_nor) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_inverted_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_balanced_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_sum_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_difference_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_constant_ratio_integers) {
-            return true;
-        }
-        if (is_enabled_extract_dependent_intermediate) {
-            return true;
-        }
-        return false;
+        read_json(  //
+            &this->is_enabled_extract_dependent_using_partial_feasible_enumeration,  //
+            "is_enabled_extract_dependent_using_partial_feasible_enumeration",
+            a_OBJECT);
     }
 
     /**************************************************************************/
@@ -321,6 +380,10 @@ struct PreprocessOption {
         obj.emplace_back(                                //
             "is_enabled_remove_duplicated_constraints",  //
             this->is_enabled_remove_duplicated_constraints);
+
+        obj.emplace_back(                                  //
+            "is_enabled_remove_implicit_fixed_variables",  //
+            this->is_enabled_remove_implicit_fixed_variables);
 
         obj.emplace_back(                                 //
             "is_enabled_remove_redundant_set_variables",  //
@@ -341,6 +404,10 @@ struct PreprocessOption {
         obj.emplace_back(                           //
             "is_enabled_initial_value_correction",  //
             this->is_enabled_initial_value_correction);
+
+        obj.emplace_back(                               //
+            "is_enabled_partial_feasible_enumeration",  //
+            this->is_enabled_partial_feasible_enumeration);
 
         obj.emplace_back(                                 //
             "is_enabled_extract_dependent_exclusive_or",  //
@@ -370,11 +437,48 @@ struct PreprocessOption {
             "is_enabled_extract_dependent_constant_ratio_integers",  //
             this->is_enabled_extract_dependent_constant_ratio_integers);
 
+        obj.emplace_back(                                            //
+            "is_enabled_extract_dependent_trinomial_exclusive_nor",  //
+            this->is_enabled_extract_dependent_trinomial_exclusive_nor);
+
+        obj.emplace_back(                                   //
+            "is_enabled_extract_dependent_all_or_nothing",  //
+            this->is_enabled_extract_dependent_all_or_nothing);
+
         obj.emplace_back(                                 //
             "is_enabled_extract_dependent_intermediate",  //
             this->is_enabled_extract_dependent_intermediate);
 
+        obj.emplace_back(  //
+            "is_enabled_extract_dependent_using_partial_feasible_enumeration",  //
+            this->is_enabled_extract_dependent_using_partial_feasible_enumeration);
+
         return obj;
+    }
+
+    /**************************************************************************/
+    inline bool is_enabled_extract_dependent(void) const {
+        std::vector<bool> flags = {
+            this->is_enabled_extract_dependent_exclusive_or,
+            this->is_enabled_extract_dependent_exclusive_nor,
+            this->is_enabled_extract_dependent_inverted_integers,
+            this->is_enabled_extract_dependent_balanced_integers,
+            this->is_enabled_extract_dependent_constant_sum_integers,
+            this->is_enabled_extract_dependent_constant_difference_integers,
+            this->is_enabled_extract_dependent_constant_ratio_integers,
+            this->is_enabled_extract_dependent_trinomial_exclusive_nor,
+            this->is_enabled_extract_dependent_all_or_nothing,
+            this->is_enabled_extract_dependent_intermediate,
+            this->is_enabled_extract_dependent_using_partial_feasible_enumeration,
+        };
+
+        for (auto flag : flags) {
+            if (flag) {
+                return true;
+            }
+        }
+
+        return false;
     }
 };
 }  // namespace printemps::option

@@ -46,7 +46,7 @@ TEST_F(TestFixedSizeQueue, size) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, max_size) {
-    /// This method is tested in size().
+    /// This test is covered by size().
 }
 
 /*****************************************************************************/
@@ -85,12 +85,12 @@ TEST_F(TestFixedSizeQueue, min) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, max) {
-    /// This method is tested in min().
+    /// This test is covered by min().
 }
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeQueue, average) {
-    /// This method is tested in min().
+    /// This test is covered by min().
 }
 }  // namespace
 /*****************************************************************************/

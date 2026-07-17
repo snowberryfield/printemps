@@ -97,7 +97,7 @@ TEST_F(TestWCNF, parse_clause_malformed_weight) {
 /*****************************************************************************/
 TEST_F(TestWCNF, read_wcnf_test_00a) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00a.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00a.wcnf");
 
     EXPECT_EQ(7, instance.number_of_variables);
     ASSERT_EQ(1u, instance.hard_clauses.size());
@@ -120,7 +120,7 @@ TEST_F(TestWCNF, read_wcnf_test_00a) {
 /*****************************************************************************/
 TEST_F(TestWCNF, read_wcnf_test_00b) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00b.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00b.wcnf");
 
     EXPECT_EQ(1, instance.number_of_variables);
     EXPECT_EQ(1, instance.metadata.number_of_hard_clauses);
@@ -130,7 +130,7 @@ TEST_F(TestWCNF, read_wcnf_test_00b) {
 /*****************************************************************************/
 TEST_F(TestWCNF, read_wcnf_test_00c_tautology) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00c.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00c.wcnf");
 
     EXPECT_EQ(1, instance.number_of_variables);
     ASSERT_EQ(1u, instance.hard_clauses.size());
@@ -142,7 +142,7 @@ TEST_F(TestWCNF, read_wcnf_test_00c_tautology) {
 /*****************************************************************************/
 TEST_F(TestWCNF, read_wcnf_test_00d_with_comments_and_blanks) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00d.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00d.wcnf");
 
     EXPECT_EQ(5, instance.number_of_variables);
     EXPECT_EQ(1, instance.metadata.number_of_hard_clauses);
@@ -160,10 +160,10 @@ TEST_F(TestWCNF, read_wcnf_missing_file) {
 /*****************************************************************************/
 TEST_F(TestWCNF, import_wcnf_minimization) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00a.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00a.wcnf");
 
     model::IPModel model;
-    model.import_wcnf(instance);
+    model.wcnf_handler().import(instance);
 
     EXPECT_TRUE(model.is_minimization());
 }
@@ -171,10 +171,10 @@ TEST_F(TestWCNF, import_wcnf_minimization) {
 /*****************************************************************************/
 TEST_F(TestWCNF, import_wcnf_proxies) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00a.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00a.wcnf");
 
     model::IPModel model;
-    model.import_wcnf(instance);
+    model.wcnf_handler().import(instance);
 
     /**
      * Two variable proxies are expected: "variables" (size = number of WCNF
@@ -202,7 +202,7 @@ TEST_F(TestWCNF, import_wcnf_proxies) {
 /*****************************************************************************/
 TEST_F(TestWCNF, import_wcnf_hard_only) {
     wcnf::WCNF instance;
-    instance.read_wcnf("./test/dat/wcnf/test_00a.wcnf");
+    instance.read_wcnf("./dat/wcnf/test_00a.wcnf");
     /// Drop soft clauses to simulate the all-hard case.
     instance.soft_clauses.clear();
     instance.metadata.number_of_soft_clauses = 0;
@@ -210,7 +210,7 @@ TEST_F(TestWCNF, import_wcnf_hard_only) {
     instance.metadata.max_weight             = 0;
 
     model::IPModel model;
-    model.import_wcnf(instance);
+    model.wcnf_handler().import(instance);
 
     /// Even with zero soft clauses, the soft_slacks proxy is still created.
     const auto &VARIABLE_PROXIES = model.variable_proxies();

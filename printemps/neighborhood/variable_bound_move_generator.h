@@ -33,7 +33,7 @@ class VariableBoundMoveGenerator
         /**
          * Convert constraint objects to BinomialConstraint objects.
          */
-        auto binomials = convert_to_binomial_constraints(constraint_ptrs);
+        auto binomials = convert_to_binomial_constraints(constraint_ptrs, true);
 
         /**
          * Setup move objects.
@@ -48,34 +48,17 @@ class VariableBoundMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[4 * i];
-            move.sense = MoveSense::VariableBound;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+
+            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.type                      = MoveType::VariableBound;
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[4 * i + 1] = move;
             this->m_moves[4 * i + 2] = move;
@@ -87,8 +70,8 @@ class VariableBoundMoveGenerator
          */
         auto move_updater =  //
             [binomials, BINOMIALS_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
@@ -112,15 +95,14 @@ class VariableBoundMoveGenerator
                         T_Variable target = 0;
                         double     target_temp =
                             (-binomials[i].constant_value -
-                             binomials[i].sensitivity_first *
-                                 (binomials[i].variable_ptr_first->value() +
-                                  1)) /
-                            binomials[i].sensitivity_second;
+                             binomials[i].coefficients[0] *
+                                 (binomials[i].variable_ptrs[0]->value() + 1)) /
+                            binomials[i].coefficients[1];
 
-                        if ((binomials[i].sensitivity_second > 0 &&
+                        if ((binomials[i].coefficients[1] > 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Less) ||
-                            (binomials[i].sensitivity_second < 0 &&
+                            (binomials[i].coefficients[1] < 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
@@ -132,7 +114,7 @@ class VariableBoundMoveGenerator
                         }
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second = target;
                     }
 
@@ -143,15 +125,14 @@ class VariableBoundMoveGenerator
                         T_Variable target = 0;
                         double     target_temp =
                             (-binomials[i].constant_value -
-                             binomials[i].sensitivity_first *
-                                 (binomials[i].variable_ptr_first->value() -
-                                  1)) /
-                            binomials[i].sensitivity_second;
+                             binomials[i].coefficients[0] *
+                                 (binomials[i].variable_ptrs[0]->value() - 1)) /
+                            binomials[i].coefficients[1];
 
-                        if ((binomials[i].sensitivity_second > 0 &&
+                        if ((binomials[i].coefficients[1] > 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Less) ||
-                            (binomials[i].sensitivity_second < 0 &&
+                            (binomials[i].coefficients[1] < 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
@@ -163,7 +144,7 @@ class VariableBoundMoveGenerator
                         }
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second = target;
                     }
 
@@ -174,15 +155,14 @@ class VariableBoundMoveGenerator
                         T_Variable target = 0;
                         double     target_temp =
                             (-binomials[i].constant_value -
-                             binomials[i].sensitivity_second *
-                                 (binomials[i].variable_ptr_second->value() +
-                                  1)) /
-                            binomials[i].sensitivity_first;
+                             binomials[i].coefficients[1] *
+                                 (binomials[i].variable_ptrs[1]->value() + 1)) /
+                            binomials[i].coefficients[0];
 
-                        if ((binomials[i].sensitivity_first > 0 &&
+                        if ((binomials[i].coefficients[0] > 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Less) ||
-                            (binomials[i].sensitivity_first < 0 &&
+                            (binomials[i].coefficients[0] < 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
@@ -195,7 +175,7 @@ class VariableBoundMoveGenerator
 
                         alterations[0].second = target;
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() + 1;
+                            binomials[i].variable_ptrs[1]->value() + 1;
                     }
 
                     {
@@ -205,15 +185,14 @@ class VariableBoundMoveGenerator
                         T_Variable target = 0;
                         double     target_temp =
                             (-binomials[i].constant_value -
-                             binomials[i].sensitivity_second *
-                                 (binomials[i].variable_ptr_second->value() -
-                                  1)) /
-                            binomials[i].sensitivity_first;
+                             binomials[i].coefficients[1] *
+                                 (binomials[i].variable_ptrs[1]->value() - 1)) /
+                            binomials[i].coefficients[0];
 
-                        if ((binomials[i].sensitivity_first > 0 &&
+                        if ((binomials[i].coefficients[0] > 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Less) ||
-                            (binomials[i].sensitivity_first < 0 &&
+                            (binomials[i].coefficients[0] < 0 &&
                              binomials[i].sense ==
                                  model_component::ConstraintSense::Greater)) {
                             target = static_cast<T_Variable>(
@@ -226,7 +205,7 @@ class VariableBoundMoveGenerator
 
                         alterations[0].second = target;
                         alterations[1].second =
-                            binomials[i].variable_ptr_second->value() - 1;
+                            binomials[i].variable_ptrs[1]->value() - 1;
                     }
                 }
 
@@ -236,19 +215,29 @@ class VariableBoundMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_bound_violation()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if (a_ACCEPT_ALL) {
                         /** nothing to do */
                     } else {

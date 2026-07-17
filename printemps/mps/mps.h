@@ -10,7 +10,7 @@
 #include "mps_constraint.h"
 #include "mps_objective.h"
 #include "mps_read_mode.h"
-#include "mps_bound_sense.h"
+#include "mps_bound_type.h"
 
 namespace printemps::mps {
 /*****************************************************************************/
@@ -61,17 +61,18 @@ struct MPS {
                 break;
         }
 
-        double value  = 0.0;
-        auto   result = std::from_chars(
-            a_VALUE_SV.data(), a_VALUE_SV.data() + a_VALUE_SV.size(), value);
+        char       *end   = nullptr;
+        const char *begin = a_VALUE_SV.data();
 
-        if (result.ec != std::errc()) [[unlikely]] {
-            throw std::runtime_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "The MPS file has something wrong in a numeric value."));
+        double value = std::strtod(begin, &end);
+
+        if (end == begin + a_VALUE_SV.size()) {
+            return value;
         }
 
-        return value;
+        throw std::runtime_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "The MPS file has something wrong in a numeric value."));
     }
 
     /*************************************************************************/
@@ -146,7 +147,7 @@ struct MPS {
     inline void parse_rows(const std::vector<std::string_view> &a_ITEMS) {
         const std::size_t ITEMS_SIZE = a_ITEMS.size();
 
-        if (ITEMS_SIZE != 2) {
+        if (ITEMS_SIZE < 2) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The MPS file has something wrong in ROWS section."));
@@ -186,7 +187,7 @@ struct MPS {
 
     /*************************************************************************/
     inline void parse_columns(const std::vector<std::string_view> &a_ITEMS,
-                              MPSVariableSense *a_variable_sense_ptr) {
+                              MPSVariableType *a_variable_type_ptr) {
         const std::size_t ITEMS_SIZE = a_ITEMS.size();
 
         if (ITEMS_SIZE < 3 || (ITEMS_SIZE & 1) == 0) {
@@ -197,10 +198,10 @@ struct MPS {
 
         if (a_ITEMS[2].size() > 0 && a_ITEMS[2].front() == '\'') {
             if (a_ITEMS[2] == "'INTORG'") {
-                *a_variable_sense_ptr = MPSVariableSense::Integer;
+                *a_variable_type_ptr = MPSVariableType::Integer;
                 return;
             } else if (a_ITEMS[2] == "'INTEND'") {
-                *a_variable_sense_ptr = MPSVariableSense::Continuous;
+                *a_variable_type_ptr = MPSVariableType::Continuous;
                 return;
             }
         }
@@ -239,7 +240,7 @@ struct MPS {
         auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
         if (inserted) {
             auto &variable = it->second;
-            variable.sense = *a_variable_sense_ptr;
+            variable.type  = *a_variable_type_ptr;
             variable.name  = it->first;
             this->variable_names.emplace_back(it->first);
         }
@@ -346,23 +347,23 @@ struct MPS {
         }
 
         const std::string COLUMN_NAME(a_ITEMS[2]);
-        const auto       &BOUND_SENSE_SV = a_ITEMS.front();
+        const auto       &BOUND_TYPE_SV = a_ITEMS.front();
 
         auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
 
         if (inserted) {
             auto &variable = it->second;
-            variable.sense = MPSVariableSense::Continuous;
+            variable.type  = MPSVariableType::Continuous;
             variable.name  = it->first;
             this->variable_names.emplace_back(it->first);
         }
 
-        const auto BOUND_SENSE = bound_sense_map(BOUND_SENSE_SV);
-        auto      &variable    = this->variables[COLUMN_NAME];
+        const auto BOUND_TYPE = bound_type_map(BOUND_TYPE_SV);
+        auto      &variable   = this->variables[COLUMN_NAME];
 
         if (a_ITEMS.size() == 3) {
-            switch (BOUND_SENSE) {
-                case MPSBoundSense::FR:
+            switch (BOUND_TYPE) {
+                case MPSBoundType::FR:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = constant::INT_HALF_MIN;
                     variable.integer_upper_bound    = constant::INT_HALF_MAX;
@@ -370,8 +371,8 @@ struct MPS {
                     variable.continuous_upper_bound = HUGE_VAL;
                     break;
 
-                case MPSBoundSense::BV:
-                    variable.sense                  = MPSVariableSense::Integer;
+                case MPSBoundType::BV:
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = 0;
                     variable.integer_upper_bound    = 1;
@@ -379,7 +380,7 @@ struct MPS {
                     variable.continuous_upper_bound = 1;
                     break;
 
-                case MPSBoundSense::MI:
+                case MPSBoundType::MI:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = constant::INT_HALF_MIN;
                     variable.integer_upper_bound    = 0;
@@ -387,7 +388,7 @@ struct MPS {
                     variable.continuous_upper_bound = 0.0;
                     break;
 
-                case MPSBoundSense::PL:
+                case MPSBoundType::PL:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = 0;
                     variable.integer_upper_bound    = constant::INT_HALF_MAX;
@@ -405,34 +406,34 @@ struct MPS {
             const double CONTINUOUS_VALUE = this->parse_value(VALUE_SV);
             const int    INTEGER_VALUE    = static_cast<int>(CONTINUOUS_VALUE);
 
-            switch (BOUND_SENSE) {
-                case MPSBoundSense::LO:
+            switch (BOUND_TYPE) {
+                case MPSBoundType::LO:
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = INTEGER_VALUE;
                     variable.continuous_lower_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::LI:
-                    variable.sense                  = MPSVariableSense::Integer;
+                case MPSBoundType::LI:
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_lower_bound    = INTEGER_VALUE;
                     variable.continuous_lower_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::UP:
+                case MPSBoundType::UP:
                     variable.is_bound_defined       = true;
                     variable.integer_upper_bound    = INTEGER_VALUE;
                     variable.continuous_upper_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::UI:
-                    variable.sense                  = MPSVariableSense::Integer;
+                case MPSBoundType::UI:
+                    variable.type                   = MPSVariableType::Integer;
                     variable.is_bound_defined       = true;
                     variable.integer_upper_bound    = INTEGER_VALUE;
                     variable.continuous_upper_bound = CONTINUOUS_VALUE;
                     break;
 
-                case MPSBoundSense::FX:
+                case MPSBoundType::FX:
                     variable.is_bound_defined       = true;
                     variable.is_fixed               = true;
                     variable.integer_fixed_value    = INTEGER_VALUE;
@@ -486,8 +487,8 @@ struct MPS {
         this->variable_names.reserve(estimated_lines / 10 + 16);
         this->constraint_names.reserve(estimated_lines / 10 + 16);
 
-        MPSReadMode      read_mode      = MPSReadMode::Initial;
-        MPSVariableSense variable_sense = MPSVariableSense::Continuous;
+        MPSReadMode     read_mode     = MPSReadMode::Initial;
+        MPSVariableType variable_type = MPSVariableType::Continuous;
 
         bool is_valid         = false;
         bool is_read_name     = false;
@@ -584,7 +585,7 @@ struct MPS {
                     break;
                 }
                 case MPSReadMode::Columns: {
-                    this->parse_columns(items, &variable_sense);
+                    this->parse_columns(items, &variable_type);
                     break;
                 }
                 case MPSReadMode::Rhs: {
@@ -613,7 +614,7 @@ struct MPS {
         // default bounds for integer variables
         for (auto &&variable : this->variables) {
             if (!variable.second.is_bound_defined &&
-                variable.second.sense == MPSVariableSense::Integer) {
+                variable.second.type == MPSVariableType::Integer) {
                 variable.second.is_bounded          = true;
                 variable.second.integer_lower_bound = 0;
                 variable.second.integer_upper_bound = 1;

@@ -6,8 +6,15 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_MODEL_COMPONENT_H__
 #define PRINTEMPS_MODEL_COMPONENT_MODEL_COMPONENT_H__
 
-#include "variable_sense.h"
+#include "variable_type.h"
+#include "expression_structure.h"
 #include "constraint_sense.h"
+#include "constraint_type.h"
+#include "constraint_type_classifier.h"
+#include "constraint_compact.h"
+#include "constraint_group.h"
+#include "constraint_multinomial.h"
+
 #include "range.h"
 
 #include "variable_proxy.h"
@@ -19,11 +26,6 @@
 
 #include "expression_binary_operator.h"
 #include "constraint_binary_operator.h"
-
-#include "variable_reference.h"
-#include "variable_type_reference.h"
-#include "constraint_reference.h"
-#include "constraint_type_reference.h"
 
 #endif
 /*****************************************************************************/

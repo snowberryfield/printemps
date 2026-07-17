@@ -74,6 +74,14 @@ class TabuSearchControllerStateManager {
                 .to_sparse();
 
         /**
+         * Initialize the pending solution. The pending solution is a solution
+         * to be employed as the initial solution for the next loop if the
+         * employing_pending_solution_flag is set to true. By default, it is set
+         * to the current global augmented incumbent solution.
+         */
+        m_state.pending_solution = m_state.global_augmented_incumbent_solution;
+
+        /**
          * Initialize the option values.
          */
         m_state.initial_tabu_tenure = m_option.tabu_search.initial_tabu_tenure;
@@ -205,7 +213,7 @@ class TabuSearchControllerStateManager {
             m_state.improvability_screening_mode;
         option.tabu_search.iteration_max = m_state.iteration_max;
         option.tabu_search.time_offset   = m_state.total_elapsed_time;
-        option.tabu_search.seed          = m_state.iteration;
+        option.tabu_search.seed = m_option.tabu_search.seed + m_state.iteration;
         option.tabu_search.number_of_initial_modification =
             m_state.number_of_initial_modification;
         option.tabu_search.initial_tabu_tenure = m_state.initial_tabu_tenure;
@@ -242,14 +250,15 @@ class TabuSearchControllerStateManager {
         this->keep_previous_solution();
 
         /**
-         * Update the status of outer stagnation.
-         */
-        this->update_is_outer_stagnation();
-
-        /**
          * Update the status of improvement in the last tabu search.
          */
         this->update_is_improved();
+
+        /**
+         * Update the status of stagnation.
+         */
+        this->update_is_inner_stagnation();
+        this->update_is_outer_stagnation();
 
         /**
          * Turn off the flags for parameter control.
@@ -287,40 +296,42 @@ class TabuSearchControllerStateManager {
         }
 
         /**
-         * Update the status of inner stagnation. This method must be called
-         * after updating penalty coefficient flags.
-         */
-        this->update_is_inner_stagnation();
-
-        /**
          * Additional processes for cases when the penalty coefficients are
          * relaxed.
          */
-        if (m_option.penalty.is_enabled_outer_stagnation_breaker &&
-            m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_state.penalty_coefficient_update_mode ==
+            PenaltyCoefficientUpdateMode::Relax) {
             this->update_penalty_coefficient_relaxing_rate();
-        }
-
-        /**
-         * Additional processes for cases when the penalty coefficients are
-         * tightened: Reset penalty coefficients if inner stagnation is
-         * detected.
-         */
-        if (m_option.penalty.is_enabled_inner_stagnation_breaker &&
-            m_state.is_enabled_penalty_coefficient_tightening) {
-            this->update_penalty_coefficient_reset_flag();
         }
 
         /**
          * Update the local penalty coefficients.
          */
-        if (m_state.penalty_coefficient_reset_flag) {
-            this->reset_local_penalty_coefficient();
-        } else if (m_state.is_enabled_penalty_coefficient_tightening) {
-            this->tighten_local_penalty_coefficient();
-        } else if (m_state.is_enabled_penalty_coefficient_relaxing) {
-            this->relax_local_penalty_coefficient();
+        switch (m_state.penalty_coefficient_update_mode) {
+            case PenaltyCoefficientUpdateMode::Keep: {
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Relax: {
+                this->relax_local_penalty_coefficient();
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Tighten: {
+                this->tighten_local_penalty_coefficient();
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Reset: {
+                this->reset_local_penalty_coefficient();
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified penalty coefficient update mode is "
+                    "invalid."));
+            }
         }
+
+        this->pullback_local_penalty_coefficient();
 
         /**
          * Update the local penalty coefficient range.
@@ -359,7 +370,6 @@ class TabuSearchControllerStateManager {
              * updated.
              */
             this->disable_special_neighborhood_moves();
-
         } else {
             /**
              * Enable the special neighborhood moves if the incumbent was
@@ -451,6 +461,8 @@ class TabuSearchControllerStateManager {
                 m_global_state_ptr->incumbent_holder
                     .global_augmented_incumbent_solution()
                     .to_sparse();
+            m_state.pending_solution =
+                m_state.global_augmented_incumbent_solution;
         } else {
             m_state.iteration_after_global_augmented_incumbent_update++;
         }
@@ -507,6 +519,15 @@ class TabuSearchControllerStateManager {
         m_state.distance_from_global_solution =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE.distance(
                 m_state.global_augmented_incumbent_solution);
+
+        /**
+         * If the search mode is "Diversify", the pending solution is set to the
+         * local augmented incumbent solution to diversify the search.
+         */
+        if (m_state.search_mode == SearchMode::Diversify) {
+            m_state.pending_solution =
+                LOCAL_AUGMENTED_INCUMBENT_SOLUTION_SPARSE;
+        }
     }
 
     /*************************************************************************/
@@ -521,8 +542,7 @@ class TabuSearchControllerStateManager {
          * proper adjustment of the penalty coefficients.
          */
         m_state.is_inner_stagnation =
-            (m_state.is_exceeded_initial_penalty_coefficient ||
-             !m_state.is_improved) &&
+            !m_state.is_improved &&
             m_state.iteration_after_relaxation >
                 m_option.penalty.inner_stagnation_threshold;
     }
@@ -535,10 +555,8 @@ class TabuSearchControllerStateManager {
          * less than m_option.penalty.outer_stagnation_threshold.
          */
         m_state.is_outer_stagnation =
-            !m_global_state_ptr->incumbent_holder
-                 .is_found_feasible_solution() &&
             m_state.iteration_after_global_augmented_incumbent_update >=
-                m_option.penalty.outer_stagnation_threshold;
+            m_option.penalty.outer_stagnation_threshold;
     }
 
     /*************************************************************************/
@@ -559,14 +577,8 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void turn_flags_off(void) {
-        m_state.employing_local_solution_flag             = false;
-        m_state.employing_global_solution_flag            = false;
-        m_state.employing_previous_solution_flag          = false;
-        m_state.is_enabled_penalty_coefficient_tightening = false;
-        m_state.is_enabled_penalty_coefficient_relaxing   = false;
-        m_state.is_enabled_forcibly_initial_modification  = false;
-        m_state.penalty_coefficient_reset_flag            = false;
-        m_state.is_enabled_special_neighborhood_move      = false;
+        m_state.is_enabled_forcibly_initial_modification = false;
+        m_state.is_enabled_special_neighborhood_move     = false;
     }
 
     /*************************************************************************/
@@ -578,35 +590,51 @@ class TabuSearchControllerStateManager {
             return;
         }
 
-        if (m_state.is_global_augmented_incumbent_updated) {
-            /**
-             * If the incumbent solution was updated in the last loop, the
-             * improvability screening mode is set to "Intensive" to search
-             * better solutions by intensive search.
-             */
-            m_state.improvability_screening_mode =
-                option::improvability_screening_mode::Intensive;
-            return;
-        }
-
-        if (m_state.tabu_search_result.is_few_permissible_neighborhood) {
-            /**
-             * If the last loop encountered a situation where there is no
-             * permissible solution, the improvability screening mode is set to
-             * "Soft" for search diversity.
-             */
+        /**
+         * If the number of evaluated moves is less than 1% of the total
+         * neighborhood size, it is likely that the search is trapped in a
+         * local optimum. In this case, the improvability screening mode is
+         * set to "Soft" for search diversity.
+         */
+        if (m_state.tabu_search_result.number_of_evaluated_moves <
+            m_state.tabu_search_result.number_of_iterations *
+                m_model_ptr->reference().number_of_mutable_variables() * 0.01) {
             m_state.improvability_screening_mode =
                 option::improvability_screening_mode::Soft;
             return;
         }
 
+        /**
+         * If the incumbent solution was updated in the last loop, the
+         * improvability screening mode is set to "Intensive" to search better
+         * solutions by intensive search.
+         */
+        if (m_state.is_global_augmented_incumbent_updated) {
+            m_state.improvability_screening_mode =
+                option::improvability_screening_mode::Intensive;
+            return;
+        }
+
+        /**
+         * If the last loop encountered a situation where there is no
+         * permissible solution, the improvability screening mode is set to
+         * "Soft" for search diversity.
+         */
+        if (m_state.tabu_search_result.is_few_permissible_neighborhood) {
+            m_state.improvability_screening_mode =
+                option::improvability_screening_mode::Soft;
+            return;
+        }
+
+        /**
+         * If the last loop failed to find any feasible solution, the
+         * improvability screening mode is set to "Aggressive" or "Intensive" to
+         * prioritize the search for feasible solutions.
+         */
         if (!m_state.tabu_search_result.is_found_new_feasible_solution) {
-            /**
-             * If the last loop failed to find any feasible solution, the
-             * improvability screening mode is set to "Aggressive" or
-             * "Intensive" to prioritize the search for feasible solutions.
-             */
-            if (m_state.is_outer_stagnation) {
+            if (m_state.is_outer_stagnation &&
+                !m_global_state_ptr->incumbent_holder
+                     .is_found_feasible_solution()) {
                 if (m_state.relaxation_count % 2 == 0) {
                     m_state.improvability_screening_mode =
                         option::improvability_screening_mode::Intensive;
@@ -636,29 +664,34 @@ class TabuSearchControllerStateManager {
                      std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
-        m_state.employing_local_solution_flag = true;
+        m_state.initial_solution_mode = InitialSolutionMode::Local;
         if (m_state.is_global_augmented_incumbent_updated) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (m_state.is_not_updated) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (m_global_state_ptr->incumbent_holder
                 .local_augmented_incumbent_score()
                 .is_feasible) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
                                  RELATIVE_RANGE_THRESHOLD) {
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
         } else {
-            m_state.is_enabled_penalty_coefficient_tightening = true;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Tighten;
         }
     }
 
@@ -686,115 +719,105 @@ class TabuSearchControllerStateManager {
                      std::fabs(m_global_state_ptr->incumbent_holder
                                    .global_augmented_incumbent_objective()));
 
-        if (m_state.is_global_augmented_incumbent_updated) {
-            /**
-             * If the global incumbent solution was updated in the last loop,
-             * the global incumbent is employed as the initial solution for the
-             * next loop. The penalty coefficients are to be relaxed.
-             */
-            m_state.employing_global_solution_flag          = true;
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
-            return;
-        }
-
-        if (m_state.is_not_updated) {
-            /**
-             * If the last loop failed to find any local/global incumbent
-             * solution, the global incumbent solution is employed as the
-             * initial solution for the next loop with some initial
-             * modifications. The penalty coefficients are to be relaxed.
-             */
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-            m_state.is_enabled_penalty_coefficient_relaxing  = true;
-
-            return;
-        }
-
         /**
-         * If a local incumbent solution was updated the last loop, the initial
-         * solution for the next loop and flags to tighten or relax the penalty
-         * coefficients will be determined by complex rules below.
+         * If the global incumbent solution was updated in the last loop, the
+         * global incumbent is employed as the initial solution for the next
+         * loop. The penalty coefficients are to be relaxed.
          */
-        if (GAP < TabuSearchControllerStateManagerConstant::GAP_TOLERANCE) {
-            /**
-             * The fact that the gap is negative implies that the obtained local
-             * incumbent solution is worse than the global incumbent solution.
-             * For this case, the initial solution for the next loop is reset by
-             * the global incumbent solution with some initial modifications.
-             * The penalty coefficients are to be relaxed or tightened according
-             * to the feasibility of the local incumbent solution.
-             */
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-
-            if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
-                m_state.is_enabled_penalty_coefficient_relaxing = true;
-            } else {
-                m_state.is_enabled_penalty_coefficient_tightening = true;
-            }
-            return;
-        }
-
-        if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
-            /**
-             * If the gap is positive and the local incumbent solution is
-             * feasible, the local incumbent solution is employed as the initial
-             * solution for the next loop. The penalty coefficients are to be
-             * relaxed.
-             */
-            m_state.employing_local_solution_flag           = true;
-            m_state.is_enabled_penalty_coefficient_relaxing = true;
-            return;
-        }
-
-        if (RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
-                                 RELATIVE_RANGE_THRESHOLD) {
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-            m_state.is_enabled_penalty_coefficient_relaxing  = true;
+        if (m_state.is_global_augmented_incumbent_updated) {
+            m_state.initial_solution_mode = InitialSolutionMode::Global;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
             return;
         }
 
         /**
-         * For the case that the gap is positive and the local incumbent
-         * solution is not feasible, the following rules will be applied:
-         * (1) If no feasible solution has been found in the previous loops:
-         * -> The obtained local incumbent solution is employed as the initial
-         * solution for the next loop.
-         * (2) If a feasible solution has been found in the previous loops:
-         * (2.1) If the obtained local incumbent solution improves the objective
-         * function value or global penalty than those of global incumbent
-         * solution: -> The obtained local incumbent solution is employed as the
-         * initial solution for the next loop.
-         *  (2.2) Otherwise; if the obtained local incumbent solution does not
-         * improve either objective function value or global penalty:
-         * -> The previous initial solution is employed as the initial solution
-         * for the next loop.
-         *
-         * For all cases, penalty coefficients are to be tightened.
+         * If the search stagnates (no updates or improvement below threshold):
+         * - Periodically alternate between Intensify (employing the global
+         *   incumbent with modifications) and Diversify (pending initial
+         * solution) to break out of local optima.
+         * - Relax the penalty coefficients to expand the search space.
+         */
+        if (m_state.is_not_updated ||
+            GAP < TabuSearchControllerStateManagerConstant::GAP_TOLERANCE ||
+            RELATIVE_RANGE < TabuSearchControllerStateManagerConstant::
+                                 RELATIVE_RANGE_THRESHOLD) {
+            if (m_state.restart_count % 4 != 0) {
+                m_state.initial_solution_mode = InitialSolutionMode::Global;
+                m_state.is_enabled_forcibly_initial_modification = true;
+                m_state.search_mode = SearchMode::Intensify;
+
+            } else {
+                m_state.initial_solution_mode = InitialSolutionMode::Pending;
+                m_state.search_mode           = SearchMode::Diversify;
+            }
+
+            m_state.restart_count++;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
+
+            return;
+        }
+
+        /**
+         * If the local incumbent is feasible, employ it as the initial solution
+         * for the next loop, and relax the penalty coefficients.
+         */
+        if (RESULT_LOCAL_AUGMENTED_INCUMBENT_SCORE.is_feasible) {
+            m_state.initial_solution_mode = InitialSolutionMode::Local;
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Relax;
+            return;
+        }
+
+        /**
+         * If the local incumbent is infeasible:
+         * - If a feasible solution was already found but no improvement was
+         * made, revert to the previous initial solution with forced
+         * modifications.
+         * - Otherwise, employ the local incumbent as the next initial solution.
+         * - Tighten the penalty coefficients to guide the search toward
+         * feasibility.
          */
         if (m_global_state_ptr->incumbent_holder.is_found_feasible_solution()) {
             if (m_state.is_improved) {
-                m_state.employing_local_solution_flag = true;
+                m_state.initial_solution_mode = InitialSolutionMode::Local;
             } else {
-                m_state.employing_previous_solution_flag = true;
+                m_state.initial_solution_mode = InitialSolutionMode::Previous;
+                m_state.is_enabled_forcibly_initial_modification = true;
             }
         } else {
-            m_state.employing_local_solution_flag            = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
+            m_state.initial_solution_mode = InitialSolutionMode::Local;
         }
-        m_state.is_enabled_penalty_coefficient_tightening = true;
+        m_state.penalty_coefficient_update_mode =
+            PenaltyCoefficientUpdateMode::Tighten;
+
+        /**
+         * If the search is stagnating in terms of both objective and
+         * feasibility (indicated by small gap and relative range) and both
+         * inner and outer stagnation are detected, reset the penalty
+         * coefficients to escape from the stagnation.
+         */
+        if (m_state.search_mode != SearchMode::Diversify &&
+            m_option.penalty.is_enabled_inner_stagnation_breaker &&
+            m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
+            m_state.penalty_coefficient_update_mode =
+                PenaltyCoefficientUpdateMode::Reset;
+        }
     }
 
     /*************************************************************************/
     inline void update_penalty_coefficient_relaxing_rate(void) {
         /**
-         * Decrease penalty coefficient relaxing rate if lack of
-         * diversification is detected. This applies only if no feasible
-         * solution has been found.
+         * Decrease penalty coefficient relaxing rate if the current primal and
+         * dual intensities are both greater than their values before the last
+         * relaxation, and no feasible solution has been found yet. This
+         * indicates that the search is not progressing towards feasibility, and
+         * the penalty coefficients may be too relaxed, so we reduce the
+         * relaxing rate to encourage more exploration of feasible regions.
          */
-        if (m_state.is_outer_stagnation &&
+        if (!m_global_state_ptr->incumbent_holder
+                 .is_found_feasible_solution() &&
             ((m_state.current_primal_intensity >
               m_state.current_primal_intensity_before_relaxation) &&
              (m_state.current_dual_intensity >
@@ -819,7 +842,8 @@ class TabuSearchControllerStateManager {
 
         /**
          * Increase penalty coefficient relaxing rate if previous solutions are
-         * employed as initial solutions, which indicates overrelaxation.
+         * employed as initial solution frequently, which indicates
+         * overrelaxation.
          */
         if (m_state.employing_previous_solution_count_after_relaxation >
             std::max(
@@ -842,20 +866,11 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
-    inline void update_penalty_coefficient_reset_flag(void) {
-        if (m_state.is_outer_stagnation && m_state.is_inner_stagnation) {
-            m_state.penalty_coefficient_reset_flag           = true;
-            m_state.employing_global_solution_flag           = true;
-            m_state.is_enabled_forcibly_initial_modification = true;
-        }
-    }
-
-    /*************************************************************************/
     inline void reset_local_penalty_coefficient(void) {
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                constraint.reset_local_penalty_coefficient();
-            }
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            constraint_ptr->reset_local_penalty_coefficient();
         }
     }
 
@@ -872,17 +887,26 @@ class TabuSearchControllerStateManager {
         const auto& VIOLATION_VALUE_PROXIES =
             LOCAL_AUGMENTED_INCUMBENT_SOLUTION.violation_value_proxies;
 
-        m_state.is_exceeded_initial_penalty_coefficient = false;
-
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
+                const int CONSTRAINT_INDEX = constraint.flat_index();
+
+                const double CONSTRAINT_VALUE =
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const double VIOLATION_VALUE =
-                    VIOLATION_VALUE_PROXIES[proxy.index()]
-                                           [constraint.flat_index()];
-                const long VIOLATION_COUNT = constraint.violation_count();
-                total_violation += VIOLATION_VALUE * (VIOLATION_COUNT + 1);
-                total_squared_violation += VIOLATION_VALUE * VIOLATION_VALUE *
-                                           std::log((VIOLATION_COUNT + 1.0));
+                    VIOLATION_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
+                const long VIOLATION_COUNT =
+                    constraint.violation_count(CONSTRAINT_VALUE);
+
+                const double WEIGHT = 1.0 + std::log(1.0 + VIOLATION_COUNT);
+
+                total_violation += VIOLATION_VALUE;
+                total_squared_violation +=
+                    WEIGHT * VIOLATION_VALUE * VIOLATION_VALUE;
             }
         }
 
@@ -894,41 +918,93 @@ class TabuSearchControllerStateManager {
                                .local_augmented_incumbent_objective();
 
         for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                const double CONSTRAINT_VALUE = CONSTRAINT_VALUE_PROXIES  //
-                    [proxy.index()][constraint.flat_index()];
-                const double VIOLATION_VALUE = VIOLATION_VALUE_PROXIES  //
-                    [proxy.index()][constraint.flat_index()];
-                const long VIOLATION_COUNT = constraint.violation_count();
+                if (!constraint.is_enabled()) {
+                    continue;
+                }
+
+                const int CONSTRAINT_INDEX = constraint.flat_index();
+
+                const double CONSTRAINT_VALUE =
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
+                const double VIOLATION_VALUE =
+                    VIOLATION_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
+                const long   VIOLATION_COUNT = constraint.violation_count();
+                const double WEIGHT = 1.0 + std::log(1.0 + VIOLATION_COUNT);
 
                 const double DELTA_PENALTY_COEFFICIENT_CONSTANT =
                     std::max(0.0, GAP) / total_violation;
                 const double DELTA_PENALTY_COEFFICIENT_PROPORTIONAL =
-                    std::max(0.0, GAP) / total_squared_violation *
-                    std::log((VIOLATION_COUNT + 1.0)) * VIOLATION_VALUE;
+                    std::max(0.0, GAP) / total_squared_violation * WEIGHT *
+                    VIOLATION_VALUE;
 
-                const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
-                const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
-                const double DELTA_PENALTY_COEFFICIENT =
-                    (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
-                     (1.0 - BALANCE) * DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                switch (constraint.sense()) {
+                    case model_component::ConstraintSense::Less: {
+                        const double DELTA_PENALTY_COEFFICIENT =
+                            (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                             (1.0 - BALANCE) *
+                                 DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        constraint.local_penalty_coefficient_less() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            DELTA_PENALTY_COEFFICIENT;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Greater: {
+                        const double DELTA_PENALTY_COEFFICIENT =
+                            (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                             (1.0 - BALANCE) *
+                                 DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        constraint.local_penalty_coefficient_greater() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            DELTA_PENALTY_COEFFICIENT;
+                        break;
+                    }
+                    case model_component::ConstraintSense::Equal: {
+                        double delta_penalty_coefficient_less    = 0.0;
+                        double delta_penalty_coefficient_greater = 0.0;
+                        if (CONSTRAINT_VALUE > 0) {
+                            delta_penalty_coefficient_less =
+                                (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                                 (1.0 - BALANCE) *
+                                     DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                            delta_penalty_coefficient_greater =
+                                BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT;
 
-                if (constraint.is_less_or_equal() &&
-                    POSITIVE_PART > constant::EPSILON) {
-                    constraint.local_penalty_coefficient_less() +=
-                        m_state.penalty_coefficient_tightening_rate *
-                        DELTA_PENALTY_COEFFICIENT;
-                } else if (constraint.is_greater_or_equal() &&
-                           NEGATIVE_PART > constant::EPSILON) {
-                    constraint.local_penalty_coefficient_greater() +=
-                        m_state.penalty_coefficient_tightening_rate *
-                        DELTA_PENALTY_COEFFICIENT;
+                        } else {
+                            delta_penalty_coefficient_less =
+                                BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT;
+
+                            delta_penalty_coefficient_greater =
+                                (BALANCE * DELTA_PENALTY_COEFFICIENT_CONSTANT +
+                                 (1.0 - BALANCE) *
+                                     DELTA_PENALTY_COEFFICIENT_PROPORTIONAL);
+                        }
+
+                        constraint.local_penalty_coefficient_less() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient_less;
+                        constraint.local_penalty_coefficient_greater() +=
+                            m_state.penalty_coefficient_tightening_rate *
+                            delta_penalty_coefficient_greater;
+                        break;
+                    }
+                    default: {
+                        throw std::logic_error(utility::format_error_location(
+                            __FILE__, __LINE__, __func__,
+                            "Invalid constraint sense."));
+                    }
                 }
             }
+        }
 
-            if (m_option.penalty.is_enabled_group_penalty_coefficient) {
+        if (m_option.penalty.is_enabled_group_penalty_coefficient) {
+            for (auto&& proxy : this->m_model_ptr->constraint_proxies()) {
                 double max_local_penalty_coefficient = 0;
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    if (!constraint.is_enabled()) {
+                        continue;
+                    }
                     max_local_penalty_coefficient =
                         std::max(max_local_penalty_coefficient,
                                  constraint.local_penalty_coefficient_less());
@@ -937,33 +1013,36 @@ class TabuSearchControllerStateManager {
                         constraint.local_penalty_coefficient_greater());
                 }
                 for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                    if (!constraint.is_enabled()) {
+                        continue;
+                    }
                     constraint.local_penalty_coefficient_less() =
                         max_local_penalty_coefficient;
                     constraint.local_penalty_coefficient_greater() =
                         max_local_penalty_coefficient;
                 }
             }
+        }
 
-            /**
-             * Penalty coefficients are bounded by the initial penalty
-             * coefficient specified in option.
-             */
-            const double INITIAL_PENALTY_COEFFICIENT =
-                this->m_option.penalty.initial_penalty_coefficient;
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                if (constraint.local_penalty_coefficient_less() >
-                    INITIAL_PENALTY_COEFFICIENT) {
-                    m_state.is_exceeded_initial_penalty_coefficient = true;
-                    constraint.local_penalty_coefficient_less() =
-                        INITIAL_PENALTY_COEFFICIENT;
-                }
+        /**
+         * Penalty coefficients are bounded by the initial penalty
+         * coefficient specified in option.
+         */
+        const double INITIAL_PENALTY_COEFFICIENT =
+            m_model_ptr->global_penalty_coefficient();
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            if (constraint_ptr->local_penalty_coefficient_less() >
+                INITIAL_PENALTY_COEFFICIENT) {
+                constraint_ptr->local_penalty_coefficient_less() =
+                    INITIAL_PENALTY_COEFFICIENT;
+            }
 
-                if (constraint.local_penalty_coefficient_greater() >
-                    INITIAL_PENALTY_COEFFICIENT) {
-                    m_state.is_exceeded_initial_penalty_coefficient = true;
-                    constraint.local_penalty_coefficient_greater() =
-                        INITIAL_PENALTY_COEFFICIENT;
-                }
+            if (constraint_ptr->local_penalty_coefficient_greater() >
+                INITIAL_PENALTY_COEFFICIENT) {
+                constraint_ptr->local_penalty_coefficient_greater() =
+                    INITIAL_PENALTY_COEFFICIENT;
             }
         }
     }
@@ -985,16 +1064,18 @@ class TabuSearchControllerStateManager {
             }
         }
 
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            const auto& CONSTRAINT_VALUES =
-                m_global_state_ptr->incumbent_holder
-                    .local_augmented_incumbent_solution()
-                    .constraint_value_proxies[proxy.index()]
-                    .flat_indexed_values();
+        const auto& LOCAL_AUGMENTED_INCUMBENT_SOLUTION =
+            m_global_state_ptr->incumbent_holder
+                .local_augmented_incumbent_solution();
+        const auto& CONSTRAINT_VALUE_PROXIES =
+            LOCAL_AUGMENTED_INCUMBENT_SOLUTION.constraint_value_proxies;
 
+        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
+            const int PROXY_INDEX = proxy.index();
             for (auto&& constraint : proxy.flat_indexed_constraints()) {
+                const int    CONSTRAINT_INDEX = constraint.flat_index();
                 const double CONSTRAINT_VALUE =
-                    CONSTRAINT_VALUES[constraint.flat_index()];
+                    CONSTRAINT_VALUE_PROXIES[PROXY_INDEX][CONSTRAINT_INDEX];
                 const double POSITIVE_PART = std::max(CONSTRAINT_VALUE, 0.0);
                 const double NEGATIVE_PART = std::max(-CONSTRAINT_VALUE, 0.0);
 
@@ -1013,19 +1094,67 @@ class TabuSearchControllerStateManager {
     }
 
     /*************************************************************************/
+    inline void pullback_local_penalty_coefficient(void) {
+        if (m_option.penalty.penalty_coefficient_pullback_rate <
+            constant::EPSILON) {
+            return;
+        }
+        const double RATE = m_option.penalty.penalty_coefficient_pullback_rate;
+        const double INITIAL_PENALTY_COEFFICIENT =
+            m_model_ptr->global_penalty_coefficient();
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            if (constraint_ptr->is_less_or_equal()) {
+                const double BASELINE =  //
+                    (constraint_ptr->sense() ==
+                     model_component::ConstraintSense::Greater)
+                        ? 0.0
+                        : INITIAL_PENALTY_COEFFICIENT;
+                if (BASELINE > constant::EPSILON) {
+                    const double CURRENT_PENALTY_COEFFICIENT =
+                        constraint_ptr->local_penalty_coefficient_less();
+                    constraint_ptr->local_penalty_coefficient_less() =
+                        std::pow(CURRENT_PENALTY_COEFFICIENT, 1.0 - RATE) *
+                        std::pow(BASELINE, RATE);
+                } else {
+                    constraint_ptr->local_penalty_coefficient_less() = 0.0;
+                }
+            }
+            if (constraint_ptr->is_greater_or_equal()) {
+                const double BASELINE =  //
+                    (constraint_ptr->sense() ==
+                     model_component::ConstraintSense::Less)
+                        ? 0.0
+                        : INITIAL_PENALTY_COEFFICIENT;
+                if (BASELINE > constant::EPSILON) {
+                    const double CURRENT_PENALTY_COEFFICIENT =
+                        constraint_ptr->local_penalty_coefficient_greater();
+                    constraint_ptr->local_penalty_coefficient_greater() =
+                        std::pow(CURRENT_PENALTY_COEFFICIENT, 1.0 - RATE) *
+                        std::pow(BASELINE, RATE);
+                } else {
+                    constraint_ptr->local_penalty_coefficient_greater() = 0.0;
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline void update_local_penalty_coefficient_range(void) {
         m_state.local_penalty_coefficient_range.initialize();
-        for (auto&& proxy : m_model_ptr->constraint_proxies()) {
-            for (auto&& constraint : proxy.flat_indexed_constraints()) {
-                if (constraint.is_less_or_equal()) {
-                    m_state.local_penalty_coefficient_range.update(
-                        constraint.local_penalty_coefficient_less());
-                }
+        const auto& enabled_constraint_ptrs =
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
+        for (auto&& constraint_ptr : enabled_constraint_ptrs) {
+            if (constraint_ptr->is_less_or_equal()) {
+                m_state.local_penalty_coefficient_range.update(
+                    constraint_ptr->local_penalty_coefficient_less());
+            }
 
-                if (constraint.is_greater_or_equal()) {
-                    m_state.local_penalty_coefficient_range.update(
-                        constraint.local_penalty_coefficient_greater());
-                }
+            if (constraint_ptr->is_greater_or_equal()) {
+                m_state.local_penalty_coefficient_range.update(
+                    constraint_ptr->local_penalty_coefficient_greater());
             }
         }
     }
@@ -1033,25 +1162,26 @@ class TabuSearchControllerStateManager {
     /*************************************************************************/
     inline void update_initial_tabu_tenure(void) {
         if (m_state.is_global_augmented_incumbent_updated) {
-            m_state.initial_tabu_tenure =
-                std::min(m_option.tabu_search.initial_tabu_tenure,
-                         m_model_ptr->number_of_mutable_variables());
+            m_state.initial_tabu_tenure = std::min(
+                m_option.tabu_search.initial_tabu_tenure,
+                m_model_ptr->reference().number_of_mutable_variables());
             return;
         }
 
         if (m_state.is_not_updated) {
-            m_state.initial_tabu_tenure =
-                std::max(m_state.initial_tabu_tenure - 1,
-                         std::min(m_option.tabu_search.initial_tabu_tenure,
-                                  m_model_ptr->number_of_mutable_variables()));
+            m_state.initial_tabu_tenure = std::max(
+                m_state.initial_tabu_tenure - 1,
+                std::min(
+                    m_option.tabu_search.initial_tabu_tenure,
+                    m_model_ptr->reference().number_of_mutable_variables()));
             return;
         }
 
         const auto LAST_TABU_TENURE = m_state.tabu_search_result.tabu_tenure;
         if (LAST_TABU_TENURE > m_state.initial_tabu_tenure) {
-            m_state.initial_tabu_tenure =
-                std::min(m_state.initial_tabu_tenure + 1,
-                         this->m_model_ptr->number_of_mutable_variables());
+            m_state.initial_tabu_tenure = std::min(
+                m_state.initial_tabu_tenure + 1,
+                this->m_model_ptr->reference().number_of_mutable_variables());
             return;
         }
 
@@ -1063,10 +1193,10 @@ class TabuSearchControllerStateManager {
             return;
         }
 
-        m_state.initial_tabu_tenure =
-            std::max(m_state.initial_tabu_tenure - 1,
-                     std::min(m_option.tabu_search.initial_tabu_tenure,
-                              m_model_ptr->number_of_mutable_variables()));
+        m_state.initial_tabu_tenure = std::max(
+            m_state.initial_tabu_tenure - 1,
+            std::min(m_option.tabu_search.initial_tabu_tenure,
+                     m_model_ptr->reference().number_of_mutable_variables()));
     }
 
     /*************************************************************************/
@@ -1138,178 +1268,13 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void disable_special_neighborhood_moves(void) {
-        auto& neighborhood = m_model_ptr->neighborhood();
-
-        /// Exclusive OR
-        if (m_option.neighborhood.is_enabled_exclusive_or_move) {
-            neighborhood.exclusive_or().disable();
-        }
-
-        /// Exclusive NOR
-        if (m_option.neighborhood.is_enabled_exclusive_nor_move) {
-            neighborhood.exclusive_nor().disable();
-        }
-
-        /// Inverted Integers
-        if (m_option.neighborhood.is_enabled_inverted_integers_move) {
-            neighborhood.inverted_integers().disable();
-        }
-
-        /// Balanced Integers
-        if (m_option.neighborhood.is_enabled_balanced_integers_move) {
-            neighborhood.balanced_integers().disable();
-        }
-
-        /// Constant Sum Integers
-        if (m_option.neighborhood.is_enabled_constant_sum_integers_move) {
-            neighborhood.constant_sum_integers().disable();
-        }
-
-        /// Constant Difference Integers
-        if (m_option.neighborhood
-                .is_enabled_constant_difference_integers_move) {
-            neighborhood.constant_difference_integers().disable();
-        }
-
-        /// Constant Ratio Integers
-        if (m_option.neighborhood.is_enabled_constant_ratio_integers_move) {
-            neighborhood.constant_ratio_integers().disable();
-        }
-
-        /// Aggregation
-        if (m_option.neighborhood.is_enabled_aggregation_move) {
-            neighborhood.aggregation().disable();
-        }
-
-        /// Precedence
-        if (m_option.neighborhood.is_enabled_precedence_move) {
-            neighborhood.precedence().disable();
-        }
-
-        /// Variable Bound
-        if (m_option.neighborhood.is_enabled_variable_bound_move) {
-            neighborhood.variable_bound().disable();
-        }
-
-        /// Trinomial Exclusive NOR
-        if (m_option.neighborhood.is_enabled_trinomial_exclusive_nor_move) {
-            neighborhood.trinomial_exclusive_nor().disable();
-        }
-
-        /// Soft Selection
-        if (m_option.neighborhood.is_enabled_soft_selection_move) {
-            neighborhood.soft_selection().disable();
-        }
-
-        /// Chain
-        if (m_option.neighborhood.is_enabled_chain_move) {
-            neighborhood.chain().disable();
-        }
-
-        /// Two Flip
-        if (m_option.neighborhood.is_enabled_two_flip_move) {
-            neighborhood.two_flip().disable();
-        }
+        m_model_ptr->neighborhood().disable_special_neighborhood_moves();
         m_state.is_enabled_special_neighborhood_move = false;
     }
 
     /*************************************************************************/
     inline void enable_special_neighborhood_moves(void) {
-        auto& neighborhood = m_model_ptr->neighborhood();
-
-        /// Exclusive OR
-        if (m_option.neighborhood.is_enabled_exclusive_or_move &&
-            neighborhood.exclusive_or().moves().size() > 0) {
-            neighborhood.exclusive_or().enable();
-        }
-
-        /// Exclusive NOR
-        if (m_option.neighborhood.is_enabled_exclusive_nor_move &&
-            neighborhood.exclusive_nor().moves().size() > 0) {
-            neighborhood.exclusive_nor().enable();
-        }
-
-        /// Inverted Integers
-        if (m_option.neighborhood.is_enabled_inverted_integers_move &&
-            neighborhood.inverted_integers().moves().size() > 0) {
-            neighborhood.inverted_integers().enable();
-        }
-
-        /// Balanced Integers
-        if (m_option.neighborhood.is_enabled_balanced_integers_move &&
-            neighborhood.balanced_integers().moves().size() > 0) {
-            neighborhood.balanced_integers().enable();
-        }
-
-        /// Constant Sum Integers
-        if (m_option.neighborhood.is_enabled_constant_sum_integers_move &&
-            neighborhood.constant_sum_integers().moves().size() > 0) {
-            neighborhood.constant_sum_integers().enable();
-        }
-
-        /// Constant Difference Integers
-        if (m_option.neighborhood
-                .is_enabled_constant_difference_integers_move &&
-            neighborhood.constant_difference_integers().moves().size() > 0) {
-            neighborhood.constant_difference_integers().enable();
-        }
-
-        /// Constant Ratio Integers
-        if (m_option.neighborhood.is_enabled_constant_ratio_integers_move &&
-            neighborhood.constant_ratio_integers().moves().size() > 0) {
-            neighborhood.constant_ratio_integers().enable();
-        }
-
-        /// Aggregation
-        if (m_option.neighborhood.is_enabled_aggregation_move &&
-            neighborhood.aggregation().moves().size() > 0) {
-            neighborhood.aggregation().enable();
-        }
-
-        /// Precedence
-        if (m_option.neighborhood.is_enabled_precedence_move &&
-            neighborhood.precedence().moves().size() > 0) {
-            neighborhood.precedence().enable();
-        }
-
-        /// Variable Bound
-        if (m_option.neighborhood.is_enabled_variable_bound_move &&
-            neighborhood.variable_bound().moves().size() > 0) {
-            neighborhood.variable_bound().enable();
-        }
-
-        /// Trinomial Exclusive NOR
-        if (m_option.neighborhood.is_enabled_trinomial_exclusive_nor_move &&
-            neighborhood.trinomial_exclusive_nor().moves().size() > 0) {
-            neighborhood.trinomial_exclusive_nor().enable();
-        }
-
-        /// Soft Selection
-        if (m_option.neighborhood.is_enabled_soft_selection_move &&
-            neighborhood.soft_selection().moves().size() > 0) {
-            neighborhood.soft_selection().enable();
-        }
-
-        /// Chain
-        if (m_option.neighborhood.is_enabled_chain_move &&
-            neighborhood.chain().moves().size() > 0) {
-            neighborhood.chain().enable();
-        }
-
-        /// Two Flip
-        if (m_option.neighborhood.is_enabled_two_flip_move &&
-            neighborhood.two_flip().moves().size() > 0) {
-            neighborhood.two_flip().enable();
-        }
-
-        /**
-         * Reset the availability of special neighborhood moves.
-         */
-        if (m_model_ptr->neighborhood()
-                .is_enabled_special_neighborhood_move()) {
-            m_model_ptr->neighborhood()
-                .reset_special_neighborhood_moves_availability();
-        }
+        m_model_ptr->neighborhood().enable_special_neighborhood_moves();
         m_state.is_enabled_special_neighborhood_move = true;
     }
 
@@ -1349,31 +1314,45 @@ class TabuSearchControllerStateManager {
 
     /*************************************************************************/
     inline void update_current_solution(void) {
-        if (m_state.employing_global_solution_flag) {
-            m_state.current_solution =  //
-                m_global_state_ptr->incumbent_holder
-                    .global_augmented_incumbent_solution()
-                    .to_sparse();
-            m_state.employing_global_solution_count_after_relaxation++;
-        } else if (m_state.employing_local_solution_flag) {
-            m_state.current_solution =  //
-                m_global_state_ptr->incumbent_holder
-                    .local_augmented_incumbent_solution()
-                    .to_sparse();
-            m_state.employing_local_solution_count_after_relaxation++;
-        } else if (m_state.employing_previous_solution_flag) {
-            m_state.current_solution = m_state.previous_solution;
-            m_state.employing_previous_solution_count_after_relaxation++;
-        } else {
-            throw std::logic_error(utility::format_error_location(
-                __FILE__, __LINE__, __func__,
-                "An error ocurred in determining the next initial solution."));
+        switch (m_state.initial_solution_mode) {
+            case InitialSolutionMode::Global: {
+                m_state.current_solution =  //
+                    m_global_state_ptr->incumbent_holder
+                        .global_augmented_incumbent_solution()
+                        .to_sparse();
+                m_state.employing_global_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Local: {
+                m_state.current_solution =  //
+                    m_global_state_ptr->incumbent_holder
+                        .local_augmented_incumbent_solution()
+                        .to_sparse();
+                m_state.employing_local_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Previous: {
+                m_state.current_solution = m_state.previous_solution;
+                m_state.employing_previous_solution_count_after_relaxation++;
+                break;
+            }
+            case InitialSolutionMode::Pending: {
+                m_state.current_solution = m_state.pending_solution;
+                m_state.employing_pending_solution_count_after_relaxation++;
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified initial solution mode is invalid."));
+            }
         }
     }
 
     /*************************************************************************/
     inline void update_relaxation_status(void) {
-        if (m_state.is_enabled_penalty_coefficient_relaxing) {
+        if (m_state.penalty_coefficient_update_mode ==
+            PenaltyCoefficientUpdateMode::Relax) {
             m_state.previous_primal_intensity_before_relaxation =
                 m_state.current_primal_intensity_before_relaxation;
             m_state.current_primal_intensity_before_relaxation =
@@ -1388,6 +1367,7 @@ class TabuSearchControllerStateManager {
             m_state.employing_previous_solution_count_after_relaxation = 0;
             m_state.employing_global_solution_count_after_relaxation   = 0;
             m_state.employing_local_solution_count_after_relaxation    = 0;
+            m_state.employing_pending_solution_count_after_relaxation  = 0;
             m_state.relaxation_count++;
         } else {
             m_state.iteration_after_relaxation++;

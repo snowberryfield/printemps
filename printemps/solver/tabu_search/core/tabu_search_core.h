@@ -20,11 +20,11 @@ namespace printemps::solver::tabu_search::core {
 template <class T_Variable, class T_Expression>
 class TabuSearchCore {
    private:
-    model::Model<T_Variable, T_Expression>*           m_model_ptr;
-    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
-    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
-    std::optional<std::function<bool()>>              m_check_interrupt;
-    option::Option                                    m_option;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
+    solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
+    std::optional<std::function<bool()>>               m_check_interrupt;
+    option::Option                                     m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
@@ -65,14 +65,15 @@ class TabuSearchCore {
         /**
          * Initialize the solution and update the model.
          */
-        m_model_ptr->import_solution(m_initial_solution);
-        m_model_ptr->update();
+        m_model_ptr->initial_solution_handler().import_solution(
+            m_initial_solution, true);
+        m_model_ptr->updater().update();
 
         /**
          * Reset the variable improvability.
          */
-        m_model_ptr->reset_variable_objective_improvabilities();
-        m_model_ptr->reset_variable_feasibility_improvabilities();
+        m_model_ptr->updater().reset_variable_objective_improvabilities();
+        m_model_ptr->updater().reset_variable_feasibility_improvabilities();
 
         m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
 
@@ -182,7 +183,7 @@ class TabuSearchCore {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::OPTIMAL);
             for (const auto& variable_ptr :
-                 m_model_ptr->variable_reference().variable_ptrs) {
+                 m_model_ptr->reference().variable.variable_ptrs) {
                 if (variable_ptr->is_objective_improvable()) {
                     m_state_manager.set_termination_status(
                         TabuSearchCoreTerminationStatus::NO_MOVE);
@@ -193,57 +194,6 @@ class TabuSearchCore {
         } else {
             m_state_manager.set_termination_status(
                 TabuSearchCoreTerminationStatus::NO_MOVE);
-            return true;
-        }
-
-        return false;
-    }
-
-    /*************************************************************************/
-    inline bool satisfy_penalty_coefficient_too_large_terminate_condition(
-        const std::vector<solution::SolutionScore>& a_TRIAL_SOLUTION_SCORES) {
-        const auto& STATE = m_state_manager.state();
-
-        constexpr int    ITERATION_MIN = 10;
-        constexpr double MARGIN        = 100.0;
-
-        if (STATE.iteration <= ITERATION_MIN) {
-            return false;
-        }
-
-        if (!STATE.current_solution_score.is_feasible) {
-            return false;
-        }
-
-        double min_infeasible_local_penalty  = HUGE_VALF;
-        bool   has_infeasible_trial_solution = false;
-
-        for (const auto& score : a_TRIAL_SOLUTION_SCORES) {
-            if (!score.is_feasible) {
-                min_infeasible_local_penalty =
-                    std::min(min_infeasible_local_penalty, score.local_penalty);
-                has_infeasible_trial_solution = true;
-            }
-        }
-
-        if (!has_infeasible_trial_solution) {
-            return false;
-        }
-
-        const auto SCORE_PTR_PAIR = std::minmax_element(
-            a_TRIAL_SOLUTION_SCORES.begin(), a_TRIAL_SOLUTION_SCORES.end(),
-            [](const auto& a_FIRST, const auto& a_SECOND) {
-                return a_FIRST.objective_improvement <
-                       a_SECOND.objective_improvement;
-            });
-
-        const double MAX_OBJECTIVE_SENSITIVITY =
-            std::max(SCORE_PTR_PAIR.second->objective_improvement,
-                     -SCORE_PTR_PAIR.first->objective_improvement);
-
-        if (MAX_OBJECTIVE_SENSITIVITY * MARGIN < min_infeasible_local_penalty) {
-            m_state_manager.set_termination_status(
-                TabuSearchCoreTerminationStatus::PENALTY_COEFFICIENT_TOO_LARGE);
             return true;
         }
 
@@ -288,8 +238,8 @@ class TabuSearchCore {
                     continue;
                 }
 
-                if (trial_move_ptrs[j]->sense ==
-                    neighborhood::MoveSense::Integer) {
+                if (trial_move_ptrs[j]->type ==
+                    neighborhood::MoveType::Integer) {
                     auto variable_ptr =
                         trial_move_ptrs[j]->alterations.front().first;
                     const T_Variable CURRENT_VALUE = variable_ptr->value();
@@ -302,9 +252,10 @@ class TabuSearchCore {
                 }
 
                 const double WEIGHT =
-                    1.0 / (move_evaluator.compute_minimum_update_count(
-                               *trial_move_ptrs[j]) +
-                           1.0);
+                    std::pow(1.0 / (move_evaluator.compute_minimum_update_count(
+                                        *trial_move_ptrs[j]) +
+                                    1.0),
+                             2.0);
 
                 candidate_move_ptrs.push_back(trial_move_ptrs[j]);
                 candidate_move_weights.push_back(WEIGHT);
@@ -324,18 +275,19 @@ class TabuSearchCore {
             TabuSearchCoreMoveScore selected_move_score;
 
             const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+            const auto& EVALUATOR              = m_model_ptr->evaluator();
 
             if (selected_move_ptr->is_univariable_move) {
-                m_model_ptr->evaluate_single(&selected_solution_score,  //
-                                             *selected_move_ptr,        //
-                                             CURRENT_SOLUTION_SCORE);
+                EVALUATOR.evaluate_single(&selected_solution_score,  //
+                                          *selected_move_ptr,        //
+                                          CURRENT_SOLUTION_SCORE);
             } else if (selected_move_ptr->is_selection_move) {
-                m_model_ptr->evaluate_selection(  //
-                    &selected_solution_score,     //
-                    *selected_move_ptr,           //
+                EVALUATOR.evaluate_selection(  //
+                    &selected_solution_score,  //
+                    *selected_move_ptr,        //
                     CURRENT_SOLUTION_SCORE);
             } else {
-                m_model_ptr->evaluate_multi(   //
+                EVALUATOR.evaluate_multi(      //
                     &selected_solution_score,  //
                     *selected_move_ptr,        //
                     CURRENT_SOLUTION_SCORE);
@@ -345,8 +297,9 @@ class TabuSearchCore {
                                     *selected_move_ptr,    //
                                     0, 0);
 
-            m_model_ptr->update(*selected_move_ptr);
             this->update_memory(selected_move_ptr);
+
+            m_model_ptr->updater().update(*selected_move_ptr);
 
             m_state_manager.update(selected_move_ptr, 0, false,
                                    {selected_move_score},
@@ -361,7 +314,6 @@ class TabuSearchCore {
         bool accept_all                    = true;
         bool accept_objective_improvable   = true;
         bool accept_feasibility_improvable = true;
-
         if (m_option.neighborhood.improvability_screening_mode ==
             option::improvability_screening_mode::Off) {
             m_model_ptr->neighborhood().update_moves(
@@ -381,9 +333,9 @@ class TabuSearchCore {
          * improvable moves will be generated.
          */
         if (STATE.iteration == 0) {
-            m_model_ptr->update_variable_objective_improvabilities();
+            m_model_ptr->updater().update_variable_objective_improvabilities();
         } else {
-            m_model_ptr->update_variable_objective_improvabilities(
+            m_model_ptr->updater().update_variable_objective_improvabilities(
                 STATE.current_move.related_variable_ptrs_vector());
         }
 
@@ -394,9 +346,11 @@ class TabuSearchCore {
                     accept_objective_improvable   = true;
                     accept_feasibility_improvable = false;
                 } else {
-                    m_model_ptr->reset_variable_feasibility_improvabilities();
-                    m_model_ptr->update_variable_feasibility_improvabilities(
-                        m_model_ptr->current_violative_constraint_ptrs());
+                    m_model_ptr->updater()
+                        .reset_variable_feasibility_improvabilities();
+                    m_model_ptr->updater()
+                        .update_variable_feasibility_improvabilities(
+                            m_model_ptr->current_violative_constraint_ptrs());
 
                     accept_all                    = false;
                     accept_objective_improvable   = true;
@@ -412,17 +366,18 @@ class TabuSearchCore {
                 } else {
                     if (m_model_ptr->previous_is_feasible() ||
                         STATE.iteration == 0) {
-                        m_model_ptr
-                            ->reset_variable_feasibility_improvabilities();
-                        m_model_ptr
-                            ->update_variable_feasibility_improvabilities(
+                        m_model_ptr->updater()
+                            .reset_variable_feasibility_improvabilities();
+                        m_model_ptr->updater()
+                            .update_variable_feasibility_improvabilities(
                                 m_model_ptr
                                     ->current_violative_constraint_ptrs());
                     } else {
-                        m_model_ptr->reset_variable_feasibility_improvabilities(
-                            STATE.current_move.related_constraint_ptrs);
-                        m_model_ptr
-                            ->update_variable_feasibility_improvabilities(
+                        m_model_ptr->updater()
+                            .reset_variable_feasibility_improvabilities(
+                                STATE.current_move.related_constraint_ptrs);
+                        m_model_ptr->updater()
+                            .update_variable_feasibility_improvabilities(
                                 m_model_ptr
                                     ->current_violative_constraint_ptrs());
                     }
@@ -440,15 +395,16 @@ class TabuSearchCore {
                     accept_feasibility_improvable = false;
                 } else {
                     if (STATE.iteration == 0) {
-                        m_model_ptr
-                            ->reset_variable_feasibility_improvabilities();
-                        m_model_ptr
-                            ->update_variable_feasibility_improvabilities();
+                        m_model_ptr->updater()
+                            .reset_variable_feasibility_improvabilities();
+                        m_model_ptr->updater()
+                            .update_variable_feasibility_improvabilities();
                     } else {
-                        m_model_ptr->reset_variable_feasibility_improvabilities(
-                            STATE.current_move.related_constraint_ptrs);
-                        m_model_ptr
-                            ->update_variable_feasibility_improvabilities(
+                        m_model_ptr->updater()
+                            .reset_variable_feasibility_improvabilities(
+                                STATE.current_move.related_constraint_ptrs);
+                        m_model_ptr->updater()
+                            .update_variable_feasibility_improvabilities(
                                 STATE.current_move.related_constraint_ptrs);
                     }
 
@@ -544,14 +500,14 @@ class TabuSearchCore {
     inline void update_chain_moves(void) {
         auto& STATE = m_state_manager.state();
 
-        if ((STATE.previous_move.sense == neighborhood::MoveSense::Binary &&
-             STATE.current_move.sense == neighborhood::MoveSense::Binary &&
+        if ((STATE.previous_move.type == neighborhood::MoveType::Binary &&
+             STATE.current_move.type == neighborhood::MoveType::Binary &&
              STATE.previous_move.alterations.front().second !=
                  STATE.current_move.alterations.front().second) ||
-            (STATE.previous_move.sense == neighborhood::MoveSense::Chain &&
-             STATE.current_move.sense == neighborhood::MoveSense::Chain) ||
-            (STATE.previous_move.sense == neighborhood::MoveSense::TwoFlip &&
-             STATE.current_move.sense == neighborhood::MoveSense::TwoFlip)) {
+            (STATE.previous_move.type == neighborhood::MoveType::Chain &&
+             STATE.current_move.type == neighborhood::MoveType::Chain) ||
+            (STATE.previous_move.type == neighborhood::MoveType::TwoFlip &&
+             STATE.current_move.type == neighborhood::MoveType::TwoFlip)) {
             neighborhood::Move<T_Variable, T_Expression> chain_move;
             if (STATE.previous_move.alterations.front().first <
                 STATE.current_move.alterations.front().first)
@@ -574,7 +530,7 @@ class TabuSearchCore {
         }
     }
 
-    /*****************************************************************************/
+    /*************************************************************************/
     inline void print_table_header(const bool a_IS_ENABLED_PRINT) {
         if (!a_IS_ENABLED_PRINT) {
             return;
@@ -824,8 +780,7 @@ class TabuSearchCore {
         const option::Option&                       a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
-        m_model_ptr->import_solution(a_INITIAL_SOLUTION);
-        m_initial_solution = m_model_ptr->export_dense_solution();
+        m_initial_solution = a_INITIAL_SOLUTION;
         m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
 
@@ -959,11 +914,12 @@ class TabuSearchCore {
 
             const double START_TIME = time_keeper.clock();
 
-            const auto NUMBER_OF_MOVES        = STATE.number_of_moves;
-            const auto CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
-            const auto ITERATION              = STATE.iteration;
-            const auto TABU_TENURE            = STATE.tabu_tenure;
-            const auto DURATION               = ITERATION - TABU_TENURE;
+            const auto  NUMBER_OF_MOVES        = STATE.number_of_moves;
+            const auto& CURRENT_SOLUTION_SCORE = STATE.current_solution_score;
+            const auto  ITERATION              = STATE.iteration;
+            const auto  TABU_TENURE            = STATE.tabu_tenure;
+            const auto  DURATION               = ITERATION - TABU_TENURE;
+            const auto& EVALUATOR              = m_model_ptr->evaluator();
 
 #ifdef _OPENMP
 #pragma omp parallel for if (m_option.parallel                                \
@@ -980,17 +936,16 @@ class TabuSearchCore {
                 if (m_option.general.is_enabled_fast_evaluation) {
 #endif
                     if (TRIAL_MOVE_PTRS[i]->is_univariable_move) {
-                        m_model_ptr->evaluate_single(
+                        EVALUATOR.evaluate_single(&trial_solution_scores[i],  //
+                                                  *TRIAL_MOVE_PTRS[i],        //
+                                                  CURRENT_SOLUTION_SCORE);
+                    } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
+                        EVALUATOR.evaluate_selection(   //
                             &trial_solution_scores[i],  //
                             *TRIAL_MOVE_PTRS[i],        //
                             CURRENT_SOLUTION_SCORE);
-                    } else if (TRIAL_MOVE_PTRS[i]->is_selection_move) {
-                        m_model_ptr->evaluate_selection(  //
-                            &trial_solution_scores[i],    //
-                            *TRIAL_MOVE_PTRS[i],          //
-                            CURRENT_SOLUTION_SCORE);
                     } else {
-                        m_model_ptr->evaluate_multi(    //
+                        EVALUATOR.evaluate_multi(       //
                             &trial_solution_scores[i],  //
                             *TRIAL_MOVE_PTRS[i],        //
                             CURRENT_SOLUTION_SCORE);
@@ -998,8 +953,8 @@ class TabuSearchCore {
 
 #ifdef _PRINTEMPS_DISABLE_FAST_EVALUATION
                 } else {
-                    m_model_ptr->evaluate(&trial_solution_scores[i],  //
-                                          *TRIAL_MOVE_PTRS[i]);
+                    EVALUATOR.evaluate(&trial_solution_scores[i],  //
+                                       *TRIAL_MOVE_PTRS[i]);
                 }
 #endif
                 move_evaluator.evaluate(&trial_move_scores[i],  //
@@ -1054,25 +1009,25 @@ class TabuSearchCore {
              * solution.
              */
             if (m_option.neighborhood.is_enabled_integer_step_size_adjuster &&
-                move_ptr->sense == neighborhood::MoveSense::Integer &&
+                move_ptr->type == neighborhood::MoveType::Integer &&
                 trial_solution_scores[SELECTED_INDEX]
                         .global_augmented_objective <
                     m_global_state_ptr->incumbent_holder
                         .global_augmented_incumbent_objective()) {
                 integer_step_size_adjuster.adjust(move_ptr,
                                                   CURRENT_SOLUTION_SCORE);
-                m_model_ptr->evaluate_multi(                 //
+                m_model_ptr->evaluator().evaluate_multi(     //
                     &trial_solution_scores[SELECTED_INDEX],  //
                     *move_ptr,                               //
                     CURRENT_SOLUTION_SCORE);
             }
 
-            m_model_ptr->update(*move_ptr);
-
             /**
              * Update the memory.
              */
             this->update_memory(move_ptr);
+
+            m_model_ptr->updater().update(*move_ptr);
 
             /**
              * Update the state.
@@ -1104,10 +1059,10 @@ class TabuSearchCore {
              */
             if (m_option.output.is_enabled_store_feasible_solutions &&
                 STATE.current_solution_score.is_feasible) {
-                m_model_ptr
-                    ->update_dependent_variables_and_disabled_constraints();
+                m_model_ptr->updater()
+                    .update_dependent_variables_and_disabled_constraints();
                 m_feasible_solutions.push_back(
-                    m_model_ptr->export_sparse_solution());
+                    m_model_ptr->state_inspector().export_sparse_solution());
             }
 
             /**
@@ -1118,18 +1073,6 @@ class TabuSearchCore {
                 STATE.update_status > 0) {
                 print_table_body(m_option.output.verbose >=
                                  option::verbose::Inner);
-            }
-
-            /**
-             * If the local penalty us sufficiently larger than objective
-             * sensitivity, the current loop will be terminated and the local
-             * penalty coefficients will be adjusted.
-             */
-            if (m_option.tabu_search.is_enabled_automatic_break) {
-                if (this->satisfy_penalty_coefficient_too_large_terminate_condition(
-                        trial_solution_scores)) {
-                    break;
-                }
             }
 
             m_state_manager.next_iteration();

@@ -11,12 +11,12 @@
 namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class TrinomialExclusiveNorMoveGenerator
+class TrinomialExclusiveNORMoveGenerator
     : public AbstractMoveGenerator<T_Variable, T_Expression> {
    private:
    public:
     /*************************************************************************/
-    TrinomialExclusiveNorMoveGenerator(void) {
+    TrinomialExclusiveNORMoveGenerator(void) {
         /// nothing to do
     }
 
@@ -33,12 +33,12 @@ class TrinomialExclusiveNorMoveGenerator
         /**
          * Convert constraint objects to TrinomialConstraint objects.
          */
-        auto trinomial = convert_to_trinomial_constraints(constraint_ptrs);
+        auto trinomials = convert_to_trinomial_constraints(constraint_ptrs);
 
         /**
          * Setup move objects.
          */
-        const int TRINOMIALS_SIZE = trinomial.size();
+        const int TRINOMIALS_SIZE = trinomials.size();
 
         this->m_moves.clear();
         this->m_flags.clear();
@@ -48,44 +48,18 @@ class TrinomialExclusiveNorMoveGenerator
 
         for (auto i = 0; i < TRINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::TrinomialExclusiveNor;
-            move.alterations.emplace_back(trinomial[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(trinomial[i].variable_ptr_second, 0);
-            move.alterations.emplace_back(trinomial[i].variable_ptr_third, 0);
+
+            move.associated_constraint_ptr = trinomials[i].constraint_ptr;
+            move.type                      = MoveType::TrinomialExclusiveNOR;
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[1], 0);
+            move.alterations.emplace_back(trinomials[i].variable_ptrs[2], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                trinomial[i]
-                    .variable_ptr_third->related_constraint_ptrs()
-                    .begin(),
-                trinomial[i]
-                    .variable_ptr_third->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
 
@@ -98,8 +72,8 @@ class TrinomialExclusiveNorMoveGenerator
          * Setup move updater.
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
@@ -117,7 +91,14 @@ class TrinomialExclusiveNorMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;

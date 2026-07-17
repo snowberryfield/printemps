@@ -53,12 +53,12 @@ TEST_F(TestEdge, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestEdge, setup_with_arg_1) {
-    /// This method is tested in constructor_with_arg_1()
+    /// This test is covered by constructor_with_arg_1()
 }
 
 /*****************************************************************************/
 TEST_F(TestEdge, setup_with_arg_2) {
-    /// This method is tested in constructor_with_arg_2()
+    /// This test is covered by constructor_with_arg_2()
 }
 
 }  // namespace

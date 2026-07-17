@@ -32,6 +32,10 @@ TEST_F(TestPenaltyOption, initialize) {
         PenaltyOptionConstant::DEFAULT_PENALTY_COEFFICIENT_TIGHTENING_RATE,  //
         option.penalty_coefficient_tightening_rate);
 
+    EXPECT_FLOAT_EQ(                                                       //
+        PenaltyOptionConstant::DEFAULT_PENALTY_COEFFICIENT_PULLBACK_RATE,  //
+        option.penalty_coefficient_pullback_rate);
+
     EXPECT_FLOAT_EQ(                                                          //
         PenaltyOptionConstant::DEFAULT_PENALTY_COEFFICIENT_UPDATING_BALANCE,  //
         option.penalty_coefficient_updating_balance);

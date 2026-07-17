@@ -51,7 +51,8 @@ struct DenseSolution {
             for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 if (FIRST.flat_indexed_values(j) !=
                     SECOND.flat_indexed_values(j)) {
-                    distance++;
+                    distance += std::abs(FIRST.flat_indexed_values(j) -
+                                         SECOND.flat_indexed_values(j));
                 }
             }
         }

@@ -16,11 +16,11 @@ namespace printemps::solver::lagrange_dual::core {
 template <class T_Variable, class T_Expression>
 class LagrangeDualCore {
    private:
-    model::Model<T_Variable, T_Expression>*           m_model_ptr;
-    GlobalState<T_Variable, T_Expression>*            m_global_state_ptr;
-    solution::DenseSolution<T_Variable, T_Expression> m_initial_solution;
-    std::optional<std::function<bool()>>              m_check_interrupt;
-    option::Option                                    m_option;
+    model::Model<T_Variable, T_Expression>*            m_model_ptr;
+    GlobalState<T_Variable, T_Expression>*             m_global_state_ptr;
+    solution::SparseSolution<T_Variable, T_Expression> m_initial_solution;
+    std::optional<std::function<bool()>>               m_check_interrupt;
+    option::Option                                     m_option;
 
     std::vector<solution::SparseSolution<T_Variable, T_Expression>>
         m_feasible_solutions;
@@ -56,8 +56,9 @@ class LagrangeDualCore {
         /**
          * Initialize the solution and update the model.
          */
-        m_model_ptr->import_solution(m_initial_solution);
-        m_model_ptr->update();
+        m_model_ptr->initial_solution_handler().import_solution(
+            m_initial_solution, true);
+        m_model_ptr->updater().update();
 
         m_state_manager.setup(m_model_ptr, m_global_state_ptr, m_option);
     }
@@ -365,8 +366,7 @@ class LagrangeDualCore {
         const option::Option&                       a_OPTION) {
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
-        m_model_ptr->import_solution(a_INITIAL_SOLUTION);
-        m_initial_solution = m_model_ptr->export_dense_solution();
+        m_initial_solution = a_INITIAL_SOLUTION;
         m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
 
@@ -402,7 +402,7 @@ class LagrangeDualCore {
         print_table_header(m_option.output.verbose >= option::verbose::Inner);
         print_table_initial(m_option.output.verbose >= option::verbose::Inner);
 
-        auto& variable_ptrs = m_model_ptr->variable_reference().variable_ptrs;
+        auto& variable_ptrs = m_model_ptr->reference().variable.variable_ptrs;
         const int VARIABLES_SIZE = variable_ptrs.size();
 
         /**
@@ -484,12 +484,12 @@ class LagrangeDualCore {
             /**
              * Update the model.
              */
-            m_model_ptr->update();
+            m_model_ptr->updater().update();
 
             /**
              * Update the state.
              */
-            const auto SOLUTION_SCORE = m_model_ptr->evaluate({});
+            const auto SOLUTION_SCORE = m_model_ptr->evaluator().evaluate({});
             m_state_manager.update(SOLUTION_SCORE);
 
             /**
@@ -497,10 +497,10 @@ class LagrangeDualCore {
              */
             if (m_option.output.is_enabled_store_feasible_solutions &&
                 STATE.current_solution_score.is_feasible) {
-                m_model_ptr
-                    ->update_dependent_variables_and_disabled_constraints();
+                m_model_ptr->updater()
+                    .update_dependent_variables_and_disabled_constraints();
                 m_feasible_solutions.push_back(
-                    m_model_ptr->export_sparse_solution());
+                    m_model_ptr->state_inspector().export_sparse_solution());
             }
 
             /**

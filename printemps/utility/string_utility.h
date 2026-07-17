@@ -65,8 +65,8 @@ template <class T_Value>
 inline std::string to_string(const T_Value      a_VALUE,
                              const std::string &a_FORMAT) {
     char result[256];
-    sprintf(result, a_FORMAT.c_str(), a_VALUE);
-    return result;
+    std::snprintf(result, sizeof(result), a_FORMAT.c_str(), a_VALUE);
+    return std::string(result);
 }
 
 /******************************************************************************/

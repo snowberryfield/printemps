@@ -146,22 +146,21 @@ TEST_F(TestVariableProxy, scalar_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x");
-        EXPECT_EQ(model_component::VariableSense::Integer,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Integer,
+                  variable_proxy.type());
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 1);
-        EXPECT_EQ(model_component::VariableSense::Binary,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Binary, variable_proxy.type());
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variable("x", 0, 10);
-        EXPECT_EQ(model_component::VariableSense::Integer,
-                  variable_proxy.sense());
+        EXPECT_EQ(model_component::VariableType::Integer,
+                  variable_proxy.type());
     }
 }
 
@@ -186,17 +185,17 @@ TEST_F(TestVariableProxy, scaler_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_lower_bound) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_upper_bound) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scaler_has_bounds) {
-    /// This method is tested in scaler_set_bound().
+    /// This test is covered by scaler_set_bound().
 }
 
 /*****************************************************************************/
@@ -210,7 +209,7 @@ TEST_F(TestVariableProxy, scalar_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, scalar_name) {
-    /// This method is tested in scalar_set_name().
+    /// This test is covered by scalar_set_name().
 }
 
 /*****************************************************************************/
@@ -503,13 +502,13 @@ TEST_F(TestVariableProxy, one_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", 2, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
 }
 
@@ -549,17 +548,17 @@ TEST_F(TestVariableProxy, one_dimensional_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_lower_bound) {
-    /// This method is tested in scaler_set_bound.
+    /// This test is covered by scaler_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_upper_bound) {
-    /// This method is tested in scaler_set_bound.
+    /// This test is covered by scaler_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_has_bounds) {
-    /// This method is tested in one_dimensional_set_bound.
+    /// This test is covered by one_dimensional_set_bound.
 }
 
 /*****************************************************************************/
@@ -574,7 +573,7 @@ TEST_F(TestVariableProxy, one_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, one_dimensional_name) {
-    /// This method is tested in one_dimensional_set_name().
+    /// This test is covered by one_dimensional_set_name().
 }
 
 /*****************************************************************************/
@@ -906,13 +905,13 @@ TEST_F(TestVariableProxy, two_dimensional_sense) {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 1);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
     {
         model::Model<int, double> model;
 
         auto& variable_proxy = model.create_variables("x", {2, 3}, 0, 10);
-        ASSERT_THROW(variable_proxy.sense(), std::runtime_error);
+        ASSERT_THROW(variable_proxy.type(), std::runtime_error);
     }
 }
 
@@ -943,17 +942,17 @@ TEST_F(TestVariableProxy, two_dimensional_set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_lower_bound) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_upper_bound) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_has_bounds) {
-    /// This method is tested in two_dimensional_set_bound.
+    /// This test is covered by two_dimensional_set_bound.
 }
 
 /*****************************************************************************/
@@ -968,7 +967,7 @@ TEST_F(TestVariableProxy, two_dimensional_set_name) {
 
 /*****************************************************************************/
 TEST_F(TestVariableProxy, two_dimensional_name) {
-    /// This method is tested in two_dimensional_set_name().
+    /// This test is covered by two_dimensional_set_name().
 }
 
 /*****************************************************************************/

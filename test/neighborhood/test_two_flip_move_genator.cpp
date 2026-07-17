@@ -24,7 +24,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
-    model.setup_unique_names();
+    model.builder().setup_unique_names();
 
     std::vector<std::pair<model_component::Variable<int, double>*,
                           model_component::Variable<int, double>*>>
@@ -47,7 +47,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(1), moves[0].alterations[1].first);
     EXPECT_EQ(0, moves[0].alterations[1].second);
     EXPECT_FALSE(moves[0].is_univariable_move);
-    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::TwoFlip, moves[0].type);
 
     EXPECT_TRUE(moves[1].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[1].alterations.size()));
@@ -56,7 +56,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(1), moves[1].alterations[1].first);
     EXPECT_EQ(1, moves[1].alterations[1].second);
     EXPECT_FALSE(moves[1].is_univariable_move);
-    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::TwoFlip, moves[1].type);
 
     EXPECT_TRUE(moves[2].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[2].alterations.size()));
@@ -65,7 +65,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(2), moves[2].alterations[1].first);
     EXPECT_EQ(0, moves[2].alterations[1].second);
     EXPECT_FALSE(moves[2].is_univariable_move);
-    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[2].sense);
+    EXPECT_EQ(neighborhood::MoveType::TwoFlip, moves[2].type);
 
     EXPECT_TRUE(moves[3].is_special_neighborhood_move);
     EXPECT_EQ(2, static_cast<int>(moves[3].alterations.size()));
@@ -74,7 +74,7 @@ TEST_F(TestTwoFlipMoveGenerator, setup) {
     EXPECT_EQ(&x(2), moves[3].alterations[1].first);
     EXPECT_EQ(1, moves[3].alterations[1].second);
     EXPECT_FALSE(moves[3].is_univariable_move);
-    EXPECT_EQ(neighborhood::MoveSense::TwoFlip, moves[3].sense);
+    EXPECT_EQ(neighborhood::MoveType::TwoFlip, moves[3].type);
 }
 }  // namespace
 /*****************************************************************************/

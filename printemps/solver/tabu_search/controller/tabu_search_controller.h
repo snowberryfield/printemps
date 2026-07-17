@@ -9,6 +9,10 @@
 #include "../../abstract_solver_controller.h"
 #include "../core/tabu_search_core.h"
 
+#include "initial_solution_mode.h"
+#include "penalty_coefficient_update_mode.h"
+#include "search_mode.h"
+
 #include "tabu_search_controller_state.h"
 #include "tabu_search_controller_state_manager.h"
 #include "tabu_search_controller_logger.h"
@@ -357,11 +361,11 @@ class TabuSearchController
     inline void print_distance(const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE = m_state_manager.state();
         utility::print_info(  //
-            " -- L0-Distance from the previous initial solution: " +
+            " -- L1-Distance from the previous initial solution: " +
                 utility::to_string(STATE.distance_from_current_solution, "%d"),
             a_IS_ENABLED_PRINT);
         utility::print_info(  //
-            " -- L0-Distance from the global incumbent solution: " +
+            " -- L1-Distance from the global incumbent solution: " +
                 utility::to_string(STATE.distance_from_global_solution, "%d"),
             a_IS_ENABLED_PRINT);
     }
@@ -419,7 +423,7 @@ class TabuSearchController
                     " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
-                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
+                    " L1-dist.: " + utility::to_string(solution.second, "%d"),
                 a_IS_ENABLED_PRINT);
         }
     }
@@ -449,7 +453,7 @@ class TabuSearchController
                     " Viol: " +
                     utility::to_string(solution.first.total_violation,
                                        "%.3e,") +
-                    " L0-dist.: " + utility::to_string(solution.second, "%d"),
+                    " L1-dist.: " + utility::to_string(solution.second, "%d"),
                 a_IS_ENABLED_PRINT);
         }
     }
@@ -497,9 +501,9 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_variable_update_frequency(
         const bool a_IS_ENABLED_PRINT) const {
-        auto mutable_variable_ptrs =
-            this->m_model_ptr->variable_reference().mutable_variable_ptrs;
-        if (mutable_variable_ptrs.size() == 0) {
+        auto variable_ptrs = this->m_model_ptr->reference()
+                                 .variable.mutable_independent_variable_ptrs;
+        if (variable_ptrs.size() == 0) {
             return;
         }
 
@@ -508,23 +512,23 @@ class TabuSearchController
             1.0, static_cast<double>(
                      this->m_global_state_ptr->memory.total_update_count()));
 
-        const int MUTABLE_VARIABLES_SIZE = mutable_variable_ptrs.size();
+        const int VARIABLES_SIZE = variable_ptrs.size();
 
-        std::stable_sort(
-            mutable_variable_ptrs.begin(), mutable_variable_ptrs.end(),
-            [](const auto& a_FIRST, const auto& a_SECOND) {
-                return a_FIRST->update_count() < a_SECOND->update_count();
-            });
+        std::stable_sort(variable_ptrs.begin(), variable_ptrs.end(),
+                         [](const auto& a_FIRST, const auto& a_SECOND) {
+                             return a_FIRST->update_count() <
+                                    a_SECOND->update_count();
+                         });
 
         int count = 0;
-        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+        for (auto i = 0; i < VARIABLES_SIZE; i++) {
             double update_rate =
-                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+                variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
             double density =
-                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
-                static_cast<double>(
-                    std::max(1, this->m_model_ptr->number_of_constraints()));
+                variable_ptrs[i]->related_constraint_ptrs().size() /
+                static_cast<double>(std::max(
+                    1, this->m_model_ptr->reference().number_of_constraints()));
 
             if (count > MAX_NUMBER_OF_PRINT_ITEMS) {
                 break;
@@ -536,8 +540,8 @@ class TabuSearchController
             }
 
             utility::print_info(
-                " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                " -- " + variable_ptrs[i]->name()  //
+                    + " (" + variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -546,14 +550,14 @@ class TabuSearchController
         }
 
         count = 0;
-        for (auto i = MUTABLE_VARIABLES_SIZE - 1; i >= 0; i--) {
+        for (auto i = VARIABLES_SIZE - 1; i >= 0; i--) {
             double update_rate =
-                mutable_variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
+                variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
             double density =
-                mutable_variable_ptrs[i]->related_constraint_ptrs().size() /
-                static_cast<double>(
-                    std::max(1, this->m_model_ptr->number_of_constraints()));
+                variable_ptrs[i]->related_constraint_ptrs().size() /
+                static_cast<double>(std::max(
+                    1, this->m_model_ptr->reference().number_of_constraints()));
 
             if (update_rate < constant::EPSILON_10) {
                 break;
@@ -569,8 +573,8 @@ class TabuSearchController
             }
 
             utility::print_info(
-                " -- " + mutable_variable_ptrs[i]->name()  //
-                    + " (" + mutable_variable_ptrs[i]->sense_label() +
+                " -- " + variable_ptrs[i]->name()  //
+                    + " (" + variable_ptrs[i]->type_label() +
                     ", Freq.: " + utility::to_string(update_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -583,7 +587,7 @@ class TabuSearchController
     inline void print_constraint_violation_frequency(
         const bool a_IS_ENABLED_PRINT) const {
         auto enabled_constraint_ptrs =
-            this->m_model_ptr->constraint_reference().enabled_constraint_ptrs;
+            this->m_model_ptr->reference().constraint.enabled_constraint_ptrs;
         if (enabled_constraint_ptrs.size() == 0) {
             return;
         }
@@ -608,12 +612,13 @@ class TabuSearchController
                           TOTAL_UPDATE_COUNT;
             satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
 
-            double density = enabled_constraint_ptrs[i]
-                                 ->expression()
-                                 .sensitivities()
-                                 .size() /
-                             static_cast<double>(std::max(
-                                 1, this->m_model_ptr->number_of_variables()));
+            double density =
+                enabled_constraint_ptrs[i]
+                    ->expression()
+                    .sensitivities()
+                    .size() /
+                static_cast<double>(std::max(
+                    1, this->m_model_ptr->reference().number_of_variables()));
 
             if (std::fabs(1.0 - satisfaction_rate) < constant::EPSILON_10) {
                 break;
@@ -630,7 +635,8 @@ class TabuSearchController
 
             utility::print_info(
                 " -- " + enabled_constraint_ptrs[i]->name()  //
-                    + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
+                    + " (" + enabled_constraint_ptrs[i]->type_label() +
+                    ", Freq.: " +
                     utility::to_string(satisfaction_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -645,12 +651,13 @@ class TabuSearchController
                           TOTAL_UPDATE_COUNT;
             satisfaction_rate = std::max(0.0, std::min(1.0, satisfaction_rate));
 
-            double density = enabled_constraint_ptrs[i]
-                                 ->expression()
-                                 .sensitivities()
-                                 .size() /
-                             static_cast<double>(std::max(
-                                 1, this->m_model_ptr->number_of_variables()));
+            double density =
+                enabled_constraint_ptrs[i]
+                    ->expression()
+                    .sensitivities()
+                    .size() /
+                static_cast<double>(std::max(
+                    1, this->m_model_ptr->reference().number_of_variables()));
 
             if (satisfaction_rate < constant::EPSILON_10) {
                 break;
@@ -667,7 +674,8 @@ class TabuSearchController
 
             utility::print_info(
                 " -- " + enabled_constraint_ptrs[i]->name()  //
-                    + " (" + enabled_constraint_ptrs[i]->type() + ", Freq.: " +
+                    + " (" + enabled_constraint_ptrs[i]->type_label() +
+                    ", Freq.: " +
                     utility::to_string(satisfaction_rate, "%.3e") +
                     ", Dens.: " + utility::to_string(density, "%.3e") + ")",
                 a_IS_ENABLED_PRINT);
@@ -712,8 +720,9 @@ class TabuSearchController
                             MAX_NUMBER_OF_PRINT_ITEMS) {
                             utility::print_info(
                                 " -- " + constraint.name()  //
-                                    + " (" + constraint.type() + ", Viol.: " +
-                                    std::to_string(VIOLATION) + ")",
+                                    + " (" + constraint.type_label() +
+                                    ", Viol.: " + std::to_string(VIOLATION) +
+                                    ")",
                                 a_IS_ENABLED_PRINT);
                         }
                     }
@@ -733,20 +742,41 @@ class TabuSearchController
 
     /*************************************************************************/
     inline void print_penalty_coefficient(const bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
+        const auto& STATE    = m_state_manager.state();
+        const auto  MODE_STR = PenaltyCoefficientUpdateModeInverseMap.at(
+            STATE.penalty_coefficient_update_mode);
 
-        if (STATE.penalty_coefficient_reset_flag) {
-            utility::print_message(                                           //
-                "Penalty coefficients were reset due to search stagnation.",  //
-                a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_relaxing) {
-            utility::print_message(                    //
-                "Penalty coefficients were relaxed.",  //
-                a_IS_ENABLED_PRINT);
-        } else if (STATE.is_enabled_penalty_coefficient_tightening) {
-            utility::print_message(                      //
-                "Penalty coefficients were tightened.",  //
-                a_IS_ENABLED_PRINT);
+        switch (STATE.penalty_coefficient_update_mode) {
+            case PenaltyCoefficientUpdateMode::Keep: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Relax: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Tighten: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            case PenaltyCoefficientUpdateMode::Reset: {
+                utility::print_info(  //
+                    "Penalty coefficients update mode: " + MODE_STR,
+                    a_IS_ENABLED_PRINT);
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified penalty coefficient update mode is "
+                    "invalid."));
+            }
         }
 
         utility::print_info(  //
@@ -760,7 +790,7 @@ class TabuSearchController
             a_IS_ENABLED_PRINT);
 
         utility::print_info(  //
-            " -- Current Penalty coefficients (Min / Max) : " +
+            " -- Current penalty coefficients (Min / Max) : " +
                 utility::to_string(STATE.local_penalty_coefficient_range.min(),
                                    "%.3e") +
                 " / " +
@@ -781,30 +811,33 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_improvability_screening_mode(
         bool a_IS_ENABLED_PRINT) const {
-        const auto& STATE = m_state_manager.state();
+        const auto& STATE    = m_state_manager.state();
+        const auto  MODE_STR = option::improvability_screening_mode::
+                                  ImprovabilityScreeningModeInverseMap.at(
+                                      STATE.improvability_screening_mode);
 
         switch (STATE.improvability_screening_mode) {
             case option::improvability_screening_mode::Off: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: off",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Soft: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: soft",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Aggressive: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: aggressive",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
             case option::improvability_screening_mode::Intensive: {
                 utility::print_info(  //
-                    " -- Improvability screening mode: intensive",
+                    " -- Improvability screening mode: " + MODE_STR,
                     a_IS_ENABLED_PRINT);
                 break;
             }
@@ -819,16 +852,34 @@ class TabuSearchController
     /*************************************************************************/
     inline void print_initial_solution(const bool a_IS_ENABLED_PRINT) const {
         const auto& STATE = m_state_manager.state();
-
-        if (STATE.employing_global_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: global incumbent", a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_local_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: local incumbent", a_IS_ENABLED_PRINT);
-        } else if (STATE.employing_previous_solution_flag) {
-            utility::print_info(  //
-                " -- Initial solution: previous initial", a_IS_ENABLED_PRINT);
+        const auto  MODE_STR =
+            InitialSolutionModeInverseMap.at(STATE.initial_solution_mode);
+        switch (STATE.initial_solution_mode) {
+            case InitialSolutionMode::Global: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Local: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Previous: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            case InitialSolutionMode::Pending: {
+                utility::print_info(  //
+                    " -- Initial solution: " + MODE_STR, a_IS_ENABLED_PRINT);
+                break;
+            }
+            default: {
+                throw std::logic_error(utility::format_error_location(
+                    __FILE__, __LINE__, __func__,
+                    "The specified initial solution mode is invalid."));
+            }
         }
     }
 

@@ -11,6 +11,7 @@ namespace printemps::solution {
 template <class T_Variable, class T_Expression>
 class NamedSolution {
     friend class model::Model<T_Variable, T_Expression>;
+    friend class model_handler::ModelStateInspector<T_Variable, T_Expression>;
 
    private:
     std::unordered_map<std::string, multi_array::ValueProxy<T_Variable>>

@@ -84,10 +84,6 @@ TEST_F(TestTabuSearchOption, initialize) {
         TabuSearchOptionConstant::DEFAULT_IS_ENABLED_MOVE_CURTAIL,  //
         option.is_enabled_move_curtail);
 
-    EXPECT_EQ(                                                         //
-        TabuSearchOptionConstant::DEFAULT_IS_ENABLED_AUTOMATIC_BREAK,  //
-        option.is_enabled_automatic_break);
-
     EXPECT_EQ(  //
         TabuSearchOptionConstant::
             DEFAULT_IS_ENABLED_AUTOMATIC_TABU_TENURE_ADJUSTMENT,  //

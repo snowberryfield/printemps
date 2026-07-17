@@ -22,3 +22,7 @@ Please refer to the [project page](https://snowberryfield.github.io/printemps/) 
   pages={19059-19076},
   doi={10.1109/ACCESS.2024.3361323}}
 ```
+
+## Contributors
+- Yuji KOGUMA
+- Masahiro Sakai

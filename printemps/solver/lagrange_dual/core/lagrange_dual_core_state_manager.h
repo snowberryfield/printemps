@@ -53,7 +53,7 @@ class LagrangeDualCoreStateManager {
         /**
          * Evaluate the initial solution score.
          */
-        m_state.current_solution_score  = m_model_ptr->evaluate({});
+        m_state.current_solution_score  = m_model_ptr->evaluator().evaluate({});
         m_state.previous_solution_score = m_state.current_solution_score;
         m_state.update_status =
             m_global_state_ptr->incumbent_holder.try_update_incumbent(
@@ -78,20 +78,22 @@ class LagrangeDualCoreStateManager {
         /**
          * Initialize the primal solution.
          */
-        m_state.primal           = m_model_ptr->export_dense_solution();
+        m_state.primal = m_model_ptr->state_inspector().export_dense_solution();
         m_state.primal_incumbent = m_state.primal;
 
         /**
          * Initialize the dual solution as lagrange multipliers.
          */
-        m_state.dual = m_model_ptr->generate_constraint_parameter_proxies(0.0);
+        m_state.dual = m_model_ptr->state_inspector()
+                           .generate_constraint_parameter_proxies(0.0);
         this->bound_dual();
         m_state.dual_incumbent = m_state.dual;
 
         /**
          * Initialize the step size for subgradient algorithm.
          */
-        m_state.step_size = 1.0 / m_model_ptr->number_of_variables();
+        m_state.step_size =
+            1.0 / m_model_ptr->reference().number_of_variables();
 
         /**
          * Set up the queue for historical lagrangians.
@@ -153,15 +155,17 @@ class LagrangeDualCoreStateManager {
     /*************************************************************************/
     inline void update_lagrangian(void) {
         m_state.lagrangian =
-            m_model_ptr->compute_lagrangian(m_state.dual) * m_model_ptr->sign();
+            m_model_ptr->evaluator().compute_lagrangian(m_state.dual) *
+            m_model_ptr->sign();
 
         /**
          * Update the lagrangian incumbent.
          */
         if (m_state.lagrangian > m_state.lagrangian_incumbent) {
             m_state.lagrangian_incumbent = m_state.lagrangian;
-            m_state.primal_incumbent     = m_model_ptr->export_dense_solution();
-            m_state.dual_incumbent       = m_state.dual;
+            m_state.primal_incumbent =
+                m_model_ptr->state_inspector().export_dense_solution();
+            m_state.dual_incumbent = m_state.dual;
         }
 
         /**
@@ -187,7 +191,7 @@ class LagrangeDualCoreStateManager {
     /*************************************************************************/
     inline void update_dual(void) {
         auto& constraint_ptrs =
-            m_model_ptr->constraint_reference().constraint_ptrs;
+            m_model_ptr->reference().constraint.constraint_ptrs;
         const int CONSTRAINTS_SIZE = constraint_ptrs.size();
 
 #ifdef _OPENMP

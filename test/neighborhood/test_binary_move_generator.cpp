@@ -26,11 +26,11 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     auto& x = model.create_variables("x", 10, 0, 1);
     x(0).fix_by(0);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
     auto binary_variable_ptrs =
-        model.variable_type_reference().binary_variable_ptrs;
+        model.reference().variable_type.binary_variable_ptrs;
 
     model.neighborhood().binary().setup(binary_variable_ptrs);
     model.neighborhood().binary().update_moves(  //
@@ -46,7 +46,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     }
 
     for (const auto& move : moves) {
-        EXPECT_EQ(neighborhood::MoveSense::Binary, move.sense);
+        EXPECT_EQ(neighborhood::MoveType::Binary, move.type);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
         EXPECT_EQ(move.alterations.front().second,
                   1 - move.alterations.front().first->value());

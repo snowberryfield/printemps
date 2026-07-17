@@ -38,7 +38,9 @@ class TwoFlipMoveGenerator
 
         for (auto i = 0; i < PAIRS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::TwoFlip;
+
+            move.associated_constraint_ptr = nullptr;
+            move.type                      = MoveType::TwoFlip;
             move.alterations.emplace_back(
                 a_FLIPPABLE_VARIABLE_PTR_PAIRS[i].first, 1);
             move.alterations.emplace_back(
@@ -48,26 +50,7 @@ class TwoFlipMoveGenerator
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .first->related_constraint_ptrs()
-                    .begin(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .second->related_constraint_ptrs()
-                    .begin(),
-                a_FLIPPABLE_VARIABLE_PTR_PAIRS[i]
-                    .second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             this->m_moves[2 * i + 1] = move;
 
@@ -79,8 +62,8 @@ class TwoFlipMoveGenerator
          * Setup move objects.
          */
         auto move_updater =                                 //
-            [](auto *     a_moves_ptr,                      //
-               auto *     a_flags,                          //
+            [](auto      *a_moves_ptr,                      //
+               auto      *a_flags,                          //
                const bool a_ACCEPT_ALL,                     //
                const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
@@ -99,18 +82,22 @@ class TwoFlipMoveGenerator
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_selection_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     if ((*a_moves_ptr)[i].has_fixed_variable()) {
                         (*a_flags)[i] = 0;
                         continue;
                     }
+
                     for (const auto &alteration :
                          (*a_moves_ptr)[i].alterations) {
                         if (alteration.first->value() == alteration.second) {
@@ -118,6 +105,7 @@ class TwoFlipMoveGenerator
                             break;
                         }
                     }
+
                     if ((*a_flags)[i] == 0) {
                         continue;
                     }

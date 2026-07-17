@@ -60,11 +60,10 @@ TEST_F(TestVariable, initialize) {
     EXPECT_EQ(0, variable.global_last_update_iteration());
     EXPECT_EQ(0, variable.update_count());
 
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
     EXPECT_EQ(0.0, variable.lagrangian_coefficient());
     EXPECT_EQ(nullptr, variable.selection_ptr());
     EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_TRUE(variable.related_binary_coefficient_constraint_ptrs().empty());
     EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
     EXPECT_EQ(0.0, variable.objective_sensitivity());
@@ -180,22 +179,22 @@ TEST_F(TestVariable, set_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, lower_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, upper_bound) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_bounds) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
@@ -210,7 +209,7 @@ TEST_F(TestVariable, set_lower_or_upper_bound) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, range) {
-    /// This method is tested in set_bound().
+    /// This test is covered by set_bound().
 }
 
 /*****************************************************************************/
@@ -228,12 +227,12 @@ TEST_F(TestVariable, set_local_last_update_iteration) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_local_last_update_iteration) {
-    /// This method is tested in set_local_last_update_iteration().
+    /// This test is covered by set_local_last_update_iteration().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, local_last_update_iteration) {
-    /// This method is tested in set_local_last_update_iteration().
+    /// This test is covered by set_local_last_update_iteration().
 }
 
 /*****************************************************************************/
@@ -249,12 +248,12 @@ TEST_F(TestVariable, set_global_last_update_iteration) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_global_last_update_iteration) {
-    /// This method is tested in set_global_last_update_iteration().
+    /// This test is covered by set_global_last_update_iteration().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, global_last_update_iteration) {
-    /// This method is tested in set_global_last_update_iteration().
+    /// This test is covered by set_global_last_update_iteration().
 }
 
 /*****************************************************************************/
@@ -272,12 +271,12 @@ TEST_F(TestVariable, increment_update_count) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_update_count) {
-    /// This method is tested in increment_update_count().
+    /// This test is covered by increment_update_count().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, update_count) {
-    /// This method is tested in increment_update_count().
+    /// This test is covered by increment_update_count().
 }
 
 /*****************************************************************************/
@@ -291,12 +290,12 @@ TEST_F(TestVariable, fix) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_fixed) {
-    /// This method is tested in fix().
+    /// This test is covered by fix().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, unfix) {
-    /// This method is tested in fix().
+    /// This test is covered by fix().
 }
 
 /*****************************************************************************/
@@ -341,7 +340,7 @@ TEST_F(TestVariable, set_is_objective_improvable_and) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_objective_improvable) {
-    /// This method is tested in set_is_objective_improvable().
+    /// This test is covered by set_is_objective_improvable().
 }
 
 /*****************************************************************************/
@@ -402,7 +401,7 @@ TEST_F(TestVariable, set_is_feasibility_improvable_if_has_upper_bound_margin) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, is_feasibility_improvable) {
-    /// This method is tested in set_is_feasibility_improvable().
+    /// This test is covered by set_is_feasibility_improvable().
 }
 
 /*****************************************************************************/
@@ -467,59 +466,57 @@ TEST_F(TestVariable, update_margin) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_lower_bound_margin) {
-    /// This method is tested in update_margin().
+    /// This test is covered by update_margin().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, has_upper_bound_margin) {
-    /// This method is tested in update_margin().
+    /// This test is covered by update_margin().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, set_sense) {
+TEST_F(TestVariable, set_type) {
     auto variable = model_component::Variable<int, double>::create_instance();
-    variable.set_sense(model_component::VariableSense::Binary);
-    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
-    EXPECT_EQ("Binary", variable.sense_label());
+    variable.set_type(model_component::VariableType::Binary);
+    EXPECT_EQ(model_component::VariableType::Binary, variable.type());
+    EXPECT_EQ("Binary", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::Integer);
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ("Integer", variable.sense_label());
+    variable.set_type(model_component::VariableType::Integer);
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
+    EXPECT_EQ("Integer", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::Selection);
-    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
-    EXPECT_EQ("Selection", variable.sense_label());
+    variable.set_type(model_component::VariableType::Selection);
+    EXPECT_EQ(model_component::VariableType::Selection, variable.type());
+    EXPECT_EQ("Selection", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::DependentBinary);
-    EXPECT_EQ(model_component::VariableSense::DependentBinary,
-              variable.sense());
-    EXPECT_EQ("DependentBinary", variable.sense_label());
+    variable.set_type(model_component::VariableType::DependentBinary);
+    EXPECT_EQ(model_component::VariableType::DependentBinary, variable.type());
+    EXPECT_EQ("Dependent Binary", variable.type_label());
 
-    variable.set_sense(model_component::VariableSense::DependentInteger);
-    EXPECT_EQ(model_component::VariableSense::DependentInteger,
-              variable.sense());
-    EXPECT_EQ("DependentInteger", variable.sense_label());
+    variable.set_type(model_component::VariableType::DependentInteger);
+    EXPECT_EQ(model_component::VariableType::DependentInteger, variable.type());
+    EXPECT_EQ("Dependent Integer", variable.type_label());
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, setup_sense_binary_or_integer) {
+TEST_F(TestVariable, setup_type_binary_or_integer) {
     auto variable = model_component::Variable<int, double>::create_instance();
     variable.set_bound(0, 1);
     model_component::Selection<int, double> selection;
     variable.set_selection_ptr(&selection);
-    EXPECT_EQ(model_component::VariableSense::Selection, variable.sense());
-    variable.setup_sense_binary_or_integer();
-    EXPECT_EQ(model_component::VariableSense::Binary, variable.sense());
+    EXPECT_EQ(model_component::VariableType::Selection, variable.type());
+    variable.setup_type_binary_or_integer();
+    EXPECT_EQ(model_component::VariableType::Binary, variable.type());
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sense) {
-    /// This method is tested in set_sense().
+TEST_F(TestVariable, type) {
+    /// This test is covered by set_type().
 }
 
 /*****************************************************************************/
-TEST_F(TestVariable, sense_label) {
-    /// This method is tested in set_sense().
+TEST_F(TestVariable, type_label) {
+    /// This test is covered by set_type().
 }
 
 /*****************************************************************************/
@@ -530,7 +527,7 @@ TEST_F(TestVariable, set_lagrangian_coefficient) {
 }
 /*****************************************************************************/
 TEST_F(TestVariable, lagrangian_coefficient) {
-    /// This method is tested in lagrangian_coefficient().
+    /// This test is covered by lagrangian_coefficient().
 }
 
 /*****************************************************************************/
@@ -554,12 +551,12 @@ TEST_F(TestVariable, set_selection_ptr) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, selection_ptr) {
-    /// This method is tested in set_selection_ptr().
+    /// This test is covered by set_selection_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, select) {
-    /// This method is tested in set_selection_ptr().
+    /// This test is covered by set_selection_ptr().
 }
 
 /*****************************************************************************/
@@ -574,135 +571,6 @@ TEST_F(TestVariable, update) {
     expression.update();
     variable_1.update();
     EXPECT_EQ(11, variable_1.value());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, register_related_constraint_ptr) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    auto constraint_0 =
-        model_component::Constraint<int, double>::create_instance();
-    auto constraint_1 =
-        model_component::Constraint<int, double>::create_instance();
-
-    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_0) !=
-                 variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
-
-    variable.register_related_constraint_ptr(&constraint_0);
-    variable.sort_and_unique_related_constraint_ptrs();
-    EXPECT_EQ(1, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
-
-    variable.register_related_constraint_ptr(&constraint_1);
-    variable.sort_and_unique_related_constraint_ptrs();
-    EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_1) !=
-                variable.related_constraint_ptrs().end());
-
-    variable.register_related_constraint_ptr(&constraint_1);
-    variable.sort_and_unique_related_constraint_ptrs();
-    EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_0) !=
-                variable.related_constraint_ptrs().end());
-    EXPECT_TRUE(std::find(variable.related_constraint_ptrs().begin(),
-                          variable.related_constraint_ptrs().end(),
-                          &constraint_1) !=
-                variable.related_constraint_ptrs().end());
-
-    variable.reset_related_constraint_ptrs();
-    EXPECT_TRUE(variable.related_constraint_ptrs().empty());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_0) !=
-                 variable.related_constraint_ptrs().end());
-    EXPECT_FALSE(std::find(variable.related_constraint_ptrs().begin(),
-                           variable.related_constraint_ptrs().end(),
-                           &constraint_1) !=
-                 variable.related_constraint_ptrs().end());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, sort_and_unique_related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, related_constraint_ptrs) {
-    /// This method is tested in register_related_constraint_ptr().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, setup_related_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_setup_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, related_binary_coefficient_constraint_ptrs) {
-    /// This method is tested in
-    /// Model.setup_variable_related_binary_coefficient_constraint_ptrs().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, set_dependent_expression_ptr) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    auto expression =
-        model_component::Expression<int, double>::create_instance();
-
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
-
-    variable.set_dependent_expression_ptr(&expression);
-
-    EXPECT_EQ(model_component::VariableSense::DependentInteger,
-              variable.sense());
-    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
-
-    variable.reset_dependent_expression_ptr();
-    EXPECT_EQ(model_component::VariableSense::Integer, variable.sense());
-    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, dependent_constraint_ptr) {
-    /// This method is tested in setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
@@ -729,23 +597,87 @@ TEST_F(TestVariable, register_constraint_sensitivity) {
     EXPECT_EQ("aa", variable.constraint_sensitivities()[0].first->name());
     EXPECT_EQ("bb", variable.constraint_sensitivities()[1].first->name());
 
+    variable.setup_related_constraint_ptrs();
+    EXPECT_EQ(2, static_cast<int>(variable.related_constraint_ptrs().size()));
+    EXPECT_EQ(&constraint_1, variable.related_constraint_ptrs()[0]);
+    EXPECT_EQ(&constraint_0, variable.related_constraint_ptrs()[1]);
+
+    variable.setup_constraint_sensitivities_compact();
+    EXPECT_EQ(2, static_cast<int>(
+                     variable.constraint_sensitivities_compact().size()));
+    EXPECT_EQ(constraint_1.compact_ptr(),
+              variable.constraint_sensitivities_compact()[0].first);
+    EXPECT_EQ(20, variable.constraint_sensitivities_compact()[0].second);
+    EXPECT_EQ(constraint_0.compact_ptr(),
+              variable.constraint_sensitivities_compact()[1].first);
+    EXPECT_EQ(10, variable.constraint_sensitivities_compact()[1].second);
+
     variable.reset_constraint_sensitivities();
     EXPECT_TRUE(variable.constraint_sensitivities().empty());
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, reset_constraint_sensitivities) {
-    /// This method is tested in register_constraint_sensitivity().
+    /// This test is covered by register_constraint_sensitivity().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, sort_constraint_sensitivities) {
-    /// This method is tested in register_related_constraint_ptr().
+    /// This test is covered by register_related_constraint_ptr().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, constraint_sensitivities) {
-    /// This method is tested in register_constraint_sensitivity().
+    /// This test is covered by register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_related_constraint_ptr) {
+    /// This test is covered by register_constraint_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, related_constraint_ptrs) {
+    /// This test is covered by register_related_constraint_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, setup_constraint_sensitivities_compact) {
+    /// This test is covered by register_related_constraint_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, constraint_sensitivities_compact) {
+    /// This test is covered by register_related_constraint_ptr().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, set_dependent_expression_ptr) {
+    auto variable = model_component::Variable<int, double>::create_instance();
+    auto expression =
+        model_component::Expression<int, double>::create_instance();
+
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
+
+    variable.set_dependent_expression_ptr(&expression);
+
+    EXPECT_EQ(model_component::VariableType::DependentInteger, variable.type());
+    EXPECT_EQ(&expression, variable.dependent_expression_ptr());
+
+    variable.reset_dependent_expression_ptr();
+    EXPECT_EQ(model_component::VariableType::Integer, variable.type());
+    EXPECT_EQ(nullptr, variable.dependent_expression_ptr());
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, reset_dependent_constraint_ptr) {
+    /// This test is covered by setup_uniform_sensitivity().
+}
+
+/*****************************************************************************/
+TEST_F(TestVariable, dependent_constraint_ptr) {
+    /// This test is covered by setup_uniform_sensitivity().
 }
 
 /*****************************************************************************/
@@ -758,7 +690,7 @@ TEST_F(TestVariable, set_objective_sensitivity) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, objective_sensitivity) {
-    /// This method is tested in set_objective_sensitivity().
+    /// This test is covered by set_objective_sensitivity().
 }
 
 /*****************************************************************************/
@@ -771,7 +703,7 @@ TEST_F(TestVariable, setup_hash) {
     g(0) = x(0) + x(1) == 1;
     g(1) = x(0) == 1;
 
-    model.setup_structure();
+    model.builder().update_derived_components();
     {
         x(0).setup_hash();
         std::uint64_t hash = reinterpret_cast<std::uint64_t>(&g(0)) +
@@ -788,32 +720,24 @@ TEST_F(TestVariable, setup_hash) {
 
 /*****************************************************************************/
 TEST_F(TestVariable, hash) {
-    /// This method is tested in setup_hash().
-}
-
-/*****************************************************************************/
-TEST_F(TestVariable, reset_related_selection_constraint_ptr_index) {
-    auto variable = model_component::Variable<int, double>::create_instance();
-    variable.reset_related_selection_constraint_ptr_index();
-    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_min());
-    EXPECT_EQ(-1, variable.related_selection_constraint_ptr_index_max());
+    /// This test is covered by setup_hash().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, setup_related_selection_constraint_ptr_index) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_selection_constraint_ptr_index_min) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 
 /*****************************************************************************/
 TEST_F(TestVariable, related_selection_constraint_ptr_index_max) {
-    /// This method is tested in
+    /// This test is covered by
     /// TestModel.setup_related_selection_constraint_ptr_index().
 }
 

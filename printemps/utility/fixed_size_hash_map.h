@@ -22,9 +22,9 @@ class FixedSizeHashMap {
     std::uint_fast32_t m_mask;
 
     bool     m_is_memory_allocated;
-    T_Key *  m_keys;
+    T_Key   *m_keys;
     T_Value *m_values;
-    bool *   m_is_occupied;
+    bool    *m_is_occupied;
 
     /*************************************************************************/
     inline std::uint_fast32_t compute_hash(const T_Key a_KEY) const noexcept {
@@ -89,7 +89,16 @@ class FixedSizeHashMap {
     /*************************************************************************/
     inline void setup(const std::unordered_map<T_Key, T_Value> &a_UNORDERED_MAP,
                       const std::uint_fast32_t                  a_KEY_SIZE) {
-        m_shift_size = floor(log2(a_KEY_SIZE));
+        if (m_is_memory_allocated) {
+            delete[] m_keys;
+            delete[] m_values;
+            delete[] m_is_occupied;
+            m_is_memory_allocated = false;
+        }
+
+        std::uint_fast32_t key_size_safe = (a_KEY_SIZE > 0) ? a_KEY_SIZE : 1;
+        m_shift_size =
+            static_cast<std::uint_fast8_t>(floor(log2(key_size_safe)));
 
         std::uint_fast32_t minimum_bucket_size =
             a_UNORDERED_MAP.size() *
@@ -107,8 +116,8 @@ class FixedSizeHashMap {
         m_is_memory_allocated = true;
 
         for (std::uint_fast32_t i = 0; i < bucket_size; i++) {
-            m_keys[i]        = static_cast<T_Key>(0);
-            m_values[i]      = static_cast<T_Value>(0);
+            m_keys[i]        = T_Key{};
+            m_values[i]      = T_Value{};
             m_is_occupied[i] = false;
         }
 

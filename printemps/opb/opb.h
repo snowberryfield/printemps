@@ -599,7 +599,7 @@ struct OPB {
         this->soft_constraints.resize(soft_constraint_lines.size());
         this->hard_constraints.resize(hard_constraint_lines.size());
 
-        const int SOFT_CONSTRAINTS_SIZE = soft_constraints.size();
+        const int SOFT_CONSTRAINTS_SIZE = this->soft_constraints.size();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -607,7 +607,7 @@ struct OPB {
             this->soft_constraints[i] =
                 OPB::parse_soft_constraint(lines[soft_constraint_lines[i]], i);
         }
-        const int HARD_CONSTRAINTS_SIZE = hard_constraints.size();
+        const int HARD_CONSTRAINTS_SIZE = this->hard_constraints.size();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -619,38 +619,39 @@ struct OPB {
         this->setup_variable_information();
     }
 
+    /*************************************************************************/
     inline void augment_solution(
-        std::unordered_map<std::string, int> &a_VARIABLES) {
+        std::unordered_map<std::string, int> *a_variables_ptr) {
         // augment negated variables
-        for (const auto &variable_name : negated_variable_names) {
+        for (const auto &variable_name : this->negated_variable_names) {
             const auto &negated_variable_name = "~" + variable_name;
-            if (a_VARIABLES.find(negated_variable_name) == a_VARIABLES.end() &&
-                a_VARIABLES.find(variable_name) != a_VARIABLES.end()) {
-                a_VARIABLES[negated_variable_name] =
-                    1 - a_VARIABLES[variable_name];
+            if (a_variables_ptr->find(negated_variable_name) == a_variables_ptr->end() &&
+                a_variables_ptr->find(variable_name) != a_variables_ptr->end()) {
+                (*a_variables_ptr)[negated_variable_name] =
+                    1 - (*a_variables_ptr)[variable_name];
             }
         }
 
         // augment product variables
-        for (const auto &product_variable_name : product_variable_names) {
-            if (a_VARIABLES.find(product_variable_name.first) !=
-                a_VARIABLES.end()) {
+        for (const auto &product_variable_name : this->product_variable_names) {
+            if (a_variables_ptr->find(product_variable_name.first) !=
+                a_variables_ptr->end()) {
                 continue;
             }
 
             int  value     = 1;
             bool not_found = false;
             for (const auto &variable_name : product_variable_name.second) {
-                if (a_VARIABLES.find(variable_name) == a_VARIABLES.end()) {
+                if (a_variables_ptr->find(variable_name) == a_variables_ptr->end()) {
                     not_found = true;
                     break;
                 } else {
-                    value *= a_VARIABLES[variable_name];
+                    value *= (*a_variables_ptr)[variable_name];
                 }
             }
 
             if (!not_found) {
-                a_VARIABLES[product_variable_name.first] = value;
+                (*a_variables_ptr)[product_variable_name.first] = value;
             }
         }
     }

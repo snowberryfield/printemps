@@ -84,17 +84,6 @@ inline void print(const std::string &a_LINE, const bool a_IS_ENABLED) {
 }
 
 /******************************************************************************/
-inline void print_parameter(const std::string &a_NAME, const double a_VALUE,
-                            const bool a_IS_ENABLED) {
-    if (!a_IS_ENABLED) {
-        return;
-    }
-    char temp[80];
-    sprintf(temp, "%25s : %.6e", a_NAME.c_str(), a_VALUE);
-    std::cout << temp << std::endl;
-}
-
-/******************************************************************************/
 inline void print_with_label(const std::string &a_HEADER_LABEL,
                              const std::string &a_MESSAGE,
                              const bool         a_IS_ENABLED) {

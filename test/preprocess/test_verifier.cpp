@@ -80,9 +80,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
 
         auto& x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(2);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -99,9 +100,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(2);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -118,9 +120,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -136,9 +139,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -154,10 +158,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -174,10 +179,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0).fix_by(1);
         x(1).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -194,9 +200,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 2;
         x(1) = 3;
-        model.setup_structure();
+
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -223,10 +231,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 2;
         x(1) = 3;
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -243,8 +252,8 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -264,8 +273,8 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -283,9 +292,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -302,9 +312,10 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -321,10 +332,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
         x(1) = 1;
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -342,10 +354,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
         x(1) = 1;
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -362,10 +375,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -383,10 +397,11 @@ TEST_F(TestVerifier, verify_and_correct_selection_variables_initial_values) {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
         model.create_constraint("g", x.selection());
+        model.builder().update_derived_components();
+
         x(0) = 1;
         x(1).fix_by(1);
 
-        model.setup_structure();
         preprocess::SelectionExtractor<int, double> selection_extractor(&model);
         selection_extractor.extract_by_defined_order(false);
 
@@ -405,9 +420,9 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(2);
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0).fix_by(2);
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
@@ -421,9 +436,9 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
-        x(0).fix_by(-1);
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0).fix_by(-1);
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
@@ -437,10 +452,10 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
-        x(0)                        = 2;
-        x(1)                        = -1;
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0) = 2;
+        x(1) = -1;
 
         preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_binary_variables_initial_values(true,
@@ -454,10 +469,10 @@ TEST_F(TestVerifier, verify_and_correct_binary_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, 0, 1);
-        x(0)                        = 2;
-        x(1)                        = -1;
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0) = 2;
+        x(1) = -1;
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
@@ -474,9 +489,9 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(11);
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0).fix_by(11);
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
@@ -490,9 +505,9 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, -10, 10);
-        x(0).fix_by(-11);
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0).fix_by(-11);
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(
@@ -506,10 +521,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, -10, 10);
-        x(0)                        = 11;
-        x(1)                        = -11;
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0) = 11;
+        x(1) = -11;
 
         preprocess::Verifier<int, double> verifier(&model);
         verifier.verify_and_correct_integer_variables_initial_values(true,
@@ -524,10 +539,10 @@ TEST_F(TestVerifier, verify_and_correct_integer_variables_initial_values) {
     {
         model::Model<int, double> model;
         auto&                     x = model.create_variables("x", 10, -10, 10);
-        x(0)                        = 11;
-        x(1)                        = -11;
+        model.builder().update_derived_components();
 
-        model.setup_structure();
+        x(0) = 11;
+        x(1) = -11;
 
         preprocess::Verifier<int, double> verifier(&model);
         ASSERT_THROW(

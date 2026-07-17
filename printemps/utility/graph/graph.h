@@ -28,13 +28,8 @@ class Graph {
 
     /*************************************************************************/
     inline void add_edge(const T a_NODE_KEY_FIRST, const T a_NODE_KEY_SECOND) {
-        if (m_nodes.find(a_NODE_KEY_FIRST) == m_nodes.end()) {
-            m_nodes[a_NODE_KEY_FIRST] = Node(a_NODE_KEY_FIRST);
-        }
-
-        if (m_nodes.find(a_NODE_KEY_SECOND) == m_nodes.end()) {
-            m_nodes[a_NODE_KEY_SECOND] = Node(a_NODE_KEY_SECOND);
-        }
+        m_nodes.try_emplace(a_NODE_KEY_FIRST, a_NODE_KEY_FIRST);
+        m_nodes.try_emplace(a_NODE_KEY_SECOND, a_NODE_KEY_SECOND);
 
         m_nodes[a_NODE_KEY_FIRST].m_edge_indices.insert(m_edges.size());
         m_nodes[a_NODE_KEY_SECOND].m_edge_indices.insert(m_edges.size());
@@ -44,13 +39,8 @@ class Graph {
     /*************************************************************************/
     inline void add_edge(const T a_NODE_KEY_FIRST, const T a_NODE_KEY_SECOND,
                          const double a_WEIGHT) {
-        if (m_nodes.find(a_NODE_KEY_FIRST) == m_nodes.end()) {
-            m_nodes[a_NODE_KEY_FIRST] = Node(a_NODE_KEY_FIRST);
-        }
-
-        if (m_nodes.find(a_NODE_KEY_SECOND) == m_nodes.end()) {
-            m_nodes[a_NODE_KEY_SECOND] = Node(a_NODE_KEY_SECOND);
-        }
+        m_nodes.try_emplace(a_NODE_KEY_FIRST, a_NODE_KEY_FIRST);
+        m_nodes.try_emplace(a_NODE_KEY_SECOND, a_NODE_KEY_SECOND);
 
         m_nodes[a_NODE_KEY_FIRST].m_edge_indices.insert(m_edges.size());
         m_nodes[a_NODE_KEY_SECOND].m_edge_indices.insert(m_edges.size());
@@ -62,13 +52,8 @@ class Graph {
         const auto &NODE_KEY_FIRST  = a_EDGE.node_keys().first;
         const auto &NODE_KEY_SECOND = a_EDGE.node_keys().second;
 
-        if (m_nodes.find(NODE_KEY_FIRST) == m_nodes.end()) {
-            m_nodes[NODE_KEY_FIRST] = Node(NODE_KEY_FIRST);
-        }
-
-        if (m_nodes.find(NODE_KEY_SECOND) == m_nodes.end()) {
-            m_nodes[NODE_KEY_SECOND] = Node(NODE_KEY_SECOND);
-        }
+        m_nodes.try_emplace(NODE_KEY_FIRST, NODE_KEY_FIRST);
+        m_nodes.try_emplace(NODE_KEY_SECOND, NODE_KEY_SECOND);
 
         m_nodes[NODE_KEY_FIRST].m_edge_indices.insert(m_edges.size());
         m_nodes[NODE_KEY_SECOND].m_edge_indices.insert(m_edges.size());
@@ -91,8 +76,10 @@ class Graph {
     }
 
     /*************************************************************************/
-    inline Graph<T> minimum_spanning_tree(void) noexcept {
+    inline Graph<T> minimum_spanning_tree(void) {
         std::vector<Edge<T> *> edge_ptrs;
+        edge_ptrs.reserve(m_edges.size());
+
         for (auto &&edge : m_edges) {
             edge_ptrs.push_back(&edge);
         }
@@ -103,18 +90,21 @@ class Graph {
                 return a_EDGE_PTR_FIRST->weight() < a_EDGE_PTR_SECOND->weight();
             });
 
-        std::unordered_set<T> total_node_keys;
+        std::vector<T> total_node_keys;
+        total_node_keys.reserve(m_nodes.size());
         for (const auto &node : m_nodes) {
-            total_node_keys.insert(node.first);
+            total_node_keys.push_back(node.first);
         }
 
         UnionFind uf(total_node_keys);
 
         std::vector<Edge<T> *> added_edge_ptrs;
+        added_edge_ptrs.reserve(m_nodes.size() - 1);
+
         for (const auto &edge_ptr : edge_ptrs) {
             auto &node_keys = edge_ptr->node_keys();
 
-            if (uf.is_same(node_keys.first, node_keys.second)) {
+            if (uf.has_same_root(node_keys.first, node_keys.second)) {
                 continue;
             } else {
                 added_edge_ptrs.push_back(edge_ptr);
@@ -137,12 +127,12 @@ class Graph {
     }
 
     /*************************************************************************/
-    inline std::unordered_map<int, Node<T>> &nodes(void) noexcept {
+    inline std::unordered_map<T, Node<T>> &nodes(void) noexcept {
         return m_nodes;
     }
 
     /*************************************************************************/
-    inline std::unordered_map<int, Node<T>> const &nodes(void) const noexcept {
+    inline std::unordered_map<T, Node<T>> const &nodes(void) const noexcept {
         return m_nodes;
     }
 

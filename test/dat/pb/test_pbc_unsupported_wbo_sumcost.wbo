@@ -1,0 +1,4 @@
+* #variable= 1 #constraint= 1 #soft= 1 sumcost= 9007199254740992 intsize= 3
+soft: 9007199254740992;
+1 x1 >= 0;
+[1] 1 x1 >= 1;

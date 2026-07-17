@@ -12,9 +12,14 @@ template <class T_Variable, class T_Expression>
 class Model;
 }  // namespace printemps::model
 
-#include "problem_size_reducer.h"
+#include "problem_size_reducer_result.h"
+#include "problem_size_reducer_basic.h"
+#include "problem_size_reducer_special.h"
 #include "selection_extractor.h"
-#include "dependent_variable_extractor.h"
+#include "dependent_integer_variable_extractor.h"
+#include "dependent_variable_eliminator.h"
+#include "partial_feasible_enumerator.h"
+#include "dependent_binary_variable_extractor.h"
 #include "gf2_solver.h"
 #include "flippable_variable_pair_extractor.h"
 #include "verifier.h"

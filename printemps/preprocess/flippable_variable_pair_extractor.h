@@ -13,7 +13,7 @@ namespace printemps::preprocess {
 template <class T_Variable, class T_Expression>
 class FlippableVariablePairExtractor {
    private:
-    model::Model<T_Variable, T_Expression> *                     m_model_ptr;
+    model::Model<T_Variable, T_Expression>                      *m_model_ptr;
     std::vector<FlippableVariablePair<T_Variable, T_Expression>> m_pairs;
 
    public:
@@ -41,14 +41,14 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline void extract_pairs(const int  a_MINIMUM_COMMON_ELEMENT,  //
-                              const bool a_IS_ENABLED_PRINT) {
+    inline void run(const int  a_MINIMUM_COMMON_ELEMENT,  //
+                    const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
         utility::print_message("Extracting flippable variable pairs...",
                                a_IS_ENABLED_PRINT);
 
         const auto &a_CONSTRAINT_PTRS =
-            m_model_ptr->constraint_reference().enabled_constraint_ptrs;
+            m_model_ptr->reference().constraint.enabled_constraint_ptrs;
 
         std::unordered_set<
             model_component::Variable<T_Variable, T_Expression> *>
@@ -58,10 +58,10 @@ class FlippableVariablePairExtractor {
                  constraint_ptr->expression().sensitivities()) {
                 auto variable_ptr = sensitivity.first;
                 if (!variable_ptr->is_fixed() &&
-                    (variable_ptr->sense() ==
-                         model_component::VariableSense::Binary ||
-                     variable_ptr->sense() ==
-                         model_component::VariableSense::Selection) &&
+                    (variable_ptr->type() ==
+                         model_component::VariableType::Binary ||
+                     variable_ptr->type() ==
+                         model_component::VariableType::Selection) &&
                     static_cast<int>(
                         variable_ptr->related_constraint_ptrs().size()) >=
                         a_MINIMUM_COMMON_ELEMENT) {
@@ -141,8 +141,8 @@ class FlippableVariablePairExtractor {
     }
 
     /*************************************************************************/
-    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>>
-        &pairs(void) const {
+    inline const std::vector<FlippableVariablePair<T_Variable, T_Expression>> &
+    pairs(void) const {
         return this->m_pairs;
     }
 };

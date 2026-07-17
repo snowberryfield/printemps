@@ -19,7 +19,7 @@ class SelectionExtractor {
     inline std::vector<model_component::Selection<T_Variable, T_Expression>>
     extract_raw_selections(void) {
         auto &set_patritioning_ptrs =
-            m_model_ptr->constraint_type_reference().set_partitioning_ptrs;
+            m_model_ptr->reference().constraint_type.set_partitioning_ptrs;
 
         std::vector<model_component::Selection<T_Variable, T_Expression>>
             raw_selections;
@@ -27,22 +27,22 @@ class SelectionExtractor {
             if (!constraint_ptr->is_enabled()) {
                 continue;
             }
-            bool is_valid = true;
+            /**
+             * NOTE: "Selection" applies only to set-partitioning constraints
+             * whose original form is exactly Σ x_i = 1. For example, a
+             * constraint Σ x_i = y with y fixed to 1 is mathematically a
+             * set-partitioning constraint, but it is NOT treated as
+             * "Selection".
+             */
+            if (constraint_ptr->expression().constant_value() != -1) {
+                continue;
+            }
 
-            for (auto &&sensitivity :
-                 constraint_ptr->expression().sensitivities()) {
-                if (sensitivity.first->sense() !=
-                    model_component::VariableSense::Binary) {
-                    is_valid = false;
-                    break;
-                }
-            }
-            if (is_valid) {
-                model_component::Selection<T_Variable, T_Expression> selection(
-                    constraint_ptr);
-                raw_selections.push_back(selection);
-            }
+            model_component::Selection<T_Variable, T_Expression> selection(
+                constraint_ptr);
+            raw_selections.push_back(selection);
         }
+
         return raw_selections;
     }
 
@@ -70,7 +70,7 @@ class SelectionExtractor {
     }
 
     /*************************************************************************/
-    inline void extract(
+    inline void run(
         const option::selection_mode::SelectionMode &a_SELECTION_MODE,
         const bool                                   a_IS_ENABLED_PRINT) {
         switch (a_SELECTION_MODE) {
@@ -121,6 +121,9 @@ class SelectionExtractor {
         for (auto &&selection : raw_selections) {
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
@@ -149,7 +152,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -194,6 +197,9 @@ class SelectionExtractor {
         for (auto &&selection : raw_selections) {
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
@@ -222,7 +228,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -233,30 +239,36 @@ class SelectionExtractor {
         utility::print_message("Extracting independent selection variables...",
                                a_IS_ENABLED_PRINT);
 
+        auto      raw_selections      = this->extract_raw_selections();
+        const int RAW_SELECTIONS_SIZE = raw_selections.size();
+
+        std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *, int>
+            variable_count;
+        variable_count.reserve(64 * RAW_SELECTIONS_SIZE);
+
+        for (auto &&selection : raw_selections) {
+            for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (!variable_ptr->is_fixed_at(0)) {
+                    variable_count[variable_ptr]++;
+                }
+            }
+        }
+
         std::vector<model_component::Selection<T_Variable, T_Expression>>
             selections;
-
-        auto raw_selections = this->extract_raw_selections();
-
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             extracted_variable_ptrs;
 
-        const int RAW_SELECTIONS_SIZE = raw_selections.size();
         for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
             bool has_overlap = false;
             for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
-                for (auto j = 0; j < RAW_SELECTIONS_SIZE; j++) {
-                    if (j != i &&
-                        std::find(raw_selections[j].variable_ptrs.begin(),
-                                  raw_selections[j].variable_ptrs.end(),
-                                  variable_ptr) !=
-                            raw_selections[j].variable_ptrs.end()) {
-                        has_overlap = true;
-                        break;
-                    }
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
                 }
 
-                if (has_overlap) {
+                if (variable_count[variable_ptr] > 1) {
+                    has_overlap = true;
                     break;
                 }
             }
@@ -264,7 +276,8 @@ class SelectionExtractor {
             if (has_overlap) {
                 continue;
             }
-            utility::print_message(  //
+
+            utility::print_message(
                 "The constraint " + raw_selections[i].constraint_ptr->name() +
                     " was detected as selection constraint.",
                 a_IS_ENABLED_PRINT);
@@ -281,7 +294,7 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
@@ -307,6 +320,9 @@ class SelectionExtractor {
 
             bool has_overlap = false;
             for (auto &&variable_ptr : selection.variable_ptrs) {
+                if (variable_ptr->is_fixed_at(0)) {
+                    continue;
+                }
                 if (std::find(extracted_variable_ptrs.begin(),
                               extracted_variable_ptrs.end(),
                               variable_ptr) != extracted_variable_ptrs.end()) {
@@ -335,21 +351,21 @@ class SelectionExtractor {
         }
 
         m_selections = selections;
-        m_model_ptr->set_selections(selections);
+        m_model_ptr->builder().setup_selections(selections);
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
     inline const std::vector<
-        model_component::Selection<T_Variable, T_Expression>>
-        &selections(void) const {
+        model_component::Selection<T_Variable, T_Expression>> &
+    selections(void) const {
         return m_selections;
     }
 
     /*************************************************************************/
-    inline std::vector<model_component::Selection<T_Variable, T_Expression>>
-        &selections(void) {
+    inline std::vector<model_component::Selection<T_Variable, T_Expression>> &
+    selections(void) {
         return m_selections;
     }
 };

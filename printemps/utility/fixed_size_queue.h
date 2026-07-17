@@ -62,16 +62,32 @@ class FixedSizeQueue {
 
     /*************************************************************************/
     inline T min(void) const {
+        if (m_queue.empty()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot compute min of an empty queue."));
+        }
+
         return *min_element(m_queue.begin(), m_queue.end());
     }
 
     /*************************************************************************/
     inline T max(void) const {
+        if (m_queue.empty()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot compute max of an empty queue."));
+        }
         return *max_element(m_queue.begin(), m_queue.end());
     }
 
     /*************************************************************************/
     inline double average(void) const {
+        if (m_queue.empty()) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Cannot compute average of an empty queue."));
+        }
         return std::accumulate(m_queue.begin(), m_queue.end(), 0.0) /
                static_cast<double>(m_queue.size());
     }

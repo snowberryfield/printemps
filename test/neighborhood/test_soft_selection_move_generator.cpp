@@ -27,11 +27,11 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     auto& y = model.create_variable("y", 0, 1);
     auto& c = model.create_constraint("c", -x.sum() == -y);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
     auto soft_selection_ptrs =
-        model.constraint_type_reference().soft_selection_ptrs;
+        model.reference().constraint_type.soft_selection_ptrs;
 
     model.neighborhood().soft_selection().setup(soft_selection_ptrs);
 
@@ -39,6 +39,9 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     auto& flags = model.neighborhood().soft_selection().flags();
     EXPECT_EQ(20, static_cast<int>(moves.size()));
     EXPECT_EQ(20, static_cast<int>(flags.size()));
+
+    EXPECT_EQ(&c[0], moves[0].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[20 - 1].associated_constraint_ptr);
 
     /// (x_0,y) = (0,0) -> (1,1)
     EXPECT_FALSE(moves[0].is_univariable_move);
@@ -48,7 +51,7 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     EXPECT_EQ(&(y[0]), moves[0].alterations[1].first);
     EXPECT_EQ(0, moves[0].alterations[0].second);
     EXPECT_EQ(0, moves[0].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::SoftSelection, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::SoftSelection, moves[0].type);
     EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
                           moves[0].related_constraint_ptrs.end(),
                           &c[0]) != moves[0].related_constraint_ptrs.end());
@@ -61,7 +64,7 @@ TEST_F(TestSoftSelectionMoveGenerator, setup) {
     EXPECT_EQ(&(y[0]), moves[1].alterations[1].first);
     EXPECT_EQ(1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::SoftSelection, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::SoftSelection, moves[1].type);
     EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
                           moves[1].related_constraint_ptrs.end(),
                           &c[0]) != moves[1].related_constraint_ptrs.end());

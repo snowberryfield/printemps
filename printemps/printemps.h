@@ -9,6 +9,7 @@
 #include "std.h"
 
 #include "constant/constant.h"
+#include "error_handler/error_handler.h"
 #include "utility/utility.h"
 #include "multi_array/multi_array.h"
 #include "helper/helper.h"
@@ -21,6 +22,7 @@
 #include "preprocess/preprocess.h"
 #include "solution/solution.h"
 #include "linear_programming/linear_programming.h"
+#include "model_handler/model_handler.h"
 #include "model/model.h"
 #include "solver/solver.h"
 #include "standalone/standalone.h"

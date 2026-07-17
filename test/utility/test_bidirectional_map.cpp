@@ -49,12 +49,12 @@ TEST_F(TestBidirectionalMap, operator_square_bracket) {
 
 /*****************************************************************************/
 TEST_F(TestBidirectionalMap, empty) {
-    /// This method is tested in initialize().
+    /// This test is covered by initialize().
 }
 
 /*****************************************************************************/
 TEST_F(TestBidirectionalMap, size) {
-    /// This method is tested in operator_square_bracket().
+    /// This test is covered by operator_square_bracket().
 }
 }  // namespace
 /*****************************************************************************/

@@ -36,7 +36,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     /**
      * [Access controls for special member functions]
      *  -- Default constructor : default, private
-     *  -- Copy constructor    : default, private (for std::vector.reserve())
+     *  -- Copy constructor    : delete, (private)
      *  -- Copy assignment     : default  public
      *  -- Move constructor    : default, public
      *  -- Move assignment     : default, public
@@ -77,7 +77,6 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                               T_Expression>
         m_fixed_sensitivities;
 
-    std::uint64_t m_selection_mask;
     std::uint64_t m_hash;
 
     /*************************************************************************/
@@ -88,7 +87,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
 
     /*************************************************************************/
     /// Copy constructor
-    Expression(const Expression<T_Variable, T_Expression> &) = default;
+    Expression(const Expression<T_Variable, T_Expression> &) = delete;
 
     /*************************************************************************/
     Expression(const std::unordered_map<Variable<T_Variable, T_Expression> *,
@@ -157,8 +156,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         m_negative_coefficient_mutable_variable_ptrs.clear();
         m_fixed_sensitivities.initialize();
 
-        m_selection_mask = 0;
-        m_hash           = 0;
+        m_hash = 0;
     }
 
     /*************************************************************************/
@@ -239,17 +237,6 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline void setup_selection_mask(void) {
-        std::uint64_t selection_mask = 0;
-        for (const auto &sensitivity : m_sensitivities) {
-            selection_mask |=
-                reinterpret_cast<std::uint64_t>(sensitivity.first);
-        }
-
-        m_selection_mask = ~selection_mask;
-    }
-
-    /*************************************************************************/
     inline void setup_hash(void) {
         /**
          * NOTE: This method is called in
@@ -257,6 +244,9 @@ class Expression : public multi_array::AbstractMultiArrayElement {
          */
         std::uint64_t hash = 0;
         for (const auto &sensitivity : m_sensitivities) {
+            if (sensitivity.first->is_fixed()) {
+                continue;
+            }
             hash += reinterpret_cast<std::uint64_t>(sensitivity.first);
         }
         m_hash = hash;
@@ -354,6 +344,14 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
         *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
         m_sensitivities.erase(a_variable_ptr);
+
+        for (auto it = m_sensitivities.begin(); it != m_sensitivities.end();) {
+            if (std::abs(it->second) < constant::EPSILON_10) {
+                it = m_sensitivities.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
     /*************************************************************************/
@@ -391,8 +389,13 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
+    inline T_Expression range(void) {
+        return this->upper_bound() - this->lower_bound();
+    }
+
+    /*************************************************************************/
     inline T_Expression fixed_term_value(void) {
-        int fixed_term_value = 0;
+        T_Expression fixed_term_value = 0;
         for (const auto &sensitivity : m_sensitivities) {
             if (sensitivity.first->is_fixed()) {
                 fixed_term_value +=
@@ -438,11 +441,6 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*************************************************************************/
-    inline std::uint64_t selection_mask(void) const noexcept {
-        return m_selection_mask;
-    }
-
-    /*************************************************************************/
     inline std::uint64_t hash(void) const noexcept {
         return m_hash;
     }
@@ -473,48 +471,159 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     }
 
     /*********************************************************************/
-    inline bool is_integer(void) const noexcept {
+    inline int number_of_mutable_variables(void) const noexcept {
+        int number_of_mutable_variables = 0;
+        for (const auto &sensitivity : m_sensitivities) {
+            if (!sensitivity.first->is_fixed()) {
+                number_of_mutable_variables++;
+            }
+        }
+        return number_of_mutable_variables;
+    }
+
+    /*********************************************************************/
+    inline std::vector<
+        std::pair<Variable<T_Variable, T_Expression> *, T_Expression> >
+    sensitivities_pair_vector(
+        const bool a_IS_ENABLED_EXCLUDE_FIXED_VARIABLE) const noexcept {
+        auto pair_vector = utility::to_pair_vector(m_sensitivities);
+
+        if (a_IS_ENABLED_EXCLUDE_FIXED_VARIABLE) {
+            std::vector<
+                std::pair<Variable<T_Variable, T_Expression> *, T_Expression> >
+                filtered;
+
+            filtered.reserve(pair_vector.size());
+
+            for (auto &&pair : pair_vector) {
+                if (!pair.first->is_fixed()) {
+                    filtered.emplace_back(std::move(pair));
+                }
+            }
+
+            pair_vector = std::move(filtered);
+        }
+
+        std::sort(pair_vector.begin(), pair_vector.end(),
+                  [](const auto &a_FIRST, const auto &a_SECOND) {
+                      return a_FIRST.first->name() < a_SECOND.first->name();
+                  });
+
+        return pair_vector;
+    }
+
+    /*********************************************************************/
+    inline ExpressionStructure<T_Variable, T_Expression> structure(void) const {
+        ExpressionStructure<T_Variable, T_Expression> structure;
+
+        structure.constant_value              = m_constant_value;
+        structure.number_of_mutable_variables = 0;
+
+        auto SENSITIVITIES_PAIR_VECTOR = this->sensitivities_pair_vector(false);
+
+        for (const auto &sensitivity : SENSITIVITIES_PAIR_VECTOR) {
+            auto variable_ptr = sensitivity.first;
+            auto coefficient  = sensitivity.second;
+
+            if (sensitivity.first->is_fixed()) {
+                structure.constant_value += coefficient * variable_ptr->value();
+            } else {
+                structure.number_of_mutable_variables++;
+            }
+        }
+
+        structure.is_integer                             = true;
+        structure.has_only_binary_coefficient            = true;
+        structure.has_only_binary_or_selection_variable  = true;
+        structure.has_only_integer_variable              = true;
+        structure.has_only_plus_or_minus_one_coefficient = true;
+        structure.has_bin_packing_variable               = false;
+        structure.max_abs_coefficient                    = 0;
+
+        structure.variable_ptrs.clear();
+        structure.coefficients.clear();
+
+        structure.variable_ptrs.reserve(structure.number_of_mutable_variables);
+        structure.coefficients.reserve(structure.number_of_mutable_variables);
+
         if (!utility::is_integer(m_constant_value)) {
-            return false;
+            structure.is_integer = false;
         }
 
         for (const auto &sensitivity : m_sensitivities) {
-            if (!utility::is_integer(sensitivity.second)) {
-                return false;
+            auto variable_ptr = sensitivity.first;
+            auto coefficient  = sensitivity.second;
+
+            if (variable_ptr->is_fixed()) {
+                continue;
             }
-        }
-        return true;
-    }
 
-    /*********************************************************************/
-    inline T_Expression max_abs_coefficient(void) const noexcept {
-        T_Expression max_abs_coefficient = 0;
-        for (const auto &sensitivity : m_sensitivities) {
-            max_abs_coefficient =
-                std::max(max_abs_coefficient, std::abs(sensitivity.second));
-        }
-        return max_abs_coefficient;
-    }
-
-    /*********************************************************************/
-    inline bool has_only_binary_coefficient(void) const noexcept {
-        for (const auto &sensitivity : m_sensitivities) {
-            if (sensitivity.second != 1) {
-                return false;
+            if (!utility::is_integer(coefficient)) {
+                structure.is_integer = false;
             }
-        }
-        return true;
-    }
 
-    /*********************************************************************/
-    inline bool has_only_binary_variable(void) const noexcept {
-        for (const auto &sensitivity : m_sensitivities) {
-            if ((sensitivity.first->sense() != VariableSense::Binary) &&
-                (sensitivity.first->sense() != VariableSense::Selection)) {
-                return false;
+            if (coefficient != 1) {
+                structure.has_only_binary_coefficient = false;
             }
+
+            if ((variable_ptr->type() != VariableType::Binary) &&
+                (variable_ptr->type() != VariableType::Selection)) {
+                structure.has_only_binary_or_selection_variable = false;
+            }
+
+            if (variable_ptr->type() != VariableType::Integer) {
+                structure.has_only_integer_variable = false;
+            }
+
+            if (std::abs(coefficient) != 1) {
+                structure.has_only_plus_or_minus_one_coefficient = false;
+            }
+
+            if (coefficient == -m_constant_value) {
+                structure.has_bin_packing_variable = true;
+            }
+
+            structure.max_abs_coefficient =
+                std::max(structure.max_abs_coefficient, std::abs(coefficient));
+
+            if (coefficient == 1) {
+                structure.plus_one_coefficient_variable_ptrs.push_back(
+                    variable_ptr);
+                if (variable_ptr->type() == VariableType::Integer) {
+                    structure.plus_one_coefficient_integer_variable_ptrs
+                        .push_back(variable_ptr);
+                }
+            } else if (coefficient == -1) {
+                structure.minus_one_coefficient_variable_ptrs.push_back(
+                    variable_ptr);
+                if (variable_ptr->type() == VariableType::Integer) {
+                    structure.minus_one_coefficient_integer_variable_ptrs
+                        .push_back(variable_ptr);
+                }
+            }
+
+            if (coefficient == structure.number_of_mutable_variables - 1) {
+                structure.plus_n_minus_one_coefficient_integer_variable_ptrs
+                    .push_back(variable_ptr);
+            } else if (coefficient ==
+                       -(structure.number_of_mutable_variables - 1)) {
+                structure.minus_n_minus_one_coefficient_integer_variable_ptrs
+                    .push_back(variable_ptr);
+            }
+
+            if (coefficient > 0) {
+                structure.positive_coefficient_variable_ptrs.push_back(
+                    variable_ptr);
+            } else if (coefficient < 0) {
+                structure.negative_coefficient_variable_ptrs.push_back(
+                    variable_ptr);
+            }
+
+            structure.variable_ptrs.push_back(variable_ptr);
+            structure.coefficients.push_back(coefficient);
         }
-        return true;
+
+        return structure;
     }
 
     /*************************************************************************/

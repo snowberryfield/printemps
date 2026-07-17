@@ -148,22 +148,22 @@ TEST_F(TestObjective, evaluate_expression_arg_move) {
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_void) {
-    /// This method is tested in evaluate_expression_arg_void().
+    /// This test is covered by evaluate_expression_arg_void().
 }
 
 /*****************************************************************************/
 TEST_F(TestObjective, update_arg_move) {
-    /// This method is tested in evaluate_expression_arg_move().
+    /// This test is covered by evaluate_expression_arg_move().
 }
 
 /*****************************************************************************/
 TEST_F(TestObjective, expression) {
-    /// This method is tested in create_instance_arg_expression().
+    /// This test is covered by create_instance_arg_expression().
 }
 
 /*****************************************************************************/
 TEST_F(TestObjective, value) {
-    /// This method is tested in following tests:
+    /// This test is covered by following tests:
     /// - evaluate_expression_arg_void,
     /// - evaluate_expression_arg_move.
 }

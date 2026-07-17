@@ -55,7 +55,7 @@ class AbstractSolverController {
     /*************************************************************************/
     inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(
-            " -- Dual Bound: " +
+            " -- Dual bound: " +
                 utility::to_string(
                     m_global_state_ptr->incumbent_holder.dual_bound(), "%.5e"),
             a_IS_ENABLED_PRINT);
@@ -65,8 +65,8 @@ class AbstractSolverController {
     inline void update_variable_bounds(const double a_OBJECTIVE,
                                        const bool   a_IS_PRIMAL,
                                        const bool   a_IS_ENABLED_PRINT) {
-        m_model_ptr->update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
-                                            a_IS_ENABLED_PRINT);
+        m_model_ptr->updater().update_variable_bounds(a_OBJECTIVE, a_IS_PRIMAL,
+                                                      a_IS_ENABLED_PRINT);
     }
 
    public:

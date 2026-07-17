@@ -74,6 +74,17 @@ class Verifier {
     }
 
     /*************************************************************************/
+    inline void verify_and_correct(const bool a_IS_ENABLED_CORRECTION,
+                                   const bool a_IS_ENABLED_PRINT) {
+        this->verify_and_correct_selection_variables_initial_values(
+            a_IS_ENABLED_CORRECTION, a_IS_ENABLED_PRINT);
+        this->verify_and_correct_binary_variables_initial_values(
+            a_IS_ENABLED_CORRECTION, a_IS_ENABLED_PRINT);
+        this->verify_and_correct_integer_variables_initial_values(
+            a_IS_ENABLED_CORRECTION, a_IS_ENABLED_PRINT);
+    }
+
+    /*************************************************************************/
     inline void verify_and_correct_selection_variables_initial_values(
         const bool a_IS_ENABLED_CORRECTION, const bool a_IS_ENABLED_PRINT) {
         utility::print_single_line(a_IS_ENABLED_PRINT);
@@ -120,7 +131,7 @@ class Verifier {
             }
 
             /**
-             * Return logic error if there is an invalid fixed variable.
+             * Return runtime error if there is an invalid fixed variable.
              */
             if (fixed_invalid_variable_ptrs.size() > 0) {
                 throw std::runtime_error(utility::format_error_location(
@@ -129,7 +140,7 @@ class Verifier {
             }
 
             /**
-             * Return logic error if there are more than 1 fixed
+             * Return runtime error if there are more than 1 fixed
              * selected variables.
              */
             if (fixed_selected_variable_ptrs.size() > 1) {
@@ -139,7 +150,7 @@ class Verifier {
             }
 
             /**
-             * Correct initial values or return logic error if there is
+             * Correct initial values or return runtime error if there is
              * a variable of which initial value violates binary
              * constraint.
              */
@@ -194,7 +205,7 @@ class Verifier {
                 }
             }
             /**
-             * Correct initial values or return logic error if there are
+             * Correct initial values or return runtime error if there are
              * more than 1 selected variables.
              */
             else if (selected_variable_ptrs.size() > 1) {
@@ -268,7 +279,7 @@ class Verifier {
                 }
             }
             /**
-             * Correct initial values or return logic error if there is
+             * Correct initial values or return runtime error if there is
              * no selected variables.
              */
             else if (selected_variable_ptrs.size() == 0) {
@@ -351,7 +362,7 @@ class Verifier {
             a_IS_ENABLED_PRINT);
 
         for (auto &&variable_ptr :
-             m_model_ptr->variable_type_reference().binary_variable_ptrs) {
+             m_model_ptr->reference().variable_type.binary_variable_ptrs) {
             if (variable_ptr->value() == 0 || variable_ptr->value() == 1) {
                 continue;
             }
@@ -391,7 +402,7 @@ class Verifier {
             a_IS_ENABLED_PRINT);
 
         for (auto &&variable_ptr :
-             m_model_ptr->variable_type_reference().integer_variable_ptrs) {
+             m_model_ptr->reference().variable_type.integer_variable_ptrs) {
             if (variable_ptr->value() >= variable_ptr->lower_bound() &&
                 variable_ptr->value() <= variable_ptr->upper_bound()) {
                 continue;

@@ -33,7 +33,8 @@ class ConstantSumIntegersMoveGenerator
         /**
          * Convert constraint objects to BinomialConstraint objects.
          */
-        auto binomials = convert_to_binomial_constraints(constraint_ptrs);
+        auto binomials =
+            convert_to_binomial_constraints(constraint_ptrs, false);
 
         /**
          * Setup move objects.
@@ -50,34 +51,17 @@ class ConstantSumIntegersMoveGenerator
 
         for (auto i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
-            move.sense = MoveSense::ConstantSumIntegers;
-            move.alterations.emplace_back(binomials[i].variable_ptr_first, 0);
-            move.alterations.emplace_back(binomials[i].variable_ptr_second, 0);
+
+            move.associated_constraint_ptr = constraint_ptrs[i];
+            move.type                      = MoveType::ConstantSumIntegers;
+            move.alterations.emplace_back(binomials[i].variable_ptrs[0], 0);
+            move.alterations.emplace_back(binomials[i].variable_ptrs[1], 0);
             move.is_univariable_move          = false;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = true;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_first->related_constraint_ptrs()
-                    .end());
-
-            move.related_constraint_ptrs.insert(
-                move.related_constraint_ptrs.end(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .begin(),
-                binomials[i]
-                    .variable_ptr_second->related_constraint_ptrs()
-                    .end());
-
-            move.sort_and_unique_related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
 
             constant_values[i] =
                 constraint_ptrs[i]->expression().constant_value();
@@ -90,8 +74,8 @@ class ConstantSumIntegersMoveGenerator
          */
         auto move_updater =  //
             [binomials, constant_values, BINOMIALS_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
@@ -113,7 +97,7 @@ class ConstantSumIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() + 1;
+                            binomials[i].variable_ptrs[0]->value() + 1;
                         alterations[1].second =
                             -constant_values[i] - alterations[0].second;
                     }
@@ -122,7 +106,7 @@ class ConstantSumIntegersMoveGenerator
                         auto &alterations = (*a_moves_ptr)[index].alterations;
 
                         alterations[0].second =
-                            binomials[i].variable_ptr_first->value() - 1;
+                            binomials[i].variable_ptrs[0]->value() - 1;
                         alterations[1].second =
                             -constant_values[i] - alterations[0].second;
                     }
@@ -134,7 +118,14 @@ class ConstantSumIntegersMoveGenerator
     num_threads(a_NUMBER_OF_THREADS)
 #endif
                 for (auto i = 0; i < MOVES_SIZE; i++) {
+                    if (!(*a_moves_ptr)[i]
+                             .associated_constraint_ptr->is_feasible()) {
+                        (*a_flags)[i] = 0;
+                        continue;
+                    }
+
                     (*a_flags)[i] = 1;
+
                     if (!(*a_moves_ptr)[i].is_available) {
                         (*a_flags)[i] = 0;
                         continue;

@@ -39,7 +39,7 @@ class PDLPController {
     /*************************************************************************/
     inline void print_dual_bound(const bool a_IS_ENABLED_PRINT) {
         utility::print_info(
-            " -- Dual Bound: " +
+            " -- Dual bound: " +
                 utility::to_string(
                     m_global_state_ptr->incumbent_holder.dual_bound(), "%.5e"),
             a_IS_ENABLED_PRINT);
@@ -113,8 +113,8 @@ class PDLPController {
 
     /*************************************************************************/
     inline bool satisfy_solved_skip_condition(const bool a_IS_ENABLED_PRINT) {
-        if (this->m_model_ptr->variable_reference()
-                .mutable_variable_ptrs.size() == 0) {
+        if (this->m_model_ptr->reference()
+                .variable.mutable_variable_ptrs.size() == 0) {
             utility::print_warning(
                 "PDLP was skipped because the problem has already been solved.",
                 a_IS_ENABLED_PRINT);
@@ -203,9 +203,11 @@ class PDLPController {
         /**
          * Run the PDLP
          */
-        m_model_ptr->import_solution(m_initial_solution);
-        m_model_ptr->update();
-        auto lp_instance = m_model_ptr->export_lp_instance();
+        m_model_ptr->initial_solution_handler().import_solution(
+            m_initial_solution, true);
+        m_model_ptr->updater().update();
+        auto lp_instance =
+            m_model_ptr->linear_programming_handler().export_lp_instance();
 
         /**
          * Skip PDLP if the problem does not make sense.

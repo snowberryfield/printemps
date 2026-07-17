@@ -44,7 +44,7 @@ class GF2Solver {
         /**
          * Set up number of GF(2) equations.
          */
-        auto &    gf2s      = m_model_ptr->constraint_type_reference().gf2_ptrs;
+        auto     &gf2s      = m_model_ptr->reference().constraint_type.gf2_ptrs;
         const int GF2S_SIZE = gf2s.size();
 
         /**
@@ -147,7 +147,7 @@ class GF2Solver {
         }
 
         for (const auto &constraint_ptr : gf2s) {
-            auto & expression       = constraint_ptr->expression();
+            auto  &expression       = constraint_ptr->expression();
             auto   key_variable_ptr = constraint_ptr->key_variable_ptr();
             double value            = expression.constant_value();
             for (const auto &sensitivity : expression.sensitivities()) {

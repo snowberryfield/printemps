@@ -90,17 +90,17 @@ TEST_F(TestFixedSizeHashMap, setup) {
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, at) {
-    /// This method is tested in setup().
+    /// This test is covered by setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, shift_size) {
-    /// This method is tested in initialize() and setup().
+    /// This test is covered by initialize() and setup().
 }
 
 /*****************************************************************************/
 TEST_F(TestFixedSizeHashMap, bucket_size) {
-    /// This method is tested in initialize() and setup().
+    /// This test is covered by initialize() and setup().
 }
 }  // namespace
 /*****************************************************************************/

@@ -42,18 +42,23 @@ inline T max_abs(const std::vector<T, A> &a_ARRAY) {
 template <class T, class A>
 inline int argmin(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
-                          min_element(a_ARRAY.begin(), a_ARRAY.end())));
+                          std::min_element(a_ARRAY.begin(), a_ARRAY.end())));
 }
 
 /*****************************************************************************/
 template <class T, class A>
 inline int argmax(const std::vector<T, A> &a_ARRAY) {
     return (std::distance(a_ARRAY.begin(),
-                          max_element(a_ARRAY.begin(), a_ARRAY.end())));
+                          std::max_element(a_ARRAY.begin(), a_ARRAY.end())));
 }
 
 /*****************************************************************************/
 inline std::vector<int> sequence(const int a_MIN, const int a_MAX) {
+    if (a_MAX <= a_MIN) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "Invalid range: a_MAX must be greater than a_MIN."));
+    }
     std::vector<int> result(a_MAX - a_MIN);
     std::iota(result.begin(), result.end(), a_MIN);
     return result;
@@ -61,6 +66,11 @@ inline std::vector<int> sequence(const int a_MIN, const int a_MAX) {
 
 /*****************************************************************************/
 inline std::vector<int> sequence(const int a_MAX) {
+    if (a_MAX <= 0) {
+        throw std::logic_error(utility::format_error_location(
+            __FILE__, __LINE__, __func__,
+            "Invalid range: a_MAX must be greater than 0."));
+    }
     std::vector<int> result(a_MAX);
     std::iota(result.begin(), result.end(), 0);
     return result;

@@ -10,28 +10,43 @@ namespace printemps::utility {
 /*****************************************************************************/
 template <class T1, class T2>
 inline std::pair<std::vector<T1>, std::vector<T2>> to_vector_pair(
-    const std::unordered_map<T1, T2> &a_UNORDERED_MAP) {
+    const std::unordered_map<T1, T2>& a_UNORDERED_MAP) {
     std::vector<T1> result_T1;
     std::vector<T2> result_T2;
-    for (const auto &item : a_UNORDERED_MAP) {
-        result_T1.push_back(item.first);
-        result_T2.push_back(item.second);
+    result_T1.reserve(a_UNORDERED_MAP.size());
+    result_T2.reserve(a_UNORDERED_MAP.size());
+
+    for (const auto& [key, value] : a_UNORDERED_MAP) {
+        result_T1.push_back(key);
+        result_T2.push_back(value);
     }
-    return std::make_pair(result_T1, result_T2);
+    return {result_T1, result_T2};
 }
 
 /*****************************************************************************/
 template <class T1, class T2>
-inline T2 distance_l1(const std::unordered_map<T1, T2> &a_FIRST,
-                      const std::unordered_map<T1, T2> &a_SECOND) {
+inline std::vector<std::pair<T1, T2>> to_pair_vector(
+    const std::unordered_map<T1, T2>& a_UNORDERED_MAP) {
+    std::vector<std::pair<T1, T2>> pair_vector;
+    pair_vector.reserve(a_UNORDERED_MAP.size());
+    for (const auto& [key, value] : a_UNORDERED_MAP) {
+        pair_vector.emplace_back(key, value);
+    }
+    return pair_vector;
+}
+
+/*****************************************************************************/
+template <class T1, class T2>
+inline T2 distance_l1(const std::unordered_map<T1, T2>& a_FIRST,
+                      const std::unordered_map<T1, T2>& a_SECOND) {
     T2 result = static_cast<T2>(0);
 
     if (a_FIRST.size() < a_SECOND.size()) {
-        for (const auto &item : a_SECOND) {
+        for (const auto& item : a_SECOND) {
             result += std::abs(item.second);
         }
 
-        for (const auto &item : a_FIRST) {
+        for (const auto& item : a_FIRST) {
             const auto SHORTER_VALUE = item.second;
             if (a_SECOND.find(item.first) != a_SECOND.end()) {
                 const auto LONGER_VALUE = a_SECOND.at(item.first);
@@ -43,11 +58,11 @@ inline T2 distance_l1(const std::unordered_map<T1, T2> &a_FIRST,
         }
         return result;
     } else {
-        for (const auto &item : a_FIRST) {
+        for (const auto& item : a_FIRST) {
             result += std::abs(item.second);
         }
 
-        for (const auto &item : a_SECOND) {
+        for (const auto& item : a_SECOND) {
             const auto SHORTER_VALUE = item.second;
             if (a_FIRST.find(item.first) != a_FIRST.end()) {
                 const auto LONGER_VALUE = a_FIRST.at(item.first);
@@ -63,13 +78,13 @@ inline T2 distance_l1(const std::unordered_map<T1, T2> &a_FIRST,
 
 /*****************************************************************************/
 template <class T1, class T2>
-inline int distance_l0(const std::unordered_map<T1, T2> &a_FIRST,
-                       const std::unordered_map<T1, T2> &a_SECOND) {
+inline int distance_l0(const std::unordered_map<T1, T2>& a_FIRST,
+                       const std::unordered_map<T1, T2>& a_SECOND) {
     int result = 0;
 
     if (a_FIRST.size() < a_SECOND.size()) {
         result += a_SECOND.size();
-        for (const auto &item : a_FIRST) {
+        for (const auto& item : a_FIRST) {
             if (a_SECOND.find(item.first) == a_SECOND.end()) {
                 result++;
                 continue;
@@ -81,7 +96,7 @@ inline int distance_l0(const std::unordered_map<T1, T2> &a_FIRST,
         return result;
     } else {
         result += a_FIRST.size();
-        for (const auto &item : a_SECOND) {
+        for (const auto& item : a_SECOND) {
             if (a_FIRST.find(item.first) == a_FIRST.end()) {
                 result++;
                 continue;
@@ -93,7 +108,6 @@ inline int distance_l0(const std::unordered_map<T1, T2> &a_FIRST,
         return result;
     }
 }
-
 }  // namespace printemps::utility
 
 #endif

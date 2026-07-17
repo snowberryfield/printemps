@@ -26,10 +26,10 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     auto& x = model.create_variables("x", 2, -10, 10);
     auto& c = model.create_constraint("c", 2 * x[0] + 4 * x[1] == 10);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
-    auto aggregation_ptrs = model.constraint_type_reference().aggregation_ptrs;
+    auto aggregation_ptrs = model.reference().constraint_type.aggregation_ptrs;
 
     model.neighborhood().aggregation().setup(aggregation_ptrs);
     model.neighborhood().aggregation().update_moves(  //
@@ -40,6 +40,11 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(4, static_cast<int>(moves.size()));
     EXPECT_EQ(4, static_cast<int>(flags.size()));
 
+    EXPECT_EQ(&c[0], moves[0].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[1].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[2].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[3].associated_constraint_ptr);
+
     /// (x,y) = (0,0) -> (1,2)
     EXPECT_FALSE(moves[0].is_univariable_move);
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
@@ -47,7 +52,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[0].alterations.size()));
     EXPECT_EQ(1, moves[0].alterations[0].second);
     EXPECT_EQ(2, moves[0].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::Aggregation, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::Aggregation, moves[0].type);
     EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
                           moves[0].related_constraint_ptrs.end(),
                           &c[0]) != moves[0].related_constraint_ptrs.end());
@@ -59,7 +64,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[1].alterations.size()));
     EXPECT_EQ(-1, moves[1].alterations[0].second);
     EXPECT_EQ(3, moves[1].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::Aggregation, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::Aggregation, moves[1].type);
     EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
                           moves[1].related_constraint_ptrs.end(),
                           &c[0]) != moves[1].related_constraint_ptrs.end());
@@ -71,7 +76,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[2].alterations.size()));
     EXPECT_EQ(3, moves[2].alterations[0].second);
     EXPECT_EQ(1, moves[2].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::Aggregation, moves[2].sense);
+    EXPECT_EQ(neighborhood::MoveType::Aggregation, moves[2].type);
     EXPECT_TRUE(std::find(moves[2].related_constraint_ptrs.begin(),
                           moves[2].related_constraint_ptrs.end(),
                           &c[0]) != moves[2].related_constraint_ptrs.end());
@@ -83,7 +88,7 @@ TEST_F(TestAggregationMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves[3].alterations.size()));
     EXPECT_EQ(7, moves[3].alterations[0].second);
     EXPECT_EQ(-1, moves[3].alterations[1].second);
-    EXPECT_EQ(neighborhood::MoveSense::Aggregation, moves[3].sense);
+    EXPECT_EQ(neighborhood::MoveType::Aggregation, moves[3].type);
     EXPECT_TRUE(std::find(moves[3].related_constraint_ptrs.begin(),
                           moves[3].related_constraint_ptrs.end(),
                           &c[0]) != moves[3].related_constraint_ptrs.end());

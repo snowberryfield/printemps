@@ -54,7 +54,7 @@ class TabuSearchCoreStateManager {
         /**
          * Evaluate the initial solution score.
          */
-        m_state.current_solution_score  = m_model_ptr->evaluate({});
+        m_state.current_solution_score  = m_model_ptr->evaluator().evaluate({});
         m_state.previous_solution_score = m_state.current_solution_score;
         m_state.update_status =
             m_global_state_ptr->incumbent_holder.try_update_incumbent(
@@ -112,7 +112,7 @@ class TabuSearchCoreStateManager {
          */
         m_state.original_tabu_tenure =
             std::min(m_option.tabu_search.initial_tabu_tenure,
-                     m_model_ptr->number_of_mutable_variables());
+                     m_model_ptr->reference().number_of_mutable_variables());
         m_state.tabu_tenure = m_state.original_tabu_tenure;
 
         /**
@@ -430,9 +430,9 @@ class TabuSearchCoreStateManager {
                 if (m_state.intensity_increase_count >
                     m_option.tabu_search.intensity_increase_count_threshold) {
                     m_state.intensity_increase_count = 0;
-                    m_state.tabu_tenure =
-                        std::min(m_state.tabu_tenure + 1,
-                                 m_model_ptr->number_of_mutable_variables());
+                    m_state.tabu_tenure              = std::min(
+                        m_state.tabu_tenure + 1,
+                        m_model_ptr->reference().number_of_mutable_variables());
                     m_state.last_tabu_tenure_updated_iteration =
                         m_state.iteration;
                     utility::print_debug(

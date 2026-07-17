@@ -24,74 +24,21 @@ TEST_F(TestMove, constructor) {
     neighborhood::Move<int, double> move;
 
     EXPECT_TRUE(move.alterations.empty());
-    EXPECT_EQ(neighborhood::MoveSense::General, move.sense);
     EXPECT_TRUE(move.related_constraint_ptrs.empty());
+    EXPECT_EQ(nullptr, move.associated_constraint_ptr);
+    EXPECT_EQ(0, static_cast<int>(move.hash));
+    EXPECT_EQ(0.0, move.overlap_rate);
+
+    EXPECT_EQ(neighborhood::MoveType::General, move.type);
+    EXPECT_FALSE(move.is_selection_move);
     EXPECT_FALSE(move.is_univariable_move);
     EXPECT_FALSE(move.is_special_neighborhood_move);
     EXPECT_TRUE(move.is_available);
-    EXPECT_EQ(0, static_cast<int>(move.hash));
-    EXPECT_EQ(0.0, move.overlap_rate);
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, sense_label) {
-    neighborhood::Move<int, double> move;
-    move.sense = neighborhood::MoveSense::Binary;
-    EXPECT_EQ("Binary", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Integer;
-    EXPECT_EQ("Integer", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Selection;
-    EXPECT_EQ("Selection", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ExclusiveOr;
-    EXPECT_EQ("ExclusiveOr", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ExclusiveNor;
-    EXPECT_EQ("ExclusiveNor", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::InvertedIntegers;
-    EXPECT_EQ("InvertedIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::BalancedIntegers;
-    EXPECT_EQ("BalancedIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantSumIntegers;
-    EXPECT_EQ("ConstantSumIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantDifferenceIntegers;
-    EXPECT_EQ("ConstantDifferenceIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::ConstantRatioIntegers;
-    EXPECT_EQ("ConstantRatioIntegers", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Aggregation;
-    EXPECT_EQ("Aggregation", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Precedence;
-    EXPECT_EQ("Precedence", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::VariableBound;
-    EXPECT_EQ("VariableBound", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::SoftSelection;
-    EXPECT_EQ("SoftSelection", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::TrinomialExclusiveNor;
-    EXPECT_EQ("TrinomialExclusiveNor", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::Chain;
-    EXPECT_EQ("Chain", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::TwoFlip;
-    EXPECT_EQ("TwoFlip", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::UserDefined;
-    EXPECT_EQ("UserDefined", move.sense_label());
-
-    move.sense = neighborhood::MoveSense::General;
-    EXPECT_EQ("General", move.sense_label());
+TEST_F(TestMove, type_label) {
+    /// This test is covered by other methods.
 }
 
 /*****************************************************************************/
@@ -187,6 +134,34 @@ TEST_F(TestMove, has_objective_improvable_variable) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, has_objective_improvable_variable_with_value_check) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    variable_0.set_is_objective_improvable(false);
+    variable_1.set_is_objective_improvable(true);
+
+    /// The move does not have an objective improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 1;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_FALSE(move.has_objective_improvable_variable_with_value_check());
+    }
+
+    /// The move has an objective improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 0;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(move.has_objective_improvable_variable_with_value_check());
+    }
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, has_feasibility_improvable_variable) {
     auto variable_0 = model_component::Variable<int, double>::create_instance();
     auto variable_1 = model_component::Variable<int, double>::create_instance();
@@ -206,6 +181,36 @@ TEST_F(TestMove, has_feasibility_improvable_variable) {
         move.alterations.emplace_back(&variable_0, 1);
         move.alterations.emplace_back(&variable_1, 1);
         EXPECT_TRUE(move.has_feasibility_improvable_variable());
+    }
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, has_feasibility_improvable_variable_with_value_check) {
+    auto variable_0 = model_component::Variable<int, double>::create_instance();
+    auto variable_1 = model_component::Variable<int, double>::create_instance();
+    variable_0.set_is_feasibility_improvable(false);
+    variable_1.set_is_feasibility_improvable(true);
+
+    /// The move does not have a feasibility improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 1;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_FALSE(
+            move.has_feasibility_improvable_variable_with_value_check());
+    }
+
+    /// The move has a feasibility improvable variable.
+    {
+        neighborhood::Move<int, double> move;
+        variable_0 = 0;
+        variable_1 = 0;
+        move.alterations.emplace_back(&variable_0, 1);
+        move.alterations.emplace_back(&variable_1, 1);
+        EXPECT_TRUE(
+            move.has_feasibility_improvable_variable_with_value_check());
     }
 }
 
@@ -232,7 +237,7 @@ TEST_F(TestMove, has_duplicate_variable) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, compute_overlap_rate) {
+TEST_F(TestMove, setup_overlap_rate) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
     auto&                     g = model.create_constraints("g", 3);
@@ -241,9 +246,9 @@ TEST_F(TestMove, compute_overlap_rate) {
     g(1) = x(0) + x(1) + x(3) <= 1;
     g(2) = x(0) + x(2) + x(3) <= 1;
 
-    model.categorize_constraints();
-    model.setup_variable_related_constraints();
-    model.setup_variable_related_binary_coefficient_constraints();
+    model.reference().update_constraint_reference();
+    model.builder().setup_variable_constraint_sensitivities();
+    model.builder().setup_variable_related_constraint_ptrs();
 
     /// x(0) and x(1) have two common constraints.
     {
@@ -280,11 +285,11 @@ TEST_F(TestMove, compute_overlap_rate) {
 }
 
 /*****************************************************************************/
-TEST_F(TestMove, compute_hash) {
+TEST_F(TestMove, setup_hash) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
 
-    model.setup_structure();
+    model.builder().update_derived_components();
 
     /// Case 1
     {
@@ -339,6 +344,57 @@ TEST_F(TestMove, compute_hash) {
 }
 
 /*****************************************************************************/
+TEST_F(TestMove, setup_related_constraint_ptrs) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 3, 0, 1);
+    auto& g = model.create_constraints("g", 3);
+
+    g(0) = x(2) <= 1;
+    g(1) = x(1) + x(2) <= 1;
+    g(2) = x(0) + x(1) + x(2) <= 1;
+
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
+
+    neighborhood::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.alterations.emplace_back(&x(2), 1);
+
+    move.setup_related_constraint_ptrs();
+
+    EXPECT_EQ(3, static_cast<int>(move.related_constraint_ptrs.size()));
+    EXPECT_EQ(&g(0), move.related_constraint_ptrs[0]);
+    EXPECT_EQ(&g(1), move.related_constraint_ptrs[1]);
+    EXPECT_EQ(&g(2), move.related_constraint_ptrs[2]);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, related_variable_ptrs_vector) {
+    model::Model<int, double> model;
+
+    auto& x = model.create_variables("x", 3, 0, 1);
+
+    neighborhood::Move<int, double> move;
+    move.alterations.emplace_back(&x(0), 1);
+    move.alterations.emplace_back(&x(1), 1);
+    move.alterations.emplace_back(&x(2), 1);
+
+    auto related_variable_ptrs_vector = move.related_variable_ptrs_vector();
+
+    EXPECT_EQ(3, static_cast<int>(related_variable_ptrs_vector.size()));
+    EXPECT_EQ(&x(0), related_variable_ptrs_vector[0]);
+    EXPECT_EQ(&x(1), related_variable_ptrs_vector[1]);
+    EXPECT_EQ(&x(2), related_variable_ptrs_vector[2]);
+}
+
+/*****************************************************************************/
+TEST_F(TestMove, sort_and_unique_related_constraint_ptrs) {
+    /// This test is covered by setup_related_constraint_ptrs().
+}
+
+/*****************************************************************************/
 TEST_F(TestMove, operator_plus) {
     model::Model<int, double> model;
 
@@ -350,10 +406,10 @@ TEST_F(TestMove, operator_plus) {
     [[maybe_unused]] auto& h = model.create_constraint("h", y + z <= 10);
     [[maybe_unused]] auto& v = model.create_constraint("v", x + z <= 10);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
-    auto variable_ptrs = model.variable_reference().variable_ptrs;
+    auto variable_ptrs = model.reference().variable.variable_ptrs;
 
     /// Single moves.
     neighborhood::Move<int, double> move_x;
@@ -376,7 +432,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_FALSE(move_x_y.has_duplicate_variable());
     EXPECT_EQ(2, static_cast<int>(move_x_y.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y.alterations[0].first);
     EXPECT_EQ(1, move_x_y.alterations[0].second);
@@ -389,7 +445,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_FALSE(move_x_y_z.has_duplicate_variable());
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y_z.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z.alterations[0].second);
@@ -405,7 +461,7 @@ TEST_F(TestMove, operator_plus) {
     EXPECT_TRUE(move_x_y_z_z.has_duplicate_variable());
     EXPECT_EQ(4, static_cast<int>(move_x_y_z_z.alterations.size()));
     EXPECT_EQ(3, static_cast<int>(move_x_y_z_z.related_constraint_ptrs.size()));
-    EXPECT_EQ(neighborhood::MoveSense::Chain, move_x_y_z_z.sense);
+    EXPECT_EQ(neighborhood::MoveType::Chain, move_x_y_z_z.type);
 
     EXPECT_EQ(variable_ptrs[0], move_x_y_z_z.alterations[0].first);
     EXPECT_EQ(1, move_x_y_z_z.alterations[0].second);

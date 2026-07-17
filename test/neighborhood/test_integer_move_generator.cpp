@@ -31,11 +31,11 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     x(0).fix();
     x(9).fix();
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
     auto integer_variable_ptrs =
-        model.variable_type_reference().integer_variable_ptrs;
+        model.reference().variable_type.integer_variable_ptrs;
 
     model.neighborhood().integer().setup(integer_variable_ptrs);
     model.neighborhood().integer().update_moves(true, false, false, false, 1);
@@ -46,7 +46,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
     EXPECT_EQ(32, static_cast<int>(flags.size()));
 
     for (const auto& move : moves) {
-        EXPECT_EQ(neighborhood::MoveSense::Integer, move.sense);
+        EXPECT_EQ(neighborhood::MoveType::Integer, move.type);
         EXPECT_FALSE(move.alterations.front().first->is_fixed());
         EXPECT_EQ(1, static_cast<int>(move.alterations.size()));
         EXPECT_TRUE(move.is_univariable_move);

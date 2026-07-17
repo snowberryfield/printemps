@@ -102,13 +102,15 @@ class Standalone {
 
         if (EXTENSION == "mps") {
             m_mps.read_mps(m_argparser.instance_file_name);
-            m_model.import_mps(m_mps, m_argparser.accept_continuous_variables);
-        } else if (EXTENSION == "opb" || EXTENSION == "wbo") {
+            m_model.mps_handler().import(
+                m_mps, m_argparser.accept_continuous_variables);
+        } else if (EXTENSION == "opb" || EXTENSION == "wbo" ||
+                   EXTENSION == "pb") {
             m_opb.read_opb(m_argparser.instance_file_name);
-            m_model.import_opb(m_opb);
+            m_model.opb_handler().import(m_opb);
         } else if (EXTENSION == "wcnf") {
             m_wcnf.read_wcnf(m_argparser.instance_file_name);
-            m_model.import_wcnf(m_wcnf);
+            m_model.wcnf_handler().import(m_wcnf);
         } else {
             throw std::runtime_error(printemps::utility::format_error_location(
                 __FILE__, __LINE__, __func__,
@@ -161,7 +163,8 @@ class Standalone {
         if (!m_argparser.mutable_variable_file_name.empty()) {
             const auto MUTABLE_VARIABLE_NAMES = printemps::helper::read_names(
                 m_argparser.mutable_variable_file_name);
-            m_model.unfix_variables(MUTABLE_VARIABLE_NAMES);
+            m_model.initial_solution_handler().unfix_variables(
+                MUTABLE_VARIABLE_NAMES);
         }
 
         /**
@@ -169,10 +172,14 @@ class Standalone {
          * be fixed at the specified values.
          */
         if (!m_argparser.fixed_variable_file_name.empty()) {
-            const auto FIXED_VARIABLES_AND_VALUES =
+            auto fixed_variables_and_values =
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
-            m_model.fix_variables(FIXED_VARIABLES_AND_VALUES);
+            if (EXTENSION == "opb" || EXTENSION == "wbo" || EXTENSION == "pb") {
+                m_opb.augment_solution(&fixed_variables_and_values);
+            }
+            m_model.initial_solution_handler().fix_variables(
+                fixed_variables_and_values);
         }
 
         /**
@@ -183,7 +190,7 @@ class Standalone {
             const auto SELECTION_CONSTRAINT_NAMES =
                 printemps::helper::read_names(
                     m_argparser.selection_constraint_file_name);
-            m_model.set_user_defined_selection_constraints(
+            m_model.builder().setup_user_defined_selection_constraints(
                 SELECTION_CONSTRAINT_NAMES);
         }
 
@@ -195,7 +202,8 @@ class Standalone {
             const auto VARIABLE_NAME_PAIRS = printemps::helper::read_name_pairs(
                 m_argparser.flippable_variable_pair_file_name);
             m_option.neighborhood.is_enabled_two_flip_move = true;
-            m_model.setup_flippable_variable_ptr_pairs(VARIABLE_NAME_PAIRS);
+            m_model.builder().setup_flippable_variable_ptr_pairs(
+                VARIABLE_NAME_PAIRS);
         }
 
         /**
@@ -204,12 +212,13 @@ class Standalone {
          * values will be used.
          */
         if (!m_argparser.initial_solution_file_name.empty()) {
-            auto INITIAL_SOLUTION = printemps::helper::read_names_and_values(
+            auto initial_solution = printemps::helper::read_names_and_values(
                 m_argparser.initial_solution_file_name);
             if (EXTENSION == "opb" || EXTENSION == "wbo") {
-                m_opb.augment_solution(INITIAL_SOLUTION);
+                m_opb.augment_solution(&initial_solution);
             }
-            m_model.import_solution(INITIAL_SOLUTION);
+            m_model.initial_solution_handler().import_solution(initial_solution,
+                                                               false);
         }
 
         signal(SIGINT, interrupt_handler);
@@ -261,7 +270,7 @@ class Standalone {
         }
 
         if (m_argparser.export_json_instance) {
-            m_model.write_json(m_model.name() + ".json");
+            m_model.json_handler().write(m_model.name() + ".json");
         }
     }
 
@@ -275,7 +284,7 @@ class Standalone {
 
         printemps::preprocess::IPFlippableVariablePairExtractor extractor(
             solver.model_ptr());
-        extractor.extract_pairs(
+        extractor.run(
             m_argparser.minimum_common_element,
             m_option.output.verbose >= printemps::option::verbose::Outer);
         extractor.write_pairs("flip.txt");

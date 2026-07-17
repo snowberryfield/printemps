@@ -25,7 +25,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_00.json");
+        option.setup("./dat/option/option_00.json");
 
         /// general
         EXPECT_EQ(  //
@@ -60,6 +60,10 @@ TEST_F(TestOption, setup) {
         EXPECT_FLOAT_EQ(  //
             0.1,          //
             option.penalty.penalty_coefficient_tightening_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.penalty.penalty_coefficient_pullback_rate);
 
         EXPECT_FLOAT_EQ(  //
             0.1,          //
@@ -110,7 +114,6 @@ TEST_F(TestOption, setup) {
             option.penalty.is_enabled_shrink_penalty_coefficient);
 
         /// parallel
-
         EXPECT_EQ(  //
             false,  //
             option.parallel.is_enabled_move_update_parallelization);
@@ -146,6 +149,10 @@ TEST_F(TestOption, setup) {
 
         EXPECT_EQ(  //
             false,  //
+            option.preprocess.is_enabled_remove_implicit_fixed_variables);
+
+        EXPECT_EQ(  //
+            false,  //
             option.preprocess.is_enabled_remove_redundant_set_variables);
 
         EXPECT_EQ(  //
@@ -163,6 +170,9 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             false,  //
             option.preprocess.is_enabled_initial_value_correction);
+
+        EXPECT_EQ(  //
+            false, option.preprocess.is_enabled_partial_feasible_enumeration);
 
         EXPECT_EQ(  //
             false,  //
@@ -196,7 +206,20 @@ TEST_F(TestOption, setup) {
                 .is_enabled_extract_dependent_constant_ratio_integers);
 
         EXPECT_EQ(  //
+            false, option.preprocess
+                       .is_enabled_extract_dependent_trinomial_exclusive_nor);
+
+        EXPECT_EQ(  //
+            false,
+            option.preprocess.is_enabled_extract_dependent_all_or_nothing);
+
+        EXPECT_EQ(  //
             false, option.preprocess.is_enabled_extract_dependent_intermediate);
+
+        EXPECT_EQ(  //
+            false,
+            option.preprocess
+                .is_enabled_extract_dependent_using_partial_feasible_enumeration);
 
         /// neighborhood
         EXPECT_EQ(  //
@@ -240,15 +263,19 @@ TEST_F(TestOption, setup) {
             option.neighborhood.is_enabled_aggregation_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_precedence_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
             option.neighborhood.is_enabled_variable_bound_move);
 
         EXPECT_EQ(  //
-            true,   //
+            false,  //
+            option.neighborhood.is_enabled_trinomial_exclusive_nor_move);
+
+        EXPECT_EQ(  //
+            false,  //
             option.neighborhood.is_enabled_soft_selection_move);
 
         EXPECT_EQ(  //
@@ -258,6 +285,10 @@ TEST_F(TestOption, setup) {
         EXPECT_EQ(  //
             true,   //
             option.neighborhood.is_enabled_two_flip_move);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.neighborhood.is_enabled_partial_feasible_enumeration_move);
 
         EXPECT_EQ(  //
             1,      //
@@ -504,10 +535,6 @@ TEST_F(TestOption, setup) {
             true,   //
             option.tabu_search.is_enabled_move_curtail);
 
-        EXPECT_EQ(  //
-            false,  //
-            option.tabu_search.is_enabled_automatic_break);
-
         EXPECT_EQ(
             false,
             option.tabu_search.is_enabled_automatic_tabu_tenure_adjustment);
@@ -551,7 +578,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_01.json");
+        option.setup("./dat/option/option_01.json");
 
         /// restart
         EXPECT_EQ(                 //
@@ -581,7 +608,7 @@ TEST_F(TestOption, setup) {
 
     {
         Option option;
-        option.setup("./test/dat/option/option_02.json");
+        option.setup("./dat/option/option_02.json");
 
         /// restart
         EXPECT_EQ(                //
@@ -615,7 +642,7 @@ TEST_F(TestOption, to_json) {
     using namespace printemps::option;
 
     Option option;
-    option.setup("./test/dat/option/option_00.json");
+    option.setup("./dat/option/option_00.json");
     auto obj = option.to_json();
 
     auto to_int    = [](auto v) { return std::any_cast<int>(v); };
@@ -711,6 +738,10 @@ TEST_F(TestOption, to_json) {
 
     EXPECT_EQ(  //
         false,  //
+        to_bool(preprocess.at("is_enabled_remove_implicit_fixed_variables")));
+
+    EXPECT_EQ(  //
+        false,  //
         to_bool(preprocess.at("is_enabled_remove_redundant_set_variables")));
 
     EXPECT_EQ(  //
@@ -765,7 +796,20 @@ TEST_F(TestOption, to_json) {
 
     EXPECT_EQ(  //
         false,  //
+        to_bool(preprocess.at(
+            "is_enabled_extract_dependent_trinomial_exclusive_nor")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(preprocess.at("is_enabled_extract_dependent_all_or_nothing")));
+
+    EXPECT_EQ(  //
+        false,  //
         to_bool(preprocess.at("is_enabled_extract_dependent_intermediate")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(preprocess.at("is_enabled_partial_feasible_enumeration")));
 
     /// neighborhood
     auto neighborhood =
@@ -813,15 +857,19 @@ TEST_F(TestOption, to_json) {
         to_bool(neighborhood.at("is_enabled_aggregation_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(neighborhood.at("is_enabled_precedence_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
         to_bool(neighborhood.at("is_enabled_variable_bound_move")));
 
     EXPECT_EQ(  //
-        true,   //
+        false,  //
+        to_bool(neighborhood.at("is_enabled_trinomial_exclusive_nor_move")));
+
+    EXPECT_EQ(  //
+        false,  //
         to_bool(neighborhood.at("is_enabled_soft_selection_move")));
 
     EXPECT_EQ(  //
@@ -831,6 +879,11 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         true,   //
         to_bool(neighborhood.at("is_enabled_two_flip_move")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(
+            neighborhood.at("is_enabled_partial_feasible_enumeration_move")));
 
     EXPECT_EQ(  //
         1,      //
@@ -994,10 +1047,6 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         true,   //
         to_bool(tabu_search.at("is_enabled_move_curtail")));
-
-    EXPECT_EQ(  //
-        false,  //
-        to_bool(tabu_search.at("is_enabled_automatic_break")));
 
     EXPECT_EQ(  //
         false,  //

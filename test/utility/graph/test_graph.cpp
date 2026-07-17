@@ -176,12 +176,12 @@ TEST_F(TestGraph, minimum_spanning_tree) {
 
 /*****************************************************************************/
 TEST_F(TestGraph, nodes) {
-    /// This method is tested in other cases.
+    /// This test is covered by other cases.
 }
 
 /*****************************************************************************/
 TEST_F(TestGraph, edges) {
-    /// This method is tested in other cases.
+    /// This test is covered by other cases.
 }
 
 }  // namespace

@@ -38,8 +38,46 @@ class BidirectionalMap {
 
     /*************************************************************************/
     inline void insert(const T1 &a_FIRST, const T2 &a_SECOND) {
+        if (m_forward.count(a_FIRST)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Key already exists in forward map"));
+        }
+        if (m_reverse.count(a_SECOND)) {
+            throw std::logic_error(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "Value already exists in reverse map"));
+        }
         m_forward[a_FIRST]  = a_SECOND;
         m_reverse[a_SECOND] = a_FIRST;
+    }
+
+    /*************************************************************************/
+    inline void erase_by_first(const T1 &a_KEY) {
+        auto it = m_forward.find(a_KEY);
+        if (it != m_forward.end()) {
+            m_reverse.erase(it->second);
+            m_forward.erase(it);
+        }
+    }
+
+    /*************************************************************************/
+    inline void erase_by_second(const T2 &a_VALUE) {
+        auto it = m_reverse.find(a_VALUE);
+        if (it != m_reverse.end()) {
+            m_forward.erase(it->second);
+            m_reverse.erase(it);
+        }
+    }
+
+    /*************************************************************************/
+    inline bool contains_first(const T1 &a_KEY) const {
+        return m_forward.count(a_KEY) > 0;
+    }
+
+    /*************************************************************************/
+    inline bool contains_second(const T2 &a_VALUE) const {
+        return m_reverse.count(a_VALUE) > 0;
     }
 
     /*************************************************************************/

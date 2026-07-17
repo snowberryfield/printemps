@@ -19,7 +19,7 @@ int main(const int argc, const char *argv[]) {
         return printemps::extra::maxsat_evaluation::MaxSATEvaluationSolver(
                    argc, argv)
             .run();
-    } catch (const printemps::model::InfeasibleError &e) {
+    } catch (const printemps::error_handler::InfeasibleError &e) {
         print_comment_lines(e.what());
         std::cout << "s UNSATISFIABLE" << std::endl;
         return 20;

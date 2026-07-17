@@ -12,6 +12,12 @@ template <class T_Variable, class T_Expression>
 class Model;
 }  // namespace printemps::model
 
+namespace printemps::model_handler {
+/*****************************************************************************/
+template <class T_Variable, class T_Expression>
+class ModelStateInspector;
+}  // namespace printemps::model_handler
+
 #include "sparse_solution.h"
 #include "dense_solution.h"
 #include "named_solution.h"

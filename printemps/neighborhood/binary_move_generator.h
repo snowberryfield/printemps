@@ -50,16 +50,16 @@ class BinaryMoveGenerator
 
         for (auto i = 0; i < VARIABLES_SIZE; i++) {
             auto &move = this->m_moves[i];
-            move.sense = MoveSense::Binary;
+
+            move.associated_constraint_ptr = nullptr;
+            move.type                      = MoveType::Binary;
             move.alterations.emplace_back(mutable_variable_ptrs[i], 0);
             move.is_univariable_move          = true;
             move.is_selection_move            = false;
             move.is_special_neighborhood_move = false;
             move.is_available                 = true;
             move.overlap_rate                 = 0.0;
-
-            move.related_constraint_ptrs =
-                mutable_variable_ptrs[i]->related_constraint_ptrs();
+            move.setup_related_constraint_ptrs();
         }
 
         /**
@@ -67,8 +67,8 @@ class BinaryMoveGenerator
          */
         auto move_updater =  //
             [mutable_variable_ptrs, VARIABLES_SIZE](
-                auto *     a_moves_ptr,                      //
-                auto *     a_flags,                          //
+                auto      *a_moves_ptr,                      //
+                auto      *a_flags,                          //
                 const bool a_ACCEPT_ALL,                     //
                 const bool a_ACCEPT_OBJECTIVE_IMPROVABLE,    //
                 const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //

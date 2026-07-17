@@ -56,12 +56,12 @@ TEST_F(TestNode, initialize) {
 
 /*****************************************************************************/
 TEST_F(TestNode, setup_with_arg_1) {
-    /// This method is tested in constructor_with_arg_1()
+    /// This test is covered by constructor_with_arg_1()
 }
 
 /*****************************************************************************/
 TEST_F(TestNode, setup_with_arg_2) {
-    /// This method is tested in constructor_with_arg_2()
+    /// This test is covered by constructor_with_arg_2()
 }
 }  // namespace
 /*****************************************************************************/

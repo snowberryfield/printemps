@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestTrinomialExclusiveNorMoveGenerator : public ::testing::Test {
+class TestTrinomialExclusiveNORMoveGenerator : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,17 +20,17 @@ class TestTrinomialExclusiveNorMoveGenerator : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
+TEST_F(TestTrinomialExclusiveNORMoveGenerator, setup) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
     auto& c = model.create_constraint("c", x[0] + x[1] == 2 * x[2]);
 
-    model.setup_unique_names();
-    model.setup_structure();
+    model.builder().setup_unique_names();
+    model.builder().update_derived_components();
 
     auto& trinomial_exclusive_nor_ptrs =
-        model.constraint_type_reference().trinomial_exclusive_nor_ptrs;
+        model.reference().constraint_type.trinomial_exclusive_nor_ptrs;
 
     model.neighborhood().trinomial_exclusive_nor().setup(
         trinomial_exclusive_nor_ptrs);
@@ -42,6 +42,9 @@ TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
     EXPECT_EQ(2, static_cast<int>(moves.size()));
     EXPECT_EQ(2, static_cast<int>(flags.size()));
 
+    EXPECT_EQ(&c[0], moves[0].associated_constraint_ptr);
+    EXPECT_EQ(&c[0], moves[1].associated_constraint_ptr);
+
     /// (x0,x1,x2) = (0,0,0)
     EXPECT_FALSE(moves[0].is_univariable_move);
     EXPECT_TRUE(moves[0].is_special_neighborhood_move);
@@ -50,7 +53,7 @@ TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
     EXPECT_EQ(0, moves[0].alterations[0].second);
     EXPECT_EQ(0, moves[0].alterations[1].second);
     EXPECT_EQ(0, moves[0].alterations[2].second);
-    EXPECT_EQ(neighborhood::MoveSense::TrinomialExclusiveNor, moves[0].sense);
+    EXPECT_EQ(neighborhood::MoveType::TrinomialExclusiveNOR, moves[0].type);
     EXPECT_TRUE(std::find(moves[0].related_constraint_ptrs.begin(),
                           moves[0].related_constraint_ptrs.end(),
                           &c[0]) != moves[0].related_constraint_ptrs.end());
@@ -62,7 +65,7 @@ TEST_F(TestTrinomialExclusiveNorMoveGenerator, setup) {
     EXPECT_EQ(1, moves[1].alterations[0].second);
     EXPECT_EQ(1, moves[1].alterations[1].second);
     EXPECT_EQ(1, moves[1].alterations[2].second);
-    EXPECT_EQ(neighborhood::MoveSense::TrinomialExclusiveNor, moves[1].sense);
+    EXPECT_EQ(neighborhood::MoveType::TrinomialExclusiveNOR, moves[1].type);
     EXPECT_TRUE(std::find(moves[1].related_constraint_ptrs.begin(),
                           moves[1].related_constraint_ptrs.end(),
                           &c[0]) != moves[1].related_constraint_ptrs.end());

@@ -77,8 +77,8 @@ TEST_F(TestDenseSolution, distance) {
     solution_1.variable_value_proxies.front().values(1, 0) = 5;
     solution_1.variable_value_proxies.front().values(1, 1) = 4;
 
-    EXPECT_EQ(2, solution_0.distance(solution_1));
-    EXPECT_EQ(2, solution_1.distance(solution_0));
+    EXPECT_EQ(3, solution_0.distance(solution_1));
+    EXPECT_EQ(3, solution_1.distance(solution_0));
 }
 
 /*****************************************************************************/

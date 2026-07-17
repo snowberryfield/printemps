@@ -48,7 +48,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
 
     /*************************************************************************/
     /// Copy assignment
-    VariableProxy<T_Variable, T_Expression> &operator    =(
+    VariableProxy<T_Variable, T_Expression> &operator=(
         const VariableProxy<T_Variable, T_Expression> &) = delete;
 
     /*************************************************************************/
@@ -272,13 +272,13 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline VariableSense sense(void) const {
+    inline VariableType type(void) const {
         if (this->number_of_elements() != 1) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of elements is not one."));
         }
-        return m_variables[0].sense();
+        return m_variables[0].type();
     }
 
     /*************************************************************************/
@@ -302,14 +302,14 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     }
 
     /*************************************************************************/
-    inline std::vector<Variable<T_Variable, T_Expression>>
-        &flat_indexed_variables(void) {
+    inline std::vector<Variable<T_Variable, T_Expression>> &
+    flat_indexed_variables(void) {
         return m_variables;
     }
 
     /*************************************************************************/
-    inline const std::vector<Variable<T_Variable, T_Expression>>
-        &flat_indexed_variables(void) const {
+    inline const std::vector<Variable<T_Variable, T_Expression>> &
+    flat_indexed_variables(void) const {
         return m_variables;
     }
 
@@ -448,7 +448,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
     template <class T_Array>
     inline Expression<T_Variable, T_Expression> dot(
         const std::vector<int> &a_MULTI_DIMENSIONAL_INDEX,
-        const T_Array &         a_COEFFICIENTS) {
+        const T_Array          &a_COEFFICIENTS) {
         const int MULTI_DIMENSIONAL_INDEX_SIZE =
             a_MULTI_DIMENSIONAL_INDEX.size();
         if (this->number_of_dimensions() != MULTI_DIMENSIONAL_INDEX_SIZE) {

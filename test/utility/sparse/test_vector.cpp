@@ -54,7 +54,7 @@ TEST_F(TestSparseVector, setup) {
 
 /*****************************************************************************/
 TEST_F(TestSparseVector, operator_square_bracket) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/
@@ -115,7 +115,7 @@ TEST_F(TestSparseVector, norm_with_arg) {
 
 /*****************************************************************************/
 TEST_F(TestSparseVector, size) {
-    /// This method is tested in constructor_with_arg().
+    /// This test is covered by constructor_with_arg().
 }
 
 /*****************************************************************************/
