@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "printemps"
-version = "2.8.0"
+version = "2.9.0"
 description = "Python bindings for the printemps integer linear programming solver"
 readme = "README.md"
 requires-python = ">=3.9"

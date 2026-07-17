@@ -24,5 +24,5 @@ Please refer to the [project page](https://snowberryfield.github.io/printemps/) 
 ```
 
 ## Contributors
-- Yuji KOGUMA
-- Masahiro Sakai
+- Yuji Koguma ([@snowberryfield](https://github.com/snowberryfield))
+- Masahiro Sakai ([@msakai](https://github.com/msakai))
