@@ -24,13 +24,25 @@ class MaxSATEvaluationSolver {
     utility::TimeKeeper             m_time_keeper;
 
     /**
-     * Best feasible objective value emitted so far. Initialized to +infinity
-     * so that the first feasible incumbent always passes the improvement
-     * check. The callback runs serially from the solver thread, so no mutex
-     * is required.
+     * Best model objective processed so far, used only as a cheap pre-gate:
+     * the incumbent holder replaces its feasible incumbent solely on a strict
+     * model-objective improvement, so when this value has not decreased the
+     * held solution (and therefore its true cost) is unchanged and we can skip
+     * recomputation. Initialized to +infinity so the first feasible incumbent
+     * always passes. The callback runs serially from the solver thread, so no
+     * mutex is required.
      */
-    double m_best_objective;
-    bool   m_have_emitted_solution;
+    double m_best_model_objective;
+
+    /**
+     * Best *true* soft-clause cost emitted so far, recomputed directly from the
+     * printed variable assignment (see exact_cost). Emission is gated on this
+     * value so the streamed o-lines are strictly decreasing and each o-line
+     * matches the cost of its own v-line. Initialized to the maximum uint64_t.
+     */
+    uint64_t m_best_cost;
+
+    bool m_have_emitted_solution;
 
    public:
     /*************************************************************************/
@@ -52,7 +64,8 @@ class MaxSATEvaluationSolver {
         m_option.initialize();
         m_time_keeper.initialize();
 
-        m_best_objective        = std::numeric_limits<double>::infinity();
+        m_best_model_objective  = std::numeric_limits<double>::infinity();
+        m_best_cost             = std::numeric_limits<uint64_t>::max();
         m_have_emitted_solution = false;
     }
 
@@ -118,37 +131,93 @@ class MaxSATEvaluationSolver {
         if (!HOLDER.is_found_feasible_solution()) {
             return;
         }
-        const double CURRENT = HOLDER.feasible_incumbent_objective();
-        if (CURRENT + constant::EPSILON >= m_best_objective) {
+
+        /**
+         * Cheap pre-gate: skip unless the model objective strictly improved,
+         * because the incumbent holder only swaps in a new feasible solution on
+         * a strict improvement, so otherwise the assignment is unchanged.
+         */
+        const double MODEL_OBJECTIVE = HOLDER.feasible_incumbent_objective();
+        if (MODEL_OBJECTIVE + constant::EPSILON >= m_best_model_objective) {
             return;
         }
-        m_best_objective = CURRENT;
-        emit_solution(HOLDER.feasible_incumbent_solution());
+        m_best_model_objective = MODEL_OBJECTIVE;
+
+        /**
+         * Recompute the true cost from the assignment itself. The model's
+         * objective is built on the soft-clause slack variables, which the
+         * metaheuristic may leave at 1 even when the clause is actually
+         * satisfied, so the model objective can overestimate the true cost.
+         * Emit only when the true cost strictly improves so that the streamed
+         * o-lines stay strictly decreasing.
+         */
+        const auto    &SOLUTION = HOLDER.feasible_incumbent_solution();
+        const uint64_t COST     = exact_cost(SOLUTION);
+        if (COST >= m_best_cost) {
+            return;
+        }
+        m_best_cost = COST;
+        emit_solution(SOLUTION, COST);
     }
 
     /*************************************************************************/
     /**
-     * Recompute the soft-clause cost exactly in uint64_t from the original
-     * WCNF weights and the per-clause violation flags carried by the
-     * "soft_slacks" proxy. The model's internal objective is accumulated in
-     * double, so for weight sums exceeding 2^53 the double value loses lower
-     * bits and the printed `o`-line would drift from the true integer cost
-     * (and for sums approaching 2^63, the long-long cast itself would be UB).
-     * Computing here from the uint64_t weights avoids both problems.
+     * Recompute the soft-clause cost exactly in uint64_t directly from the
+     * variable assignment: sum the weights of the soft clauses that the given
+     * assignment fails to satisfy.
+     *
+     * This must not be derived from the "soft_slacks" proxy. Each soft clause
+     * is modelled as `... + s >= 1 - |N|`, so the slack s is free to be 1 even
+     * when the clause is already satisfied by the x-variables; the
+     * metaheuristic frequently leaves such slacks at 1, which made the old
+     * slack-based `o`-line overestimate the true cost and disagree with the
+     * printed `v`-line (MSE's verifier reports "VERIFIED NOT_MATCHED").
+     * Evaluating the clauses themselves yields exactly what the verifier
+     * computes. Accumulating in uint64_t also avoids the double-precision loss
+     * that would occur for weight sums exceeding 2^53.
+     *
+     * @param a_VALUES 0-based variable assignment; index i holds x_{i+1}.
      */
-    inline uint64_t exact_cost(const std::vector<int> &a_SLACKS) const {
-        const size_t N = m_wcnf.soft_clauses.size();
-        uint64_t cost = 0;
-        for (size_t i = 0; i < N && i < a_SLACKS.size(); ++i) {
-            if (a_SLACKS[i] != 0) {
-                cost += m_wcnf.soft_clauses[i].weight;
+    inline uint64_t exact_cost(const std::vector<int> &a_VALUES) const {
+        const int N    = static_cast<int>(a_VALUES.size());
+        uint64_t  cost = 0;
+        for (const auto &CLAUSE : m_wcnf.soft_clauses) {
+            bool satisfied = false;
+            for (const auto literal : CLAUSE.literals) {
+                const int  VAR_INDEX = std::abs(literal);  // 1-based
+                const bool VALUE     = (VAR_INDEX >= 1 && VAR_INDEX <= N) &&
+                                   (a_VALUES[VAR_INDEX - 1] != 0);
+                if ((literal > 0 && VALUE) || (literal < 0 && !VALUE)) {
+                    satisfied = true;
+                    break;
+                }
+            }
+            if (!satisfied) {
+                cost += CLAUSE.weight;
             }
         }
         return cost;
     }
 
     /*************************************************************************/
-    inline void emit_solution(const solution::IPDenseSolution &a_SOLUTION) {
+    /**
+     * Convenience overload that reads the x-variable assignment from the first
+     * ("variables") proxy of a dense incumbent solution. The soft-clause slack
+     * proxies follow it and are deliberately ignored (see exact_cost above).
+     */
+    inline uint64_t exact_cost(
+        const solution::IPDenseSolution &a_SOLUTION) const {
+        static const std::vector<int> EMPTY;
+        if (a_SOLUTION.variable_value_proxies.empty()) {
+            return exact_cost(EMPTY);
+        }
+        return exact_cost(
+            a_SOLUTION.variable_value_proxies.front().flat_indexed_values());
+    }
+
+    /*************************************************************************/
+    inline void emit_solution(const solution::IPDenseSolution &a_SOLUTION,
+                              const uint64_t                   a_COST) {
         /**
          * The first variable proxy named "variables" holds x_1..x_n in
          * 1-indexed order; the soft-clause slacks live in subsequent proxies
@@ -165,16 +234,7 @@ class MaxSATEvaluationSolver {
             }
         }
 
-        /**
-         * In import_wcnf the "variables" proxy is created first and
-         * "soft_slacks" immediately after, so the slacks live at index 1.
-         */
-        const uint64_t COST =
-            a_SOLUTION.variable_value_proxies.size() >= 2
-                ? exact_cost(a_SOLUTION.variable_value_proxies[1]
-                                 .flat_indexed_values())
-                : 0;
-        std::cout << "o " << COST << "\n";
+        std::cout << "o " << a_COST << "\n";
         std::cout << "v " << v_line << std::endl;
 
         m_have_emitted_solution = true;
@@ -196,19 +256,17 @@ class MaxSATEvaluationSolver {
          */
         const auto &SOLUTION = RESULT.solution;
         if (SOLUTION.is_feasible()) {
-            const double FINAL_COST = static_cast<double>(SOLUTION.objective());
-            if (FINAL_COST + constant::EPSILON < m_best_objective) {
-                m_best_objective = FINAL_COST;
+            const auto &VALUES =
+                SOLUTION.variables("variables").flat_indexed_values();
+            const uint64_t COST = exact_cost(VALUES);
+            if (COST < m_best_cost) {
+                m_best_cost = COST;
                 std::string v_line;
-                const auto &PROXY  = SOLUTION.variables("variables");
-                const auto &VALUES = PROXY.flat_indexed_values();
-                const int   N      = static_cast<int>(VALUES.size());
+                const int   N = static_cast<int>(VALUES.size());
                 v_line.reserve(N);
                 for (auto i = 0; i < N; i++) {
                     v_line.push_back(VALUES[i] != 0 ? '1' : '0');
                 }
-                const uint64_t COST = exact_cost(
-                    SOLUTION.variables("soft_slacks").flat_indexed_values());
                 std::cout << "o " << COST << "\n";
                 std::cout << "v " << v_line << std::endl;
                 m_have_emitted_solution = true;
