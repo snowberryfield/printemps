@@ -153,6 +153,9 @@ jobs:
       - name: Build wheels using cibuildwheel
         run: |
           python -m cibuildwheel --output-dir wheelhouse python
+        env:
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest {project}/python/tests
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
