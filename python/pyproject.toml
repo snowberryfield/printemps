@@ -45,6 +45,7 @@ sdist.include = ["_vendor/printemps/**"]
 
 [tool.scikit-build.cmake.define]
 CMAKE_POSITION_INDEPENDENT_CODE = "ON"
+CPU_ARCH = "none"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

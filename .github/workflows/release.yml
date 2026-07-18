@@ -16,41 +16,85 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact_name: printemps-linux
+            os_name: linux
           - os: macos-latest
-            artifact_name: printemps-macos
+            os_name: macos
           - os: windows-latest
-            artifact_name: printemps-windows.exe
+            os_name: windows
     steps:
       - uses: actions/checkout@v6
 
       - name: Configure CMake
+        shell: bash
         run: |
           mkdir build_app
-          cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR=${{ github.workspace }} -DCPU_ARCH=none
+          if [ "${{ matrix.os }}" = "macos-latest" ]; then
+            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR=${{ github.workspace }} -DCPU_ARCH=none -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          else
+            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR=${{ github.workspace }} -DCPU_ARCH=none
+          fi
 
       - name: Build
         run: cmake --build build_app --config Release --parallel 4
 
+      - name: Set Release Tag
+        shell: bash
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
       - name: Prepare binary (Unix)
         if: runner.os != 'Windows'
         run: |
-          cp build_app/printemps ./printemps
-          tar -czf ${{ matrix.artifact_name }}.tar.gz printemps
+          DIR_NAME="printemps-${{ env.RELEASE_TAG }}-${{ matrix.os_name }}"
+          mkdir -p "$DIR_NAME"
+          cp build_app/printemps "$DIR_NAME/"
+          cp LICENSE README.md "$DIR_NAME/"
+          tar -czf "${DIR_NAME}.tar.gz" "$DIR_NAME"
 
       - name: Prepare binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          cp build_app/Release/printemps.exe ./printemps.exe
-          compress-archive -Path printemps.exe -DestinationPath ${{ matrix.artifact_name }}.zip
+          $dirName = "printemps-${env:RELEASE_TAG}-${{ matrix.os_name }}"
+          mkdir "$dirName"
+          cp build_app/Release/printemps.exe "$dirName/"
+          cp LICENSE, README.md "$dirName/"
+          compress-archive -Path "$dirName" -DestinationPath "${dirName}.zip"
         shell: pwsh
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            ${{ matrix.artifact_name }}.tar.gz
-            ${{ matrix.artifact_name }}.zip
+            printemps-*-linux.tar.gz
+            printemps-*-macos.tar.gz
+            printemps-*-windows.zip
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-headers:
+    name: Package C++ Headers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set Release Tag
+        run: echo "RELEASE_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Prepare Headers Archive
+        run: |
+          DIR_NAME="printemps-${{ env.RELEASE_TAG }}-headers"
+          mkdir -p "$DIR_NAME"
+          cp -r printemps "$DIR_NAME/"
+          cp LICENSE README.md "$DIR_NAME/"
+          zip -r "${DIR_NAME}.zip" "$DIR_NAME"
+          tar -czf "${DIR_NAME}.tar.gz" "$DIR_NAME"
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            printemps-*-headers.zip
+            printemps-*-headers.tar.gz
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
