@@ -28,10 +28,11 @@ jobs:
         shell: bash
         run: |
           mkdir build_app
+          TOP_DIR_SLASHEED="${GITHUB_WORKSPACE//\\//}"
           if [ "${{ matrix.os }}" = "macos-latest" ]; then
-            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR=${{ github.workspace }} -DCPU_ARCH=none -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR="$TOP_DIR_SLASHEED" -DCPU_ARCH=none -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
           else
-            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR=${{ github.workspace }} -DCPU_ARCH=none
+            cmake -S cmake/application -B build_app -DCMAKE_BUILD_TYPE=Release -DTOP_DIR="$TOP_DIR_SLASHEED" -DCPU_ARCH=none
           fi
 
       - name: Build
