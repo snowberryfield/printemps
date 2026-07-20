@@ -26,12 +26,11 @@ layout: sub
         - [Selection Constraint](#selection-constraint)
 - [Optimization](#optimization)
 - [Accessing the Result](#accessing-the-result)
-- [Work-in-Progress Topics](#work-in-progress-topics)
+- [Python Bindings](#python-bindings)
 - [References](#references)
 
 ## Introduction
-PRINTEMPS can compute approximate solutions for __integer linear programming problems__ by __Weighted Tabu Search__ [1].
-In solving, it replaces constraints with penalty functions which return violations to the corresponding constraints, and the penalty functions multiplied by positive penalty coefficients are added to the objective function. For more information on the algorithm, please refer to the literature [2]. 
+PRINTEMPS can compute approximate solutions for __integer linear programming problems__ using __Weighted Tabu Search__ [1]. To solve the problem, the solver replaces constraints with penalty functions that return violations of the corresponding constraints, and these penalty functions, scaled by positive penalty coefficients, are added to the objective function. For more information on the algorithm, please refer to the paper [2]. 
 The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
 
 <div align="center">
@@ -85,7 +84,7 @@ x(0) = 7
 x(1) = 70
 ```
 
-An optimization using PRINTEMPS consists of three steps; (1) modeling, (2) optimization, and (3) accessing the result. Each step is detailed in the following sections of this document. 
+An optimization using PRINTEMPS consists of three steps: (1) modeling, (2) optimization, and (3) accessing the result. Each step is detailed in the following sections of this document. 
 
 ## Modeling
 ### Basics
@@ -138,12 +137,12 @@ g_3 = x_1 + y_1 == 1;
 model.minimize(f_1 + f_2);
 ```
 
-An optimization problem can be described as like arithmetic calculations on decision variables, expressions, constraints and related objects. 
-An expression can express a first-order function on decision variables such as `2 x_1 + 7 x_2 + 9 x_3 + 1` and it could be used for simplifying the model. Of course, the statement `model.minimize(f_1 + f_2);` in the code above can be replaced with `model.minimize(2 * x_1 + 7 * x_2 + 9 * x_3 + 5 * y_1 + 6 * y_2 + 1);`. 
-Please note that instances of the decision variable, expression and constraint created by the methods `create_variable()`, `create_expression()`, and `create_constraint()` are managed in an `IPModel` object. 
-These methods return the references of their instances, so that the symbols describing the problem must be declared as aliases. 
+An optimization problem can be described using arithmetic operations on decision variables, expressions, constraints, and related objects. 
+An expression can represent a linear function of decision variables, such as `2 x_1 + 7 x_2 + 9 x_3 + 1`, and can be used to simplify the model. Of course, the statement `model.minimize(f_1 + f_2);` in the code above can be replaced with `model.minimize(2 * x_1 + 7 * x_2 + 9 * x_3 + 5 * y_1 + 6 * y_2 + 1);`. 
+Please note that instances of decision variables, expressions, and constraints created by the methods `create_variable()`, `create_expression()`, and `create_constraint()` are managed by the `IPModel` object. 
+These methods return references to the created instances, which should be assigned to references (aliases) representing the symbols of the problem. 
 
-PRINTEMPS supports one or higher-dimensional indexed symbols such as `x(0), x(1), x(0,0), x(0,1), ...` for intuitive modeling.
+PRINTEMPS supports one- or multi-dimensional indexed variables such as `x(0), x(1), x(0,0), x(0,1), ...` for intuitive modeling.
 The problem (P2) can be equivalently modeled as follows:
 
 ```c++
@@ -172,10 +171,10 @@ g(2) = x(0) + y(0) == 1;
 model.minimize(f(0) + f(1));
 ```
 
-In addition, following special methods are provided to define a problem simply:
+In addition, the following special methods are provided to simplify problem formulation:
 - The method `sum()` to express a sum of decision variables or expressions.
 - The method `dot()` to express an inner product of coefficients and decision variables.
-- The method `selection()` to express a selection constraint that just one component takes value 1 in indexed decision variables.
+- The method `selection()` to express a selection constraint forcing exactly one of the indexed binary decision variables to take the value 1.
 
 With these methods, the problem (P2) can be simplified as follows:
 
@@ -216,10 +215,10 @@ Decision variables to describe the problem can be created as follows:
 ```c++
 printemps::model::IPModel model;
 
-// Create scalar (no-indexed) variable x.
+// Create scalar (non-indexed) variable x.
 auto& x = model.create_variable("x");
 
-// Create scalar (no-indexed) variable y with the lower bound 0 and the upper
+// Create scalar (non-indexed) variable y with the lower bound 0 and the upper
 // bound 1.
 auto& y = model.create_variable("y", 0, 1);
 
@@ -230,16 +229,16 @@ auto& z = model.create_variables("z", 10);
 auto& w = model.create_variables("w", {20, 30});
 ```
 
-The methods `create_variable(name)` and `create_variable(name, lb, ub)` create scalar (no-indexed) decision variable named `name`. 
-As optional, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively.
+The methods `create_variable(name)` and `create_variable(name, lb, ub)` create a scalar (non-indexed) decision variable named `name`. 
+Optionally, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively.
 
 The methods `create_variables(name, n)` and `create_variables(name, n, lb, ub)` create `n` decision variables named `name` with one-dimensional index. 
-Each decision variable can be accessed by like as `z(0)`.
-As optional, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively, and they will be commonly set for all variables. 
+Each decision variable can be accessed as `z(0)`.
+Optionally, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively, and they will be commonly set for all variables. 
 
 The methods `create_variables("name", {n_1, ..., n_m})` and `create_variables("name", {n_1, ..., n_m}, lb, ub)` create `n_1 * ... * n_m` decision variables named `name` with `m`-dimensional index. 
-Each variable can be accessed by like as `w(0, 0)`.
-As optional, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively, and they will be commonly set for all variables. 
+Each variable can be accessed as `w(0, 0)`.
+Optionally, lower and upper bounds can be set through the arguments `lb` and `ub`, respectively, and they will be commonly set for all variables. 
 
 #### Setting Lower and Upper Bounds for Decision Variables
 The lower and upper bounds of a decision variable can be specified after creation of the decision variable by the method `set_bound(lb, ub)`. 
@@ -257,14 +256,14 @@ x(0).set_bound(0, 20);
 ```
 
 #### Setting Initial Values for Decision Variables
-The default initial value of decision variable is `0`. 
-Users can specify initial values by the operator `=`, and the current value of the decision variable can be accessed by the method `value()`. In the following code, the initial value for `x(0)` is set as `1`, while as those of `x(1)` to `x(9)` are still `0`.
+The default initial value of a decision variable is `0`. 
+Users can specify initial values using the `=` operator, and the current value of the decision variable can be accessed using the `value()` method. In the following code, the initial value for `x(0)` is set to `1`, while those of `x(1)` to `x(9)` are still `0`.
 
 ```c++
 printemps::model::IPModel model;
 
 // Create decision variables x(0), ..., x(9). 
-// The initial values of them are set by the default value 0.
+// The initial values are set to the default value 0.
 auto& x = model.create_variables("x", 10);
 
 // The initial value of x(0) is changed to 1.
@@ -276,8 +275,8 @@ auto x_value = x(0).value();
 
 #### Fixing Decision Variable Values
 Users can also "fix" the values of decision variables by the method `fix_by(value)`. 
-The value of fixed variable will not be changed during optimization. 
-In the following code, the value for `x(0)` is fixed by 1, while as those of `x(1)` to `x(9)` can vary.
+The value of a fixed variable will not be changed during optimization. 
+In the following code, the value for `x(0)` is fixed to 1, while those of `x(1)` to `x(9)` can vary.
 
 ```c++
 printemps::model::IPModel model;
@@ -290,8 +289,8 @@ x(0).fix_by(1);
 ```
 
 There are some other methods related to fixing. 
-The method `unfix()` cancels the fixing, and the method `set_value_if_not_fixed(value)` tries to override the value of the decision variable if it is not fixed. 
-If the decision variable is fixed, initialization by the operator `=` discussed above will throw an error. 
+The method `unfix()` cancels the fixing, and the method `set_value_if_not_fixed(value)` overrides the value of the decision variable if it is not fixed. 
+If the decision variable is fixed, assignment using the `=` operator discussed above will throw an error. 
 Users can check whether the decision variable is fixed or not by the method `is_fixed()`, which returns true if and only if the decision variable is fixed. 
 
 ### Expression
@@ -304,10 +303,10 @@ printemps::model::IPModel model;
 auto& x = model.create_variable("x");
 auto& y = model.create_variable("y");
 
-// Create scalar(no-indexed) expression p.
+// Create scalar (non-indexed) expression p.
 auto& p = model.create_expression("p");
 
-// Create scalar(no-indexed) expression q by given expression 2 * x + 3 * y.
+// Create scalar (non-indexed) expression q by given expression 2 * x + 3 * y.
 auto& q = model.create_expression("q", 2 * x + 3 * y);
 
 // Create one-dimensional expressions r(0), ..., r(9).
@@ -317,15 +316,15 @@ auto& r = model.create_expressions("r", 10);
 auto& s = model.create_expressions("s", {20, 30});
 ```
 
-The methods  `create_expression(name)` and `create_expression(name, expression)` create scalar (no-indexed) expression named `name`. 
-As optional, the created expression can be directly defined by  `expression`.
+The methods `create_expression(name)` and `create_expression(name, expression)` create a scalar (non-indexed) expression named `name`. 
+Optionally, the created expression can be directly defined by an expression.
 
-The methods `create_expressions(name, n)` creates `n` expressions named `name` with one-dimensional index. Each expression can be accessed by like as `r(0)`.
+The methods `create_expressions(name, n)` creates `n` expressions named `name` with one-dimensional index. Each expression can be accessed as `r(0)`.
 
 The `create_expressions("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_m` expressions named `name` with `m`-dimensional index. Each expression can be accessed as `s(0, 0)`.
 
 #### Defining Expression
-An expression can be defined as a first-order function on decision variables and other expressions.
+An expression can be defined as a linear function of decision variables and other expressions.
 The following code shows examples of expression definitions.
 
 ```c++
@@ -366,11 +365,11 @@ t(0) = x + 3 * (y * z(0));
 t(1) = 5 * s(0) + 6 * s(1) + 6;
 
 auto &u = model.create_expression("u");
-// Invalid. Multiplication and division which produce nonlinear terms are not
-// possible. 
+// Invalid. Multiplication and division that produce nonlinear terms are not
+// supported. 
 // u = x * x + x / y;
 
-// Invalid. Nonlinear function is not possible.
+// Invalid. Nonlinear functions are not supported.
 // u = sin(x);
 ```
 
@@ -406,7 +405,7 @@ The `create_constraints("name", {n_1, ..., n_m})` method creates `n_1 * ... * n_
 
 #### Defining Constraint
 A constraint can be defined as an equal or inequality between decision variables, expressions, and constants (numerical values of primitive types such as int, double) with operators `==`, `<=`, and `>=`.  
-Note that a constraint whose sides are both constants is not acceptable, namely, either side must contain a decision variable or an expression, 
+Note that a constraint whose sides are both constants is not acceptable, meaning that at least one side must contain a decision variable or an expression. 
 The following code shows examples of constraint definitions.
 
 ```c++
@@ -442,7 +441,7 @@ for (auto i = 0; i < 10; i++) {
 The objective function and the optimization sense (minimization or maximization) can be specified by the methods `minimize()` and `maximize()` of `IPModel` object. 
 An expression or a decision variable can be objective function by specifying them as the argument of the methods `minimize()` or `maximize()`. 
 If there is no objective function definition, PRINTEMPS solves the problem as a constraint satisfaction problem, which aims to find a feasible solution. 
-If methods `minimize()` or `maximize()` are called more than once, the last definition will be effective.
+If the `minimize()` or `maximize()` methods are called more than once, only the last definition will take effect.
 The following code shows an example of objective function definitions.
 ```c++
 printemps::model::IPModel model;
@@ -469,7 +468,7 @@ model.minimize(5 * x - 6 * y + 7);
 
 ### Special Methods for Practical Modeling
 #### Sum of Indexed Components
-The method `sum()` gives an expression defined by sum of components of indexed decision variables or expressions. 
+The method `sum()` returns an expression defined as the sum of all components of the indexed decision variables or expressions. 
 The code
 
 ```c++
@@ -500,8 +499,8 @@ for (auto i = 0; i < 10; i++) {
 }
 ```
 
-Partial sums of components of indexed decision variables or expressions can be obtained by specifying indices for fixed and those for summation. 
-Summation is calculated for an index of which value is specified by the constant `printemps::model_component::All`.
+Partial sums of components of indexed decision variables or expressions can be obtained by specifying which dimensions are fixed and which are summed over. 
+Summation is calculated along the dimension where the index is specified by the constant `printemps::model_component::All`.
 The code
 
 ```c++
@@ -535,7 +534,7 @@ for (auto i = 0; i < 10; i++) {
 ```
 
 #### Inner Product 
-The method `dot()` gives an expression of an inner product between indexed variables or expressions and a numerical array with the same number of components.
+The method `dot()` returns an expression representing the inner product of the indexed variables or expressions and a numerical array with the same number of components.
 The code
 
 ```c++
@@ -567,7 +566,7 @@ for (auto i = 0; i < 10; i++) {
 }
 ```
 
-The method `dot()` is also applicable to two or higher-dimensional indexed decision variables and expressions by specifying indices for fixed and for summation. Note that the number of indices for summation must be one.
+The method `dot()` is also applicable to two- or higher-dimensional indexed decision variables and expressions by specifying fixed indices and the index to be summed over. Note that only one index can be summed over (using Range::All) at a time.
 The following code shows example of allowable and non-allowable usages.
 
 ```c++
@@ -610,7 +609,7 @@ auto& r = model.create_expressions("r", 10);
 ```
 
 #### Selection Constraint
-The method `selection()` gives a constraint that just one component takes value 1 in indexed decision variables. 
+The method `selection()` returns a constraint forcing exactly one of the indexed binary decision variables to take the value 1. 
 Such constraints are frequently used in practice.
 The code
 
@@ -644,7 +643,7 @@ auto& g = model.create_constraint("g");
 g = (p == 1);
 ```
 
-Of course, a selection constraint for partial sums of indexed binary decision variables can be obtained by specifying indices for fixed and for summation. 
+Of course, a selection constraint for partial sums of indexed binary decision variables can be obtained by specifying fixed indices and the index to be summed over. 
 The code
 
 ```c++
@@ -694,10 +693,10 @@ auto result = printemps::solver::solve(&model);
 Users can configure the behavior of the solver by setting options. The options include those related to optimization parameters, log verbosity, multi-thread computation enabling, etc. [Solver Option Guide](solver_option_guide.md) gives a detailed description of the options and their default values.
 
 ## Accessing the Result
-The result of the optimization is stored in the member `solution` in the `result` object, which is returned by the `solve()` function.
-If one or more feasible solution was found in the optimization, the best solution among the feasible solutions is to be selected as the final best solution. 
-Otherwise, the solution with the minimum augmented objective function value is to be selected. 
-The augmented objective function is the sum of the original objective function value and the penalty values for violating the constraints.
+The result of the optimization is stored in the `solution` member of the `result` object, which is returned by the `solve()` function.
+If one or more feasible solutions were found during the optimization, the best solution among them is selected as the final best solution. 
+Otherwise, the solution with the minimum augmented objective function value is selected. 
+The augmented objective function is the sum of the original objective function value and the penalty values of constraint violations.
 The following code shows an example of accessing the optimization result.
 
 ```c++
@@ -748,7 +747,7 @@ For accessing the result, the following methods are provided by the member `solu
     -  The method `objective()` returns the objective function value of the final best solution.                                                                            
         
 - __Methods for accessing the values of decision variables:__ 
-    - The method `variables(name).value()` returns the value of the scalar (no-indexed) decision variable named `name` in the final best solution. The string `name` must correspond to the name given in the declaration.
+    - The method `variables(name).value()` returns the value of the scalar (non-indexed) decision variable named `name` in the final best solution. The string `name` must correspond to the name given in the declaration.
   
     - The method `variables(name).values(n_1, ..., n_m)` returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed decision variable named `name` in the final best solution.
 
@@ -762,9 +761,9 @@ For accessing the result, the following methods are provided by the member `solu
     - The method `violations(name).value()` method returns the violation for the scalar (no-indexed) constraint named `name` in the final solution. The value of the violation is non-negative.
     - The method `violations(name).values(n_1, ..., n_m)` method returns the violation for the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
 
-To make it easier to check the value, the utility functions `print_variable_values()`, `print_expression_values()`, `print_constraint_values()` and `print_violations_values()` are provided.
+To make it easier to inspect the values, the utility functions `print_variable_values()`, `print_expression_values()`, `print_constraint_values()`, and `print_violation_values()` are provided.
 They respectively print the values of all variables, expressions,  constraints, and violations to the standard output. 
-Please refer [example](https://github.com/snowberryfield/printemps/tree/master/example/simple_2.cpp).
+Please refer to the example.
 
 ## References
 
@@ -773,3 +772,52 @@ Please refer [example](https://github.com/snowberryfield/printemps/tree/master/e
 - [2] Y.Koguma: [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), __IEEE Access__, Vol.12, pp.19059-19076 (2024).
 
 - [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).
+
+## Python Bindings
+Official Python bindings built with `pybind11` are supported from v2.9.0.
+
+### Installation
+You can install the package from the repository root:
+```bash
+pip install ./python
+```
+
+### Quick Start
+The Python API mirrors the C++ API closely. Here is a simple example solving the same problem (P):
+
+```python
+import printemps
+
+# (1) Modeling
+model = printemps.IPModel()
+x = model.create_variables("x", 2, -100, 100)
+g = model.create_constraints("g", 2)
+
+g[0] = 66 * x(0) + 14 * x(1) >= 1430
+g[1] = -82 * x(0) + 28 * x(1) >= 1306
+model.minimize(x(0) + 10 * x(1))
+
+# (2) Running Solver
+result = printemps.solve(model)
+
+# (3) Accessing the Result
+print("objective =", result.solution.objective())
+print("x(0) =", result.solution.variables("x")(0))
+print("x(1) =", result.solution.variables("x")(1))
+```
+
+### Key Differences from C++
+The main syntax differences are summarised as follows:
+
+| C++ idiom                                   | Python idiom                                  |
+|---------------------------------------------|-----------------------------------------------|
+| `auto& x = model.create_variables(...)`     | `x = model.create_variables(...)`             |
+| `g(0) = expr >= 1430`                       | `g[0] = expr >= 1430`                         |
+| `f(0) = expr`                               | `f[0] = expr`                                 |
+| `objective += term`                         | `objective += term`                           |
+| `expression_block(i, j, k) += x(n, m, k)`   | `expression_block[i, j, k] += x(n, m, k)`     |
+| `x.selection({n, Range::All, k})`           | `x.selection([n, printemps.ALL, k])`          |
+| `option.output.verbose = verbose::Full`     | `option.output.verbose = printemps.Verbose.Full` |
+| `result.solution.variables("x").values(n,m)`| `result.solution.variables("x")(n, m)`        |
+
+For details, please refer to the Python binding [README.md](https://github.com/snowberryfield/printemps/tree/master/python/README.md) in the repository.
