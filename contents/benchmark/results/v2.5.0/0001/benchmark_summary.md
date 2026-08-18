@@ -7,7 +7,7 @@ layout: sub
 ## Condition
 | Item               | Value                                                                                                                                              |
 |:-------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------|
-| Last Updated       | Dec 5, 2024                                                                                                                                      |
+| Last Updated       | Dec. 5, 2024                                                                                                                                      |
 | PRINTEMPS Version  | 2.5.0                                                                                                                                              |
 | Computational Time | 600sec for each instance                                                                                                                           |
 | Instance Set       | Pure integer instances of [MIPLIB 2017 Benchmark Set](https://miplib.zib.de/tag_benchmark.html) (89 instances)                                     |

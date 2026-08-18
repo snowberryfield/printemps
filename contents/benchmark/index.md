@@ -6,20 +6,24 @@ layout: sub
 # Benchmark Results
 The following results were obtained by the solver detailed in [Standalone Solver](https://snowberryfield.github.io/printemps/#standalone-solver). To refer each detail benchmark result, click the number in the `No.` column for each record.
 
+## v2.9.0
+|                       No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
+|:-----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
+| [1](./results/v2.9.0/0001/benchmark_summary.md) | Aug. 18, 2026 | v2.9.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 24.04   | g++13.2.0  | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
+| [2](./results/v2.9.0/0002/benchmark_summary.md) | Aug. 18, 2026 | v2.9.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(52 "open" instances) |   Ubuntu 24.04   | g++ 13.2.0 | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
+
+
 ## v2.5.0
 |                       No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
 |:-----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
-| [1](./results/v2.5.0/0001/benchmark_summary.md) | Dec 12, 2024 | v2.5.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 24.04   | g++13.2.0  | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
-| [2](./results/v2.5.0/0002/benchmark_summary.md) | Dec 12, 2024 | v2.5.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(57 "open" instances) |   Ubuntu 24.04   | g++ 13.2.0 | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
+| [1](./results/v2.5.0/0001/benchmark_summary.md) | Dec. 12, 2024 | v2.5.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 24.04   | g++13.2.0  | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
+| [2](./results/v2.5.0/0002/benchmark_summary.md) | Dec. 12, 2024 | v2.5.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(57 "open" instances) |   Ubuntu 24.04   | g++ 13.2.0 | Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz | 32GB |
 
 ## v2.3.0
 |                       No.                       | Last Updated | Version | Computational Time |                                        Instances                                        | Operating System |  Compiler  |                    CPU                    | RAM  |
 |:-----------------------------------------------:|:------------:|:-------:|:------------------:|:---------------------------------------------------------------------------------------:|:----------------:|:----------:|:-----------------------------------------:|------|
-| [1](./results/v2.3.0/0001/benchmark_summary.md) | May 5, 2024 | v2.3.0  |       600sec(*)       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
+| [1](./results/v2.3.0/0001/benchmark_summary.md) | May 5, 2024 | v2.3.0  |       600sec       |     [Benchmark Set](https://miplib.zib.de/tag_benchmark.html) <br />(89 instances)      |   Ubuntu 22.04   | g++11.2.0  | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
 | [2](./results/v2.3.0/0002/benchmark_summary.md) | May 5, 2024 | v2.3.0  |       600sec       | [Collection Set](https://miplib.zib.de/tag_collection.html) <br />(58 "open" instances(**)) |   Ubuntu 22.04   | g++ 11.2.0 | Intel(R) Xeon(R) CPU E3-1270 v5 @ 3.60GHz | 16GB |
-
-(*) From this version, computational time includes the time to read the MPS file.
-(**) The number of open instances was reduced because open instances [pb-market-split8-70-4](https://miplib.zib.de/instance_details_pb-market-split8-70-4.html) and [sorrell4](https://miplib.zib.de/instance_details_sorrell4.html) were solved (the difficulty of the instance moves to "hard"). 
 
 
 ## v2.2.0 and v2.2.1

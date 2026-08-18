@@ -7,7 +7,7 @@ layout: sub
 ## Condition
 | Item               | Value                                                                                                                                              |
 |:-------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------|
-| Last Updated       | Dec 5, 2024                                                                                                                                      |
+| Last Updated       | Dec. 5, 2024                                                                                                                                      |
 | PRINTEMPS Version  | 2.5.0                                                                                                                                              |
 | Computational Time | 600sec for each instance                                                                                                                           |
 | Instance Set       | Pure integer "open" instances of [MIPLIB 2017 Collection Set](https://miplib.zib.de/tag_collection.html) (57 instances)                            |

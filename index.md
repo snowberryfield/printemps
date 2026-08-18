@@ -18,8 +18,9 @@ __PRINTEMPS__ (PoRtable INTEger Mathematical Programming Solver) is a C++ metahe
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
+| Aug. 18, 2026 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
 | Jul. 21, 2026 | [PRINTEMPS v2.9.0](https://github.com/snowberryfield/printemps/releases/tag/v2.9.0) was released. |
-| Feb. 8, 2024 | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
+| Feb. 8, 2024  | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
 PRINTEMPS can compute approximate solutions for __integer linear programming problems__ using __Weighted Tabu Search__ [1]. For more information on the algorithm, please refer to the paper [2]. The figure below shows the flow-chart of the algorithm of PRINTEMPS. 
