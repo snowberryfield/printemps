@@ -25,6 +25,7 @@ class TwoFlipMoveGenerator
                std::pair<model_component::Variable<T_Variable, T_Expression> *,
                          model_component::Variable<T_Variable, T_Expression> *>>
                    &a_FLIPPABLE_VARIABLE_PTR_PAIRS) {
+        this->initialize();
         /**
          * Setup move objects.
          */

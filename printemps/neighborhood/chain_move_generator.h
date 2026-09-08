@@ -22,6 +22,7 @@ class ChainMoveGenerator
 
     /*************************************************************************/
     void setup(void) {
+        this->initialize();
         auto move_updater =                                 //
             [](auto      *a_moves_ptr,                      //
                auto      *a_flags,                          //

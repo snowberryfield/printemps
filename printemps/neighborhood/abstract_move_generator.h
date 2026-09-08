@@ -27,7 +27,7 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    void initialize(void) {
+    virtual void initialize(void) {
         m_move_updater = [](std::vector<Move<T_Variable, T_Expression>> *,  //
                             std::vector<short> *,                           //
                             const bool,                                     //

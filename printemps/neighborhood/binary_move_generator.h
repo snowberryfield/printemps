@@ -24,6 +24,7 @@ class BinaryMoveGenerator
     void setup(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_RAW_VARIABLE_PTRS) {
+        this->initialize();
         /**
          * "Flip" move for binary variables:
          * e.g) binary variable x \in {0, 1}

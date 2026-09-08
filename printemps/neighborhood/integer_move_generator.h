@@ -24,6 +24,7 @@ class IntegerMoveGenerator
     void setup(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_RAW_VARIABLE_PTRS) {
+        this->initialize();
         /**
          *  "Shift" move for integer variables:
          *  e.g) integer variable 0 <= x <= 10 (x \in Z)

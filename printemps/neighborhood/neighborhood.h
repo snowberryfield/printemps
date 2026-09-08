@@ -316,6 +316,27 @@ class Neighborhood {
     }
 
     /*************************************************************************/
+    inline void enable_default_moves(
+        const option::NeighborhoodOption &a_OPTION) {
+        if (a_OPTION.is_enabled_binary_move && m_binary.moves().size() > 0) {
+            m_binary.enable();
+        }
+
+        if (a_OPTION.is_enabled_integer_move && m_integer.moves().size() > 0) {
+            m_integer.enable();
+        }
+
+        if (a_OPTION.is_enabled_user_defined_move) {
+            m_user_defined.enable();
+        }
+
+        if (a_OPTION.selection_mode != option::selection_mode::Off &&
+            m_selection.moves().size() > 0) {
+            m_selection.enable();
+        }
+    }
+
+    /*************************************************************************/
     inline BinaryMoveGenerator      //
         <T_Variable, T_Expression>  //
             &binary(void) noexcept {

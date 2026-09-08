@@ -23,6 +23,7 @@ class TrinomialExclusiveNORMoveGenerator
     /*************************************************************************/
     void setup(const std::vector<model_component::Constraint<
                    T_Variable, T_Expression> *> &a_RAW_CONSTRAINT_PTRS) {
+        this->initialize();
         /**
          * Exclude constraints which contain fixed variables or selection
          * variables.

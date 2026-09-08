@@ -24,7 +24,8 @@ class UserDefinedMoveGenerator
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    inline void initialize(void) override {
+        AbstractMoveGenerator<T_Variable, T_Expression>::initialize();
         this->m_move_updater_wrapper =
             [](std::vector<Move<T_Variable, T_Expression>> *) {};
     }

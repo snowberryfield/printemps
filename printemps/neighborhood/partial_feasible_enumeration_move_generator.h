@@ -23,6 +23,7 @@ class PartialFeasibleEnumerationMoveGenerator
     /*************************************************************************/
     void setup(const std::vector<model_component::ConstraintGroup<
                    T_Variable, T_Expression>> &a_SMALL_CONSTRAINT_GROUPS) {
+        this->initialize();
         /**
          * Setup move objects.
          */

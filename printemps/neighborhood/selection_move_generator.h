@@ -24,6 +24,7 @@ class SelectionMoveGenerator
     inline void setup(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
             &a_RAW_VARIABLE_PTRS) {
+        this->initialize();
         /**
          *  "Swap" move for binary variables in selection
          * constraints: e.g.) selection constraint x + y + z = 1 (x,
