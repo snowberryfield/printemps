@@ -96,7 +96,7 @@ class AbstractSolverController {
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    virtual void initialize(void) {
         m_model_ptr        = nullptr;
         m_global_state_ptr = nullptr;
         m_initial_solution.initialize();
@@ -117,6 +117,7 @@ class AbstractSolverController {
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
         const option::Option&                                 a_OPTION) {
+        this->initialize();
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;

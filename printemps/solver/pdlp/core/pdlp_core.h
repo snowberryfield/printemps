@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_PDLP_LINEAR_CORE_PROGRAMMING_CORE_H_
 #define PRINTEMPS_SOLVER_PDLP_LINEAR_CORE_PROGRAMMING_CORE_H_
 
+#include "matrix_model/matrix_model.h"
 #include "pdlp_core_termination_status.h"
 #include "pdlp_core_state.h"
 #include "pdlp_core_state_manager.h"
@@ -15,11 +16,11 @@ namespace printemps::solver::pdlp::core {
 /*****************************************************************************/
 class PDLPCore {
    private:
-    linear_programming::LinearProgramming* m_instance_ptr;
-    std::optional<std::function<bool()>>   m_check_interrupt;
-    option::Option                         m_option;
-    PDLPCoreStateManager                   m_state_manager;
-    PDLPCoreResult                         m_result;
+    matrix_model::MatrixModel*           m_instance_ptr;
+    std::optional<std::function<bool()>> m_check_interrupt;
+    option::Option                       m_option;
+    PDLPCoreStateManager                 m_state_manager;
+    PDLPCoreResult                       m_result;
 
     /*************************************************************************/
     inline void preprocess(void) {
@@ -222,10 +223,10 @@ class PDLPCore {
         }
 
         std::printf(  //
-            "%8d%c|  %8.2e |%c%11.4e (%8.2e)|%c%11.4e (%8.2e)|%c%8.3e\n",
-            state.total_iteration,                   //
-            mark_restart,                            //
-            state.step_size_current,                 //
+            "%s%c|  %8.2e |%c%11.4e (%8.2e)|%c%11.4e (%8.2e)|%c%8.3e\n",
+            utility::int_format(state.total_iteration, 8).c_str(),  //
+            mark_restart,                                           //
+            state.step_size_current,                                //
             mark_primal_feasible,                    //
             state.primal.objective * SIGN,           //
             state.primal.relative_violation_norm,    //
@@ -262,10 +263,9 @@ class PDLPCore {
     }
 
     /*************************************************************************/
-    PDLPCore(linear_programming::LinearProgramming*      a_instance_ptr,
+    PDLPCore(matrix_model::MatrixModel*                  a_instance_ptr,
              const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
              const option::Option&                       a_OPTION) {
-        this->initialize();
         this->setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
     }
 
@@ -280,9 +280,11 @@ class PDLPCore {
 
     /*************************************************************************/
     inline void setup(
-        linear_programming::LinearProgramming*      a_instance_ptr,
+        matrix_model::MatrixModel*                  a_instance_ptr,
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
         const option::Option&                       a_OPTION) {
+        this->initialize();
+
         m_instance_ptr    = a_instance_ptr;
         m_check_interrupt = a_CHECK_INTERRUPT;
         m_option          = a_OPTION;
@@ -337,6 +339,7 @@ class PDLPCore {
             if (this->satisfy_interrupted_terminate_condition()) {
                 break;
             }
+
             /**
              * Terminate the loop if the time is over.
              */
@@ -371,7 +374,7 @@ class PDLPCore {
             }
 
             /**
-             * Terminate the loop if an optimal solution was found.
+             * Terminate the loop if the problem was proved infeasible.
              */
             if (this->satisfy_infeasible_terminate_condition()) {
                 if (!previous_iteration_log_flag) {

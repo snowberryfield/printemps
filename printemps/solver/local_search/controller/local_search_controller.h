@@ -35,7 +35,6 @@ class LocalSearchController
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
         const option::Option&                                 a_OPTION) {
-        this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
@@ -46,7 +45,7 @@ class LocalSearchController
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
+    inline void initialize(void) override {
         AbstractSolverController<T_Variable, T_Expression>::initialize();
         m_result.initialize();
     }

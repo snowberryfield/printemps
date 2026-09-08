@@ -279,10 +279,10 @@ class LagrangeDualCore {
 #endif
 
         std::printf(  //
-            "%8d |  %9.2e | %9.2e |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
+            "%s |  %9.2e | %9.2e |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
             "%s(%8.2e)%s\n",
-            STATE.iteration,          //
-            STATE.lagrangian * SIGN,  //
+            utility::int_format(STATE.iteration, 8).c_str(),  //
+            STATE.lagrangian * SIGN,                          //
             STATE.step_size,          //
             color_incumbent_update_begin.c_str(),
             mark_current,  //
@@ -332,7 +332,6 @@ class LagrangeDualCore {
                                                     a_INITIAL_SOLUTION,  //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
         const option::Option&                       a_OPTION) {
-        this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
@@ -364,14 +363,13 @@ class LagrangeDualCore {
                                                     a_INITIAL_SOLUTION,  //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
         const option::Option&                       a_OPTION) {
+        this->initialize();
+
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
         m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
-
-        m_feasible_solutions.clear();
-        m_incumbent_solutions.clear();
     }
 
     /*************************************************************************/

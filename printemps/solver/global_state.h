@@ -8,6 +8,7 @@
 
 #include "memory.h"
 #include "search_tree.h"
+#include "termination_status.h"
 
 namespace printemps::solver {
 /*****************************************************************************/
@@ -30,6 +31,16 @@ struct GlobalState {
 
     SearchTree<T_Variable, T_Expression> search_tree;
 
+    /**
+     * Solver-level termination status.
+     */
+    TerminationStatus termination_status;
+
+    /*************************************************************************/
+    inline bool is_proven_infeasible(void) const noexcept {
+        return this->termination_status == TerminationStatus::INFEASIBLE;
+    }
+
     /*************************************************************************/
     GlobalState(void) {
         this->initialize();
@@ -45,6 +56,7 @@ struct GlobalState {
         this->feasible_solution_archive.initialize();
         this->incumbent_solution_archive.initialize();
         this->search_tree.initialize();
+        this->termination_status = TerminationStatus::UNKNOWN;
     }
 };
 using IPGlobalState = GlobalState<int, double>;

@@ -6,6 +6,8 @@
 #ifndef PRINTEMPS_SOLVER_STATUS_H__
 #define PRINTEMPS_SOLVER_STATUS_H__
 
+#include "termination_status.h"
+
 namespace printemps::solver {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
@@ -21,6 +23,12 @@ struct Status {
     T_Expression objective;
     T_Expression total_violation;
     bool         is_found_feasible_solution;
+    TerminationStatus termination_status;
+
+    /*************************************************************************/
+    inline bool is_proven_infeasible(void) const noexcept {
+        return this->termination_status == TerminationStatus::INFEASIBLE;
+    }
 
     std::string start_date_time;
     std::string finish_date_time;
@@ -68,6 +76,7 @@ struct Status {
         this->objective                  = 0;
         this->total_violation            = 0;
         this->is_found_feasible_solution = false;
+        this->termination_status         = TerminationStatus::UNKNOWN;
 
         this->start_date_time.clear();
         this->finish_date_time.clear();
@@ -101,9 +110,9 @@ struct Status {
         const auto &TABU_SEARCH_RESULT =
             a_solver_ptr->tabu_search_controller().result();
 
+        const auto &GLOBAL_STATE = this->solver_ptr->global_state();
         const auto &INCUMBENT_SOLUTION =
-            this->solver_ptr->global_state()
-                .incumbent_holder.global_augmented_incumbent_solution();
+            GLOBAL_STATE.incumbent_holder.global_augmented_incumbent_solution();
 
         this->model_ptr = a_solver_ptr->model_ptr();
         this->option    = a_solver_ptr->option_original();
@@ -112,6 +121,20 @@ struct Status {
 
         this->total_violation            = INCUMBENT_SOLUTION.total_violation;
         this->is_found_feasible_solution = INCUMBENT_SOLUTION.is_feasible;
+
+        if (GLOBAL_STATE.termination_status != TerminationStatus::UNKNOWN) {
+            this->termination_status = GLOBAL_STATE.termination_status;
+        } else if (this->is_found_feasible_solution) {
+            this->termination_status = TerminationStatus::FEASIBLE;
+        } else {
+            if (this->option.general.time_max >= 0 &&
+                a_solver_ptr->time_keeper().elapsed_time() >=
+                    this->option.general.time_max) {
+                this->termination_status = TerminationStatus::TIME_OVER;
+            } else {
+                this->termination_status = TerminationStatus::UNKNOWN;
+            }
+        }
 
         this->start_date_time  = a_solver_ptr->start_date_time();
         this->finish_date_time = a_solver_ptr->finish_date_time();
@@ -188,6 +211,10 @@ struct Status {
 
         a_object->emplace_back(  //
             "is_found_feasible_solution", this->is_found_feasible_solution);
+
+        a_object->emplace_back(  //
+            "termination_status",
+            TerminationStatusInverseMap.at(this->termination_status));
 
         a_object->emplace_back(  //
             "start_date_time", this->start_date_time);

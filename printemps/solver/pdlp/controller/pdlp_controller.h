@@ -54,22 +54,21 @@ class PDLPController {
     /*************************************************************************/
     PDLPController(
         model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+        GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
         const solution::SparseSolution<T_Variable, T_Expression>&
                                                     a_INITIAL_SOLUTION,  //
         const utility::TimeKeeper&                  a_TIME_KEEPER,       //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
-        const option::Option&                                 a_OPTION,    //
-        GlobalState<T_Variable, T_Expression>* a_global_state_ptr) {
-        this->initialize();
+        const option::Option&                                 a_OPTION) {
         this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
                     a_TIME_KEEPER,       //
                     a_CHECK_INTERRUPT,   //
                     a_CALLBACK,          //
-                    a_OPTION,            //
-                    a_global_state_ptr);
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -97,6 +96,7 @@ class PDLPController {
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
         const option::Option&                                 a_OPTION) {
+        this->initialize();
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
@@ -125,10 +125,10 @@ class PDLPController {
 
     /*************************************************************************/
     inline bool satisfy_nonsense_skip_condition(
-        const linear_programming::LinearProgramming& a_LP_INSTANCE,
-        const bool                                   a_IS_ENABLED_PRINT) {
-        if (a_LP_INSTANCE.number_of_columns <= 1 ||
-            a_LP_INSTANCE.number_of_rows <= 1) {
+        const matrix_model::MatrixModel& a_LP_INSTANCE,
+        const bool                       a_IS_ENABLED_PRINT) {
+        if (a_LP_INSTANCE.number_of_variables <= 1 ||
+            a_LP_INSTANCE.number_of_constraints <= 1) {
             utility::print_warning(
                 "PDLP was skipped because the problem does not make sense.",
                 a_IS_ENABLED_PRINT);
@@ -206,34 +206,43 @@ class PDLPController {
         m_model_ptr->initial_solution_handler().import_solution(
             m_initial_solution, true);
         m_model_ptr->updater().update();
-        auto lp_instance =
-            m_model_ptr->linear_programming_handler().export_lp_instance();
+        auto instance =
+            m_model_ptr->matrix_model_handler().export_matrix_model();
 
         /**
          * Skip PDLP if the problem does not make sense.
          */
         if (this->satisfy_nonsense_skip_condition(
-                lp_instance,
+                instance,
                 this->m_option.output.verbose >= option::verbose::Outer)) {
             m_result.initialize();
             return;
         }
 
-        lp_instance.scaling(m_option.pdlp.counts_of_ruiz_scaling,
-                            m_option.pdlp.is_enabled_pock_chambolle_scaling);
+        instance.scaling(m_option.pdlp.counts_of_ruiz_scaling,
+                         m_option.pdlp.is_enabled_pock_chambolle_scaling);
 
-        pdlp::core::PDLPCore pdlp_core(&lp_instance, m_check_interrupt, option);
+        pdlp::core::PDLPCore pdlp_core(&instance, m_check_interrupt, option);
         pdlp_core.run();
 
         auto pdlp_result = pdlp_core.result();
-        pdlp_result.scaling(
-            lp_instance.primal_constraint_coefficients.row_scaler,
-            lp_instance.primal_constraint_coefficients.column_scaler);
+        pdlp_result.scaling(instance.constraint_coefficients.row_scaler,
+                            instance.constraint_coefficients.column_scaler);
 
         /**
          * Store the result.
          */
         m_result = PDLPControllerResult(pdlp_result);
+
+        /**
+         * If the LP relaxation is proven infeasible, the original integer
+         * problem is also mathematically infeasible.
+         */
+        if (pdlp_result.termination_status ==
+            core::PDLPCoreTerminationStatus::INFEASIBLE) {
+            this->m_global_state_ptr->termination_status =
+                TerminationStatus::INFEASIBLE;
+        }
 
         /**
          * Update the dual bound.

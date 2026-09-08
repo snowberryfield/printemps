@@ -14,6 +14,7 @@
 #include "lagrange_dual/controller/lagrange_dual_controller.h"
 #include "local_search/controller/local_search_controller.h"
 #include "tabu_search/controller/tabu_search_controller.h"
+#include "cdcl/controller/cdcl_controller.h"
 
 namespace printemps::solver {
 /*****************************************************************************/
@@ -44,6 +45,8 @@ class Solver {
         m_local_search_controller;
     tabu_search::controller::TabuSearchController<T_Variable, T_Expression>
         m_tabu_search_controller;
+    cdcl::controller::CDCLController<T_Variable, T_Expression>
+        m_cdcl_controller;
 
     /*************************************************************************/
     inline void print_program_info(const bool a_IS_ENABLED_PRINT) {
@@ -81,30 +84,7 @@ class Solver {
         }
     }
 
-    /*************************************************************************/
-    inline void enable_default_neighborhood(void) {
-        auto& neighborhood = m_model_ptr->neighborhood();
 
-        if (m_option.neighborhood.is_enabled_binary_move &&
-            neighborhood.binary().moves().size() > 0) {
-            neighborhood.binary().enable();
-        }
-
-        if (m_option.neighborhood.is_enabled_integer_move &&
-            neighborhood.integer().moves().size() > 0) {
-            neighborhood.integer().enable();
-        }
-
-        if (m_option.neighborhood.is_enabled_user_defined_move) {
-            neighborhood.user_defined().enable();
-        }
-
-        if (m_option.neighborhood.selection_mode !=
-                option::selection_mode::Off &&
-            neighborhood.selection().moves().size() > 0) {
-            neighborhood.selection().enable();
-        }
-    }
 
     /*************************************************************************/
     inline Result<T_Variable, T_Expression> postprocess(void) {
@@ -131,9 +111,11 @@ class Solver {
          * All value of the expressions and the constraints are updated forcibly
          * to take into account the cases they are disabled.
          */
-        m_model_ptr->initial_solution_handler().import_solution(incumbent,
-                                                                true);
-        m_model_ptr->updater().update();
+        if (!incumbent.variable_value_proxies.empty()) {
+            m_model_ptr->initial_solution_handler().import_solution(incumbent,
+                                                                    true);
+            m_model_ptr->updater().update();
+        }
 
         auto named_solution =
             m_model_ptr->state_inspector().export_named_solution();
@@ -159,6 +141,21 @@ class Solver {
                                 m_callback,          //
                                 m_option);
         m_pdlp_controller.run();
+    }
+
+    /*************************************************************************/
+    inline void run_cdcl(void) {
+        m_cdcl_controller.setup(m_model_ptr,         //
+                                &m_global_state,     //
+                                m_current_solution,  //
+                                m_time_keeper,       //
+                                m_check_interrupt,   //
+                                m_callback,          //
+                                m_option);
+        m_cdcl_controller.run();
+        m_current_solution = m_global_state.incumbent_holder
+                                 .global_augmented_incumbent_solution()
+                                 .to_sparse();
     }
 
     /*************************************************************************/
@@ -244,6 +241,7 @@ class Solver {
         m_lagrange_dual_controller.initialize();
         m_local_search_controller.initialize();
         m_tabu_search_controller.initialize();
+        m_cdcl_controller.initialize();
     }
 
     /*************************************************************************/
@@ -329,8 +327,31 @@ class Solver {
         /**
          * Build the model.
          */
-        m_model_ptr->build(m_option,
-                           m_option.output.verbose >= option::verbose::Outer);
+        try {
+            m_model_ptr->build(m_option,
+                               m_option.output.verbose >= option::verbose::Outer);
+        } catch (const error_handler::InfeasibleError &e) {
+            m_global_state.termination_status = TerminationStatus::INFEASIBLE;
+            m_global_state.model_ptr          = m_model_ptr;
+            m_global_state.solver_ptr           = this;
+            m_global_state.feasible_solution_archive.setup(
+                m_option.output.feasible_solutions_capacity,  //
+                m_model_ptr->is_minimization() ? solution::SortMode::Ascending
+                                               : solution::SortMode::Descending,  //
+                m_model_ptr->name(),                                              //
+                m_model_ptr->reference().number_of_variables(),                   //
+                m_model_ptr->reference().number_of_constraints());
+            m_global_state.incumbent_solution_archive.setup(
+                -1,  //
+                solution::SortMode::Off,
+                m_model_ptr->name(),                             //
+                m_model_ptr->reference().number_of_variables(),  //
+                m_model_ptr->reference().number_of_constraints());
+            utility::print_message(
+                "Preprocessing proved infeasibility.",
+                m_option.output.verbose >= option::verbose::Outer);
+            return;
+        }
 
         /**
          * Print the problem size.
@@ -371,7 +392,7 @@ class Solver {
          * Enables the default neighborhood moves. Special neighborhood moves
          * will be enabled when optimization stagnates.
          */
-        this->enable_default_neighborhood();
+        m_model_ptr->neighborhood().enable_default_moves(m_option.neighborhood);
 
         /**
          * Set local and global penalty coefficient for each constraint.
@@ -433,7 +454,7 @@ class Solver {
         auto initial_solution =
             m_model_ptr->state_inspector().export_dense_solution();
         m_global_state.incumbent_holder.try_update_incumbent(
-            initial_solution, m_model_ptr->evaluator().evaluate({}));
+            m_model_ptr, m_model_ptr->evaluator().evaluate({}));
         m_current_solution = initial_solution.to_sparse();
 
         m_global_state.incumbent_solution_archive.push(
@@ -446,6 +467,14 @@ class Solver {
          * Preprocessing; setup the model and the solver.
          */
         this->preprocess();
+
+        /**
+         * If preprocessing proved the problem infeasible, skip optimization.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            auto result = this->postprocess();
+            return result;
+        }
 
         /**
          * Start optimization.
@@ -462,6 +491,36 @@ class Solver {
          */
         if (m_option.pdlp.is_enabled) {
             this->run_pdlp();
+        }
+
+        /**
+         * If PDLP proved the LP relaxation infeasible, skip remaining phases.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "PDLP proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            auto result = this->postprocess();
+            return result;
+        }
+
+        /**
+         * Solve using CDCL to find a feasible solution (Optional).
+         */
+        if (m_option.cdcl.is_enabled) {
+            this->run_cdcl();
+        }
+
+        /**
+         * If CDCL proved the problem infeasible, skip remaining phases to
+         * avoid wasting the time budget on a search that cannot succeed.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "CDCL proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            auto result = this->postprocess();
+            return result;
         }
 
         /**
@@ -499,6 +558,13 @@ class Solver {
         this->preprocess();
 
         /**
+         * If preprocessing proved the problem infeasible, skip optimization.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            return;
+        }
+
+        /**
          * Start optimization.
          */
         utility::print_single_line(  //
@@ -513,6 +579,33 @@ class Solver {
          */
         if (m_option.pdlp.is_enabled) {
             this->run_pdlp();
+        }
+
+        /**
+         * If PDLP proved the LP relaxation infeasible, skip remaining phases.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "PDLP proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            return;
+        }
+
+        /**
+         * Solve using CDCL to find a feasible solution (Optional).
+         */
+        if (m_option.cdcl.is_enabled) {
+            this->run_cdcl();
+        }
+
+        /**
+         * If CDCL proved the problem infeasible, skip remaining phases.
+         */
+        if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "CDCL proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            return;
         }
 
         /**
@@ -602,6 +695,12 @@ class Solver {
                                                                T_Expression>&
     tabu_search_controller(void) const {
         return m_tabu_search_controller;
+    }
+
+    /*************************************************************************/
+    inline const cdcl::controller::CDCLController<T_Variable, T_Expression>&
+    cdcl_controller(void) const {
+        return m_cdcl_controller;
     }
 };
 

@@ -673,23 +673,18 @@ class TabuSearchCore {
         }
 #endif
 
-        auto int_format = [](const int a_VALUE) {
-            if (a_VALUE >= 100000) {
-                return utility::to_string(a_VALUE / 1000, "%4dk");
-            } else {
-                return utility::to_string(a_VALUE, "%5d");
-            }
-        };
-
         std::printf(  //
-            "%8d%c|%s %s %s %s |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
+            "%s%c|%s %s %s %s |%s%c%9.2e%s %s(%8.2e)%s |%s%c%9.2e%s "
             "%s(%8.2e)%s\n",
-            STATE.iteration,
-            mark_special_neighborhood_move,                                 //
-            int_format(STATE.number_of_all_neighborhoods).c_str(),          //
-            int_format(STATE.number_of_feasible_neighborhoods).c_str(),     //
-            int_format(STATE.number_of_permissible_neighborhoods).c_str(),  //
-            int_format(STATE.number_of_improvable_neighborhoods).c_str(),   //
+            utility::int_format(STATE.iteration, 8).c_str(),
+            mark_special_neighborhood_move,                                  //
+            utility::int_format(STATE.number_of_all_neighborhoods).c_str(),  //
+            utility::int_format(STATE.number_of_feasible_neighborhoods)
+                .c_str(),  //
+            utility::int_format(STATE.number_of_permissible_neighborhoods)
+                .c_str(),  //
+            utility::int_format(STATE.number_of_improvable_neighborhoods)
+                .c_str(),  //
             color_incumbent_update_begin.c_str(),
             mark_current,  //
             CURRENT_SOLUTION_SCORE.objective * SIGN,
@@ -745,7 +740,6 @@ class TabuSearchCore {
                                                     a_INITIAL_SOLUTION,  //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
         const option::Option&                       a_OPTION) {
-        this->initialize();
         this->setup(a_model_ptr,         //
                     a_global_state_ptr,  //
                     a_INITIAL_SOLUTION,  //
@@ -778,14 +772,13 @@ class TabuSearchCore {
                                                     a_INITIAL_SOLUTION,  //
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,   //
         const option::Option&                       a_OPTION) {
+        this->initialize();
+
         m_model_ptr        = a_model_ptr;
         m_global_state_ptr = a_global_state_ptr;
         m_initial_solution = a_INITIAL_SOLUTION;
         m_check_interrupt  = a_CHECK_INTERRUPT;
         m_option           = a_OPTION;
-
-        m_feasible_solutions.clear();
-        m_incumbent_solutions.clear();
     }
 
     /*************************************************************************/

@@ -6,20 +6,21 @@
 #ifndef PRINTEMPS_SOLVER_PDLP_CORE_PDLP_CORE_STATE_MANAGER_H__
 #define PRINTEMPS_SOLVER_PDLP_CORE_PDLP_CORE_STATE_MANAGER_H__
 
+#include "matrix_model/matrix_model.h"
 #include "pdlp_core_state.h"
 
 namespace printemps::solver::pdlp::core {
 /*****************************************************************************/
 class PDLPCoreStateManager {
    private:
-    PDLPCoreState                          m_state;
-    linear_programming::LinearProgramming* m_instance_ptr;
-    option::Option                         m_option;
+    PDLPCoreState              m_state;
+    matrix_model::MatrixModel* m_instance_ptr;
+    option::Option             m_option;
 
    public:
     /*************************************************************************/
-    PDLPCoreStateManager(linear_programming::LinearProgramming* a_instance_ptr,
-                         const option::Option&                  a_OPTION) {
+    PDLPCoreStateManager(matrix_model::MatrixModel* a_instance_ptr,
+                         const option::Option&      a_OPTION) {
         this->setup(a_instance_ptr, a_OPTION);
     }
 
@@ -36,23 +37,23 @@ class PDLPCoreStateManager {
     }
 
     /*************************************************************************/
-    inline void setup(linear_programming::LinearProgramming* a_instance_ptr,
-                      const option::Option&                  a_OPTION) {
+    inline void setup(matrix_model::MatrixModel* a_instance_ptr,
+                      const option::Option&      a_OPTION) {
         this->initialize();
         m_instance_ptr = a_instance_ptr;
         m_option       = a_OPTION;
 
-        const int NUMBER_OF_ROWS    = m_instance_ptr->number_of_rows;
-        const int NUMBER_OF_COLUMNS = m_instance_ptr->number_of_columns;
+        const int NUMBER_OF_ROWS    = m_instance_ptr->number_of_constraints;
+        const int NUMBER_OF_COLUMNS = m_instance_ptr->number_of_variables;
 
         m_state.primal = PrimalDualState(NUMBER_OF_COLUMNS);
         m_state.dual   = PrimalDualState(NUMBER_OF_ROWS);
 
-        m_state.primal.solution = m_instance_ptr->primal_initial_solution;
+        m_state.primal.solution = m_instance_ptr->variable_initial_solution;
         m_state.dual.solution   = m_instance_ptr->dual_initial_solution;
 
         m_state.primal.objective_coefficients_norm =
-            m_instance_ptr->primal_objective_coefficients.norm();
+            m_instance_ptr->objective_coefficients.norm();
         m_state.dual.objective_coefficients_norm =
             m_instance_ptr->dual_objective_coefficients.norm();
 
@@ -60,22 +61,22 @@ class PDLPCoreStateManager {
         m_state.primal.objective_upper_bound = 0.0;
         for (auto i = 0; i < NUMBER_OF_COLUMNS; i++) {
             const auto COEFFICIENT =
-                m_instance_ptr->primal_objective_coefficients[i];
+                m_instance_ptr->objective_coefficients[i];
             if (COEFFICIENT > 0) {
                 m_state.primal.objective_upper_bound +=
-                    COEFFICIENT * m_instance_ptr->primal_upper_bounds[i];
+                    COEFFICIENT * m_instance_ptr->variable_upper_bounds[i];
                 m_state.primal.objective_lower_bound +=
-                    COEFFICIENT * m_instance_ptr->primal_lower_bounds[i];
+                    COEFFICIENT * m_instance_ptr->variable_lower_bounds[i];
             } else {
                 m_state.primal.objective_upper_bound +=
-                    COEFFICIENT * m_instance_ptr->primal_lower_bounds[i];
+                    COEFFICIENT * m_instance_ptr->variable_lower_bounds[i];
                 m_state.primal.objective_lower_bound +=
-                    COEFFICIENT * m_instance_ptr->primal_upper_bounds[i];
+                    COEFFICIENT * m_instance_ptr->variable_upper_bounds[i];
             }
         }
 
         m_state.primal.solution_average =
-            m_instance_ptr->primal_initial_solution;
+            m_instance_ptr->variable_initial_solution;
         m_state.dual.solution_average = m_instance_ptr->dual_initial_solution;
 
         m_state.current_outer_loop_normalized_gap =
@@ -97,20 +98,20 @@ class PDLPCoreStateManager {
     /*************************************************************************/
     inline void setup_initial_step_size(void) {
         m_state.step_size_current =
-            1.0 / m_instance_ptr->primal_constraint_coefficients.norm_infty;
+            1.0 / m_instance_ptr->constraint_coefficients.norm_infty;
         m_state.step_size_previous = m_state.step_size_current;
     }
 
     /*************************************************************************/
     inline void setup_initial_primal_weight(void) {
         const double PRIMAL_NORM =
-            m_instance_ptr->primal_objective_coefficients.norm();
+            m_instance_ptr->objective_coefficients.norm();
         const double DUAL_NORM =
             m_instance_ptr->dual_objective_coefficients.norm();
 
         if (PRIMAL_NORM > constant::EPSILON && DUAL_NORM > constant::EPSILON) {
             m_state.primal_weight =
-                m_instance_ptr->primal_objective_coefficients.norm() /
+                m_instance_ptr->objective_coefficients.norm() /
                 m_instance_ptr->dual_objective_coefficients.norm();
         } else {
             m_state.primal_weight = 1.0;
@@ -182,26 +183,26 @@ class PDLPCoreStateManager {
         utility::sparse::linear_combination(
             &m_state.primal.lagrangian_coefficients,  //
             -1.0, m_instance_ptr->dual_constraint_coefficients,
-            a_DUAL_CENTER,                               //
-            1.0, INSTANCE.primal_objective_coefficients  //
+            a_DUAL_CENTER,                           //
+            1.0, INSTANCE.objective_coefficients     //
         );
 
         utility::sparse::linear_combination(
             &m_state.dual.lagrangian_coefficients,  //
-            -1.0, m_instance_ptr->primal_constraint_coefficients,
+            -1.0, m_instance_ptr->constraint_coefficients,
             a_PRIMAL_CENTER,                           //
             1.0, INSTANCE.dual_objective_coefficients  //
         );
 
-        for (auto i = 0; i < INSTANCE.number_of_columns; i++) {
+        for (auto i = 0; i < INSTANCE.number_of_variables; i++) {
             m_state.primal.direction[i] = 0.0;
 
-            if (a_PRIMAL_CENTER[i] >= INSTANCE.primal_upper_bounds[i] &&
+            if (a_PRIMAL_CENTER[i] >= INSTANCE.variable_upper_bounds[i] &&
                 m_state.primal.lagrangian_coefficients[i] <= 0) {
                 continue;
             }
 
-            if (a_PRIMAL_CENTER[i] <= INSTANCE.primal_lower_bounds[i] &&
+            if (a_PRIMAL_CENTER[i] <= INSTANCE.variable_lower_bounds[i] &&
                 m_state.primal.lagrangian_coefficients[i] >= 0) {
                 continue;
             }
@@ -211,7 +212,7 @@ class PDLPCoreStateManager {
                 m_state.primal_weight;
         }
 
-        for (auto i = 0; i < INSTANCE.number_of_rows; i++) {
+        for (auto i = 0; i < INSTANCE.number_of_constraints; i++) {
             m_state.dual.direction[i] = 0.0;
 
             if (a_DUAL_CENTER[i] >= INSTANCE.dual_upper_bounds[i] &&
@@ -244,7 +245,7 @@ class PDLPCoreStateManager {
                              m_state.dual.direction);
 
         const auto NORMALIZED_GAP =
-            -m_instance_ptr->primal_objective_coefficients.dot(
+            -m_instance_ptr->objective_coefficients.dot(
                 m_state.primal.direction) +
             m_instance_ptr->dual_objective_coefficients.dot(
                 m_state.dual.direction) -
@@ -254,7 +255,7 @@ class PDLPCoreStateManager {
                 m_state.dual.solution_trial) +
             utility::sparse::dot_dot(  //
                 &m_state.dual.buffer, a_DUAL_CENTER,
-                m_instance_ptr->primal_constraint_coefficients,
+                m_instance_ptr->constraint_coefficients,
                 m_state.primal.solution_trial);
 
         return NORMALIZED_GAP / a_RADIUS;
@@ -274,15 +275,15 @@ class PDLPCoreStateManager {
             const double PRIMAL_STEP_SIZE =
                 step_size_trial / m_state.primal_weight;
 
-            utility::sparse::linear_combination(                            //
-                &m_state.primal.solution_trial,                             //
-                1.0, m_state.primal.solution,                               //
-                -PRIMAL_STEP_SIZE, INSTANCE.primal_objective_coefficients,  //
-                PRIMAL_STEP_SIZE, m_state.primal.lhs                        //
+            utility::sparse::linear_combination(                         //
+                &m_state.primal.solution_trial,                          //
+                1.0, m_state.primal.solution,                            //
+                -PRIMAL_STEP_SIZE, INSTANCE.objective_coefficients,      //
+                PRIMAL_STEP_SIZE, m_state.primal.lhs                     //
             );
 
-            m_state.primal.solution_trial.clamp(INSTANCE.primal_lower_bounds,
-                                                INSTANCE.primal_upper_bounds);
+            m_state.primal.solution_trial.clamp(INSTANCE.variable_lower_bounds,
+                                                INSTANCE.variable_upper_bounds);
 
             /// Dual
             const double DUAL_STEP_SIZE =
@@ -294,8 +295,8 @@ class PDLPCoreStateManager {
                 -1.0, m_state.primal.solution        //
             );
 
-            INSTANCE.primal_constraint_coefficients.dot(&m_state.dual.lhs,
-                                                        m_state.primal.buffer);
+            INSTANCE.constraint_coefficients.dot(&m_state.dual.lhs,
+                                                 m_state.primal.buffer);
 
             utility::sparse::linear_combination(                       //
                 &m_state.dual.solution_trial,                          //
@@ -318,7 +319,7 @@ class PDLPCoreStateManager {
             const double MOVE = this->compute_weighted_norm(  //
                 m_state.primal.move, m_state.dual.move);
 
-            INSTANCE.primal_constraint_coefficients.dot(  //
+            INSTANCE.constraint_coefficients.dot(  //
                 &m_state.dual.buffer, m_state.primal.move);
 
             const double INTERACTION =
@@ -475,15 +476,15 @@ class PDLPCoreStateManager {
             &m_state.primal.reduced_cost_coefficients, -1.0,
             m_instance_ptr->dual_constraint_coefficients,
             m_state.dual.solution_average, 1.0,
-            m_instance_ptr->primal_objective_coefficients);
+            m_instance_ptr->objective_coefficients);
 
-        for (auto i = 0; i < m_instance_ptr->number_of_columns; i++) {
-            if (m_instance_ptr->is_primal_upper_unbounded[i] == 1) {
+        for (auto i = 0; i < m_instance_ptr->number_of_variables; i++) {
+            if (m_instance_ptr->is_variable_upper_unbounded[i] == 1) {
                 m_state.primal.reduced_cost_coefficients[i] =
                     std::max(m_state.primal.reduced_cost_coefficients[i], 0.0);
             }
 
-            if (m_instance_ptr->is_primal_lower_unbounded[i] == 1) {
+            if (m_instance_ptr->is_variable_lower_unbounded[i] == 1) {
                 m_state.primal.reduced_cost_coefficients[i] =
                     std::min(m_state.primal.reduced_cost_coefficients[i], 0.0);
             }
@@ -491,20 +492,20 @@ class PDLPCoreStateManager {
 
         double reduced_cost = 0.0;
 
-        for (auto i = 0; i < m_instance_ptr->number_of_columns; i++) {
+        for (auto i = 0; i < m_instance_ptr->number_of_variables; i++) {
             if (m_state.primal.reduced_cost_coefficients[i] > 0) {
                 reduced_cost += m_state.primal.reduced_cost_coefficients[i] *
-                                m_instance_ptr->primal_lower_bounds[i];
+                                m_instance_ptr->variable_lower_bounds[i];
 
             } else {
                 reduced_cost += m_state.primal.reduced_cost_coefficients[i] *
-                                m_instance_ptr->primal_upper_bounds[i];
+                                m_instance_ptr->variable_upper_bounds[i];
             }
         }
 
         m_state.primal.objective =
             m_state.primal.solution_average.dot(
-                m_instance_ptr->primal_objective_coefficients) +
+                m_instance_ptr->objective_coefficients) +
             m_instance_ptr->objective_offset;
 
         m_state.dual.objective =
@@ -517,7 +518,7 @@ class PDLPCoreStateManager {
     inline void update_violation(void) {
         utility::sparse::linear_combination(
             &m_state.dual.buffer, -1.0,
-            m_instance_ptr->primal_constraint_coefficients,
+            m_instance_ptr->constraint_coefficients,
             m_state.primal.solution_average, 1.0,
             m_instance_ptr->dual_objective_coefficients);
 
@@ -547,7 +548,7 @@ class PDLPCoreStateManager {
             &m_state.primal.buffer, -1.0,
             m_instance_ptr->dual_constraint_coefficients,
             m_state.dual.solution_average, 1.0,
-            m_instance_ptr->primal_objective_coefficients, -1.0,
+            m_instance_ptr->objective_coefficients, -1.0,
             m_state.primal.reduced_cost_coefficients);
 
         m_state.dual.absolute_violation_norm = m_state.primal.buffer.norm();
@@ -612,9 +613,6 @@ class PDLPCoreStateManager {
     inline const PDLPCoreState& state(void) const {
         return m_state;
     }
-};  // namespace printemps::solver::pdlp::core
+};
 }  // namespace printemps::solver::pdlp::core
 #endif
-/*****************************************************************************/
-// END
-/*****************************************************************************/
