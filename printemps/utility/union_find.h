@@ -222,7 +222,7 @@ class UnionFind {
         std::vector<UnionFindRootGroup<T>> result;
         const int        ELEMENTS_SIZE = static_cast<int>(m_elements.size());
         std::vector<int> root_to_group(ELEMENTS_SIZE, -1);
-        for (int i = 0; i < ELEMENTS_SIZE; ++i) {
+        for (int i = 0; i < ELEMENTS_SIZE; i++) {
             const auto [ROOT_ID, PARITY] =
                 this->root_with_id_and_parity_const(i);
 

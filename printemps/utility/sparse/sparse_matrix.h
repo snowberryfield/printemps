@@ -91,7 +91,11 @@ struct SparseMatrix {
             c_temp[this->column_indices[i]] += VALUE;
             norm_infty = std::max(norm_infty, VALUE);
         }
-        this->norm_one   = *std::max_element(c_temp.begin(), c_temp.end());
+        if (this->number_of_columns > 0) {
+            this->norm_one   = *std::max_element(c_temp.begin(), c_temp.end());
+        } else {
+            this->norm_one   = 0.0;
+        }
         this->norm_infty = norm_infty;
     }
 

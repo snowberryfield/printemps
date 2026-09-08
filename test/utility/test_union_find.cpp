@@ -137,8 +137,8 @@ TEST_F(TestUnionFind, groups) {
             }
         }
 
-        for (size_t i = 0; i < group.members.size(); ++i) {
-            for (size_t j = 0; j < group.members.size(); ++j) {
+        for (size_t i = 0; i < group.members.size(); i++) {
+            for (size_t j = 0; j < group.members.size(); j++) {
                 const auto& a = group.members[i];
                 const auto& b = group.members[j];
 
@@ -148,8 +148,8 @@ TEST_F(TestUnionFind, groups) {
         }
     }
 
-    for (size_t i = 0; i < groups.size(); ++i) {
-        for (size_t j = i + 1; j < groups.size(); ++j) {
+    for (size_t i = 0; i < groups.size(); i++) {
+        for (size_t j = i + 1; j < groups.size(); j++) {
             EXPECT_FALSE(uf.has_same_root(groups[i].root, groups[j].root));
         }
     }

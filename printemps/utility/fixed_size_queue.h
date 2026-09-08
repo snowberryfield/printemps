@@ -38,6 +38,11 @@ class FixedSizeQueue {
     }
 
     /*************************************************************************/
+    inline void clear(void) {
+        m_queue.clear();
+    }
+
+    /*************************************************************************/
     inline void push(const T a_DATA) {
         if (static_cast<int>(m_queue.size()) == m_max_size) {
             m_queue.pop_front();

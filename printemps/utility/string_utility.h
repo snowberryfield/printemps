@@ -70,6 +70,39 @@ inline std::string to_string(const T_Value      a_VALUE,
 }
 
 /******************************************************************************/
+inline std::string int_format(const int64_t a_VALUE, const int a_WIDTH = 5) {
+    const std::string RAW_STR = std::to_string(a_VALUE);
+    if (static_cast<int>(RAW_STR.size()) <= a_WIDTH) {
+        if (static_cast<int>(RAW_STR.size()) < a_WIDTH) {
+            return std::string(a_WIDTH - RAW_STR.size(), ' ') + RAW_STR;
+        }
+        return RAW_STR;
+    }
+
+    if (a_WIDTH >= 2) {
+        const std::string K_STR = std::to_string(a_VALUE / 1000) + "k";
+        if (static_cast<int>(K_STR.size()) <= a_WIDTH) {
+            if (static_cast<int>(K_STR.size()) < a_WIDTH) {
+                return std::string(a_WIDTH - K_STR.size(), ' ') + K_STR;
+            }
+            return K_STR;
+        }
+    }
+
+    if (a_WIDTH >= 2) {
+        const std::string M_STR = std::to_string(a_VALUE / 1000000) + "M";
+        if (static_cast<int>(M_STR.size()) <= a_WIDTH) {
+            if (static_cast<int>(M_STR.size()) < a_WIDTH) {
+                return std::string(a_WIDTH - M_STR.size(), ' ') + M_STR;
+            }
+            return M_STR;
+        }
+    }
+
+    return RAW_STR;
+}
+
+/******************************************************************************/
 inline std::string to_true_or_false(const bool a_VALUE) {
     return a_VALUE != 0 ? "True" : "False";
 }

@@ -47,6 +47,61 @@ TEST_F(TestStringUtility, to_string) {
 }
 
 /*****************************************************************************/
+TEST_F(TestStringUtility, int_format) {
+    // 1. Default width (5)
+    // - Not abbreviated when fits in 5 digits
+    EXPECT_EQ("    0", utility::int_format(0));
+    EXPECT_EQ("   42", utility::int_format(42));
+    EXPECT_EQ("  999", utility::int_format(999));
+    EXPECT_EQ(" 9999", utility::int_format(9999));
+    EXPECT_EQ("99999", utility::int_format(99999));
+
+    // - 100,000 ~ 99,999,999: uses 'k' abbreviation
+    EXPECT_EQ(" 100k", utility::int_format(100000));
+    EXPECT_EQ(" 125k", utility::int_format(125345));
+    EXPECT_EQ("1000k", utility::int_format(1000000));
+    EXPECT_EQ("9999k", utility::int_format(9999999));
+
+    // - 10,000,000 ~ : uses 'M' abbreviation when 'k' doesn't fit in 5 digits
+    EXPECT_EQ("  10M", utility::int_format(10000000));
+    EXPECT_EQ(" 100M", utility::int_format(100000000));
+    EXPECT_EQ("9999M", utility::int_format(9999999999LL));
+
+    // 2. Custom width
+    // - width = 4
+    EXPECT_EQ(" 999", utility::int_format(999, 4));
+    EXPECT_EQ("1000", utility::int_format(1000, 4));
+    EXPECT_EQ("9999", utility::int_format(9999, 4));
+    EXPECT_EQ(" 10k", utility::int_format(10000, 4));
+    EXPECT_EQ("100k", utility::int_format(100000, 4));
+    EXPECT_EQ("999k", utility::int_format(999999, 4));
+    EXPECT_EQ("  1M", utility::int_format(1000000, 4));
+    EXPECT_EQ(" 10M", utility::int_format(10000000, 4));
+    EXPECT_EQ("999M", utility::int_format(999999999, 4));
+
+    // - width = 6
+    EXPECT_EQ(" 99999", utility::int_format(99999, 6));
+    EXPECT_EQ("100000", utility::int_format(100000, 6));    // fits without abbreviation!
+    EXPECT_EQ("999999", utility::int_format(999999, 6));    // fits without abbreviation!
+    EXPECT_EQ(" 1000k", utility::int_format(1000000, 6));   // uses k first!
+    EXPECT_EQ("99999k", utility::int_format(99999999, 6));  // uses k first!
+    EXPECT_EQ("  100M", utility::int_format(100000000, 6)); // k exceeds 6, uses M!
+
+    // - width = 8 (iteration column)
+    EXPECT_EQ("       0", utility::int_format(0, 8));
+    EXPECT_EQ("   10000", utility::int_format(10000, 8));
+    EXPECT_EQ(" 9999999", utility::int_format(9999999, 8));
+    EXPECT_EQ("99999999", utility::int_format(99999999, 8));
+    EXPECT_EQ(" 100000k", utility::int_format(100000000, 8));
+    EXPECT_EQ("9999999k", utility::int_format(9999999999LL, 8));
+    EXPECT_EQ("1000000M", utility::int_format(1000000000000LL, 8));
+
+    // - Negative numbers
+    EXPECT_EQ("  -42", utility::int_format(-42, 5));
+    EXPECT_EQ(" -10k", utility::int_format(-10000, 5));
+}
+
+/*****************************************************************************/
 TEST_F(TestStringUtility, to_true_or_false) {
     EXPECT_EQ("False", utility::to_true_or_false(false));
     EXPECT_EQ("True", utility::to_true_or_false(true));
