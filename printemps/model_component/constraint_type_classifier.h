@@ -417,14 +417,34 @@ class ConstraintTypeClassifier {
     }
 
     /**************************************************************************/
+    /**************************************************************************/
     inline bool check_set_partitioning(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value == -1 &&
-            m_sense == ConstraintSense::Equal) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i = 1 <=> sum x_i - 1 = 0
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == -1 &&
+            m_sense == ConstraintSense::Equal;
+
+        // -sum x_i = -1 <=> -sum x_i + 1 = 0
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == 1 &&
+            m_sense == ConstraintSense::Equal;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::SetPartitioning;
             return true;
         }
@@ -434,13 +454,32 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_set_packing(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value == -1 &&
-            m_sense == ConstraintSense::Less) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i <= 1 <=> sum x_i - 1 <= 0
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == -1 &&
+            m_sense == ConstraintSense::Less;
+
+        // -sum x_i >= -1 <=> -sum x_i + 1 >= 0
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == 1 &&
+            m_sense == ConstraintSense::Greater;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::SetPacking;
             return true;
         }
@@ -450,13 +489,32 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_set_covering(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value == -1 &&
-            m_sense == ConstraintSense::Greater) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i >= 1 <=> sum x_i - 1 >= 0
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == -1 &&
+            m_sense == ConstraintSense::Greater;
+
+        // -sum x_i <= -1 <=> -sum x_i + 1 <= 0
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value == 1 &&
+            m_sense == ConstraintSense::Less;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::SetCovering;
             return true;
         }
@@ -466,13 +524,32 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_cardinality(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value <= -2 &&
-            m_sense == ConstraintSense::Equal) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i = k (k >= 2) <=> sum x_i - k = 0 (constant_value <= -2)
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value <= -2 &&
+            m_sense == ConstraintSense::Equal;
+
+        // -sum x_i = -k (k >= 2) <=> -sum x_i + k = 0 (constant_value >= 2)
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value >= 2 &&
+            m_sense == ConstraintSense::Equal;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::Cardinality;
             return true;
         }
@@ -482,13 +559,32 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_invariant_knapsack(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value <= -2 &&
-            m_sense == ConstraintSense::Less) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i <= k (k >= 2) <=> sum x_i - k <= 0 (constant_value <= -2)
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value <= -2 &&
+            m_sense == ConstraintSense::Less;
+
+        // -sum x_i >= -k (k >= 2) <=> -sum x_i + k >= 0 (constant_value >= 2)
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value >= 2 &&
+            m_sense == ConstraintSense::Greater;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::InvariantKnapsack;
             return true;
         }
@@ -498,13 +594,32 @@ class ConstraintTypeClassifier {
 
     /**************************************************************************/
     inline bool check_multiple_covering(void) {
-        if (!m_structure_ptr->has_only_binary_coefficient ||
-            !m_structure_ptr->has_only_binary_or_selection_variable) {
+        if (!m_structure_ptr->has_only_binary_or_selection_variable) {
             return false;
         }
 
-        if (m_structure_ptr->constant_value <= -2 &&
-            m_sense == ConstraintSense::Greater) {
+        const int N = m_structure_ptr->number_of_mutable_variables;
+        if (N <= 0) {
+            return false;
+        }
+
+        // sum x_i >= k (k >= 2) <=> sum x_i - k >= 0 (constant_value <= -2)
+        const bool is_positive_form =
+            static_cast<int>(
+                m_structure_ptr->plus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value <= -2 &&
+            m_sense == ConstraintSense::Greater;
+
+        // -sum x_i <= -k (k >= 2) <=> -sum x_i + k <= 0 (constant_value >= 2)
+        const bool is_negative_form =
+            static_cast<int>(
+                m_structure_ptr->minus_one_coefficient_variable_ptrs.size()) ==
+                N &&
+            m_structure_ptr->constant_value >= 2 &&
+            m_sense == ConstraintSense::Less;
+
+        if (is_positive_form || is_negative_form) {
             m_type = ConstraintType::MultipleCovering;
             return true;
         }

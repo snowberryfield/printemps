@@ -84,6 +84,9 @@ class PBCompetitionSolver {
                 }
             }
             std::cout << std::endl;
+        } else if (a_SOLVER.global_state().termination_status ==
+                   printemps::solver::TerminationStatus::INFEASIBLE) {
+            std::cout << "s UNSATISFIABLE" << std::endl;
         } else {
             std::cout << "s UNKNOWN" << std::endl;
         }

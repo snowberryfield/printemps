@@ -26,11 +26,11 @@ TEST_F(TestModel, initialize) {
     /// These declarations are for googletest constraint.
     /// http://opencv.jp/googletestdocs/FAQ.html#faq-the-compiler-complains-about-undefined-reference
     auto max_number_of_variable_proxies = model_handler::
-        ModelComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+        ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
     auto max_number_of_expression_proxies = model_handler::
-        ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
+        ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
     auto max_number_of_constraint_proxies = model_handler::
-        ModelComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
+        ComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES;
 
     EXPECT_EQ("", model.name());
 
@@ -48,7 +48,9 @@ TEST_F(TestModel, initialize) {
     EXPECT_FALSE(model.is_defined_objective());
     EXPECT_TRUE(model.is_minimization());
     EXPECT_FALSE(model.is_solved());
-    EXPECT_FALSE(model.is_integer());
+    EXPECT_FALSE(model.is_all_integer_coefficients());
+    EXPECT_FALSE(model.is_all_binary_variables());
+    EXPECT_FALSE(model.is_monotone());
     EXPECT_FALSE(model.is_feasible());
     EXPECT_FALSE(model.current_is_feasible());
     EXPECT_FALSE(model.previous_is_feasible());
@@ -70,7 +72,7 @@ TEST_F(TestModel, constructor_arg_name) {
 
 /*****************************************************************************/
 TEST_F(TestModel, build) {
-    /// This test is covered by test_model_builder.cpp.
+    /// This test is covered by test_builder.cpp.
 }
 
 /*****************************************************************************/
@@ -202,8 +204,18 @@ TEST_F(TestModel, is_solved) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, is_integer) {
-    /// This test is covered by test_model_builder.cpp.
+TEST_F(TestModel, is_all_integer_coefficients) {
+    /// This test is covered by test_builder.cpp.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_all_binary_variables) {
+    /// This test is covered by test_builder.cpp.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, is_monotone) {
+    /// This test is covered by test_builder.cpp.
 }
 
 /*****************************************************************************/
@@ -335,6 +347,11 @@ TEST_F(TestModel, initial_solution_handler) {
 
 /*****************************************************************************/
 TEST_F(TestModel, state_inspector) {
+    /// This test is skipped because it is just a getter.
+}
+
+/*****************************************************************************/
+TEST_F(TestModel, inspector) {
     /// This test is skipped because it is just a getter.
 }
 

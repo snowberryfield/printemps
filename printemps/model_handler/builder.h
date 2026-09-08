@@ -3,13 +3,13 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_BUILDER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_BUILDER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_BUILDER_H__
+#define PRINTEMPS_MODEL_HANDLER_BUILDER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelBuilder {
+class Builder {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
@@ -172,13 +172,12 @@ class ModelBuilder {
 
    public:
     /*************************************************************************/
-    ModelBuilder(void) {
+    Builder(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelBuilder(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
+    Builder(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
 
@@ -190,6 +189,7 @@ class ModelBuilder {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 
@@ -293,9 +293,19 @@ class ModelBuilder {
         this->setup_variable_related_selection_constraint_ptr_index();
 
         /**
+         * Set up the binary nature of variables.
+         */
+        this->setup_is_all_binary_variables();
+
+        /**
          * Set up the integrity of constraints.
          */
-        this->setup_is_integer();
+        this->setup_is_all_integer_coefficients();
+
+        /**
+         * Set up the monotonicity of constraints.
+         */
+        this->setup_is_monotone();
 
         /**
          * Store the global penalty coefficient for evaluation.
@@ -306,7 +316,7 @@ class ModelBuilder {
         /**
          * Modify the global penalty coefficient.
          */
-        if (model.m_is_integer &&
+        if (model.m_is_all_integer_coefficients &&
             a_OPTION.penalty.is_enabled_shrink_penalty_coefficient) {
             this->shrink_global_penalty_coefficient(a_IS_ENABLED_PRINT);
         }
@@ -399,30 +409,26 @@ class ModelBuilder {
     }
 
     /*************************************************************************/
-    inline void setup_is_integer(void) {
-        /**
-         * NOTE: In this method, m_reference is not referred because　the object
-         * may not have been set up at the stage this method is called.
-         */
-        auto &model = *m_model_ptr;
+    inline void setup_is_all_binary_variables(void) {
+        auto &model                     = *m_model_ptr;
+        model.m_is_all_binary_variables = model.inspector().compute_is_all_binary_variables();
+    }
 
-        model.m_is_integer = true;
-        for (auto &&proxy : model.constraint_proxies()) {
-            for (auto &&constraint : proxy.flat_indexed_constraints()) {
-                if (!constraint.structure().is_integer) {
-                    model.m_is_integer = false;
-                    return;
-                }
-            }
-        }
+    /*************************************************************************/
+    inline void setup_is_all_integer_coefficients(void) {
+        auto &model = *m_model_ptr;
+        model.m_is_all_integer_coefficients =
+            model.inspector().compute_is_all_integer_coefficients();
+    }
+
+    /*************************************************************************/
+    inline void setup_is_monotone(void) {
+        auto &model         = *m_model_ptr;
+        model.m_is_monotone = model.inspector().compute_is_monotone();
     }
 
     /*************************************************************************/
     inline void setup_constraint_compacts(void) {
-        /**
-         * NOTE: In this method, m_reference is not referred because　the object
-         * may not have been set up at the stage this method is called.
-         */
         auto &model                 = *m_model_ptr;
         int   number_of_constraints = 0;
 
@@ -453,10 +459,6 @@ class ModelBuilder {
 
     /*************************************************************************/
     inline void setup_variable_constraint_sensitivities(void) {
-        /**
-         * NOTE: In this method, m_reference is not referred because　the object
-         * may not have been set up at the stage this method is called.
-         */
         auto &model = *m_model_ptr;
 
         for (auto &&proxy : model.variable_proxies()) {
@@ -493,10 +495,6 @@ class ModelBuilder {
 
     /*************************************************************************/
     inline void setup_variable_constraint_sensitivities_compact(void) {
-        /**
-         * NOTE: In this method, m_reference is not referred because　the object
-         * may not have been set up at the stage this method is called.
-         */
         auto &model = *m_model_ptr;
         for (auto &&proxy : model.variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {

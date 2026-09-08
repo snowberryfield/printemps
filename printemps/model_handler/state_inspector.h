@@ -3,26 +3,25 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_STATE_INSPECTOR_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_STATE_INSPECTOR_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_STATE_INSPECTOR_H__
+#define PRINTEMPS_MODEL_HANDLER_STATE_INSPECTOR_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelStateInspector {
+class StateInspector {
    private:
     const model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    ModelStateInspector(void) {
+    StateInspector(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelStateInspector(
+    StateInspector(
         const model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
         this->setup(a_model_ptr);
     }
 
@@ -34,6 +33,7 @@ class ModelStateInspector {
     /*************************************************************************/
     inline void setup(
         const model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

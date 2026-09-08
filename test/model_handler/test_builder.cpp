@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelBuilder : public ::testing::Test {
+class TestBuilder : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,17 +20,17 @@ class TestModelBuilder : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, build) {
+TEST_F(TestBuilder, build) {
     /// This test is covered by the following submethods.
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, update_derived_components) {
+TEST_F(TestBuilder, update_derived_components) {
     /// This test is covered by the following submethods.
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_unique_names) {
+TEST_F(TestBuilder, setup_unique_names) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -56,32 +56,22 @@ TEST_F(TestModelBuilder, setup_unique_names) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_is_integer) {
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 2);
-        auto& g = model.create_constraint("g");
-        g       = x(0) + x(1) <= 1;
-
-        model.builder().setup_is_integer();
-        EXPECT_TRUE(model.is_integer());
-    }
-
-    {
-        model::Model<int, double> model;
-
-        auto& x = model.create_variables("x", 2);
-        auto& g = model.create_constraint("g");
-        g       = 1.1 * x(0) + x(1) <= 1;
-
-        model.builder().setup_is_integer();
-        EXPECT_FALSE(model.is_integer());
-    }
+TEST_F(TestBuilder, setup_is_all_binary_variables) {
+    /// This test is covered by test_inspector.cpp.
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_variable_related_constraints) {
+TEST_F(TestBuilder, setup_is_all_integer_coefficients) {
+    /// This test is covered by test_inspector.cpp.
+}
+
+/*****************************************************************************/
+TEST_F(TestBuilder, setup_is_monotone) {
+    /// This test is covered by test_inspector.cpp.
+}
+
+/*****************************************************************************/
+TEST_F(TestBuilder, setup_variable_related_constraints) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -131,7 +121,7 @@ TEST_F(TestModelBuilder, setup_variable_related_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_variable_objective_sensitivities) {
+TEST_F(TestBuilder, setup_variable_objective_sensitivities) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -152,7 +142,7 @@ TEST_F(TestModelBuilder, setup_variable_objective_sensitivities) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_variable_constraint_sensitivities) {
+TEST_F(TestBuilder, setup_variable_constraint_sensitivities) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -193,7 +183,7 @@ TEST_F(TestModelBuilder, setup_variable_constraint_sensitivities) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_related_selection_constraint_ptr_index) {
+TEST_F(TestBuilder, setup_related_selection_constraint_ptr_index) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 4, 0, 1);
@@ -237,29 +227,28 @@ TEST_F(TestModelBuilder, setup_related_selection_constraint_ptr_index) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder,
-       setup_variable_related_binary_coefficient_constraints) {
+TEST_F(TestBuilder, setup_variable_related_binary_coefficient_constraints) {
     /// This test is covered by setup_variable_related_constraint_ptrs().
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_neighborhood) {
+TEST_F(TestBuilder, setup_neighborhood) {
     /// This test is covered by test_neighborhood.h
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_fixed_sensitivities) {
+TEST_F(TestBuilder, setup_fixed_sensitivities) {
     /// This test is covered by test_expression.h
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder,
+TEST_F(TestBuilder,
        setup_positive_and_negative_coefficient_mutable_variable_ptrs) {
     /// This test is covered by test_expression.h
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, shrink_global_penalty_coefficient) {
+TEST_F(TestBuilder, shrink_global_penalty_coefficient) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 2, -1, 1);
@@ -271,13 +260,12 @@ TEST_F(TestModelBuilder, shrink_global_penalty_coefficient) {
     const auto EXPECTED_UPPER_BOUND = 2.0 * (1 + 1) + 1;   // 5
     const auto EXPECTED_LOWER_BOUND = 2.0 * (-1 - 1) + 1;  // -3
 
-    EXPECT_FLOAT_EQ(
-        EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1,
-        model.global_penalty_coefficient());  // 5 - (-3) + 1 = 9
+    EXPECT_FLOAT_EQ(EXPECTED_UPPER_BOUND - EXPECTED_LOWER_BOUND + 1,
+                    model.global_penalty_coefficient());  // 5 - (-3) + 1 = 9
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_selections) {
+TEST_F(TestBuilder, setup_selections) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, 0, 1);
@@ -305,7 +293,7 @@ TEST_F(TestModelBuilder, setup_selections) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_user_defined_selection_constraints) {
+TEST_F(TestBuilder, setup_user_defined_selection_constraints) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);
@@ -324,7 +312,7 @@ TEST_F(TestModelBuilder, setup_user_defined_selection_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelBuilder, setup_flippable_variable_ptr_pairs) {
+TEST_F(TestBuilder, setup_flippable_variable_ptr_pairs) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 3, 0, 1);

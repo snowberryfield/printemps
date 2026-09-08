@@ -13,18 +13,19 @@ class Model;
 }  // namespace printemps::model
 
 #include "reference.h"
-#include "model_component_creator.h"
-#include "model_builder.h"
-#include "model_evaluator.h"
-#include "model_updater.h"
-#include "model_initial_solution_handler.h"
-#include "model_json_handler.h"
-#include "model_linear_programming_handler.h"
-#include "model_mps_handler.h"
-#include "model_opb_handler.h"
-#include "model_wcnf_handler.h"
-#include "model_printer.h"
-#include "model_state_inspector.h"
+#include "component_creator.h"
+#include "builder.h"
+#include "evaluator.h"
+#include "updater.h"
+#include "initial_solution_handler.h"
+#include "json_handler.h"
+#include "matrix_model_handler.h"
+#include "mps_handler.h"
+#include "opb_handler.h"
+#include "wcnf_handler.h"
+#include "printer.h"
+#include "state_inspector.h"
+#include "inspector.h"
 
 #endif
 /*****************************************************************************/

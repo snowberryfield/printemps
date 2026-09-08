@@ -3,8 +3,8 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_MPS_HANDLER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_MPS_HANDLER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_MPS_HANDLER_H__
+#define PRINTEMPS_MODEL_HANDLER_MPS_HANDLER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
@@ -21,7 +21,6 @@ class ModelMPSHandler {
 
     /*************************************************************************/
     ModelMPSHandler(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
         this->setup(a_model_ptr);
     }
 
@@ -33,6 +32,7 @@ class ModelMPSHandler {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

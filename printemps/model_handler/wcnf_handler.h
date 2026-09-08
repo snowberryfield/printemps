@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 // Modified by Antigravity (2026)
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_WCNF_HANDLER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_WCNF_HANDLER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_WCNF_HANDLER_H__
+#define PRINTEMPS_MODEL_HANDLER_WCNF_HANDLER_H__
 
 #include "../wcnf/wcnf.h"
 
@@ -24,7 +24,6 @@ class ModelWCNFHandler {
 
     /*************************************************************************/
     ModelWCNFHandler(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
         this->setup(a_model_ptr);
     }
 
@@ -36,6 +35,7 @@ class ModelWCNFHandler {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

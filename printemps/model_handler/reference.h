@@ -36,7 +36,6 @@ struct Reference {
 
     /*************************************************************************/
     Reference(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
         this->setup(a_model_ptr);
     }
 
@@ -52,6 +51,7 @@ struct Reference {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

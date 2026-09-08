@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelComponentCreator : public ::testing::Test {
+class TestComponentCreator : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,10 +20,10 @@ class TestModelComponentCreator : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_variable_scalar_without_bound) {
+TEST_F(TestComponentCreator, create_variable_scalar_without_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -46,10 +46,10 @@ TEST_F(TestModelComponentCreator, create_variable_scalar_without_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_variable_scalar_with_bound) {
+TEST_F(TestComponentCreator, create_variable_scalar_with_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -73,11 +73,11 @@ TEST_F(TestModelComponentCreator, create_variable_scalar_with_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator,
+TEST_F(TestComponentCreator,
        create_variable_one_dimensional_without_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -101,10 +101,10 @@ TEST_F(TestModelComponentCreator,
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_variable_one_dimensional_with_bound) {
+TEST_F(TestComponentCreator, create_variable_one_dimensional_with_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -129,11 +129,11 @@ TEST_F(TestModelComponentCreator, create_variable_one_dimensional_with_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator,
+TEST_F(TestComponentCreator,
        create_variable_two_dimensional_without_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -158,10 +158,10 @@ TEST_F(TestModelComponentCreator,
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_variable_two_dimensional_with_bound) {
+TEST_F(TestComponentCreator, create_variable_two_dimensional_with_bound) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_VARIABLE_PROXIES;
              i++) {
             auto  name = "x" + std::to_string(i);
@@ -186,10 +186,10 @@ TEST_F(TestModelComponentCreator, create_variable_two_dimensional_with_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_expression_scalar) {
+TEST_F(TestComponentCreator, create_expression_scalar) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
@@ -209,10 +209,10 @@ TEST_F(TestModelComponentCreator, create_expression_scalar) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_expression_one_dimensional) {
+TEST_F(TestComponentCreator, create_expression_one_dimensional) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
@@ -233,10 +233,10 @@ TEST_F(TestModelComponentCreator, create_expression_one_dimensional) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_expression_two_dimensional) {
+TEST_F(TestComponentCreator, create_expression_two_dimensional) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto  name = "p" + std::to_string(i);
@@ -258,11 +258,11 @@ TEST_F(TestModelComponentCreator, create_expression_two_dimensional) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_expression_arg_expression_like) {
+TEST_F(TestComponentCreator, create_expression_arg_expression_like) {
     {
         model::Model<int, double> model;
 
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto name = "p" + std::to_string(i);
@@ -292,11 +292,11 @@ TEST_F(TestModelComponentCreator, create_expression_arg_expression_like) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_expression_arg_expression) {
+TEST_F(TestComponentCreator, create_expression_arg_expression) {
     {
         model::Model<int, double> model;
 
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_EXPRESSION_PROXIES;
              i++) {
             auto name = "p" + std::to_string(i);
@@ -327,10 +327,10 @@ TEST_F(TestModelComponentCreator, create_expression_arg_expression) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_constraint_scalar) {
+TEST_F(TestComponentCreator, create_constraint_scalar) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
@@ -350,10 +350,10 @@ TEST_F(TestModelComponentCreator, create_constraint_scalar) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_constraint_one_dimensional) {
+TEST_F(TestComponentCreator, create_constraint_one_dimensional) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
@@ -374,10 +374,10 @@ TEST_F(TestModelComponentCreator, create_constraint_one_dimensional) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_constraint_two_dimensional) {
+TEST_F(TestComponentCreator, create_constraint_two_dimensional) {
     {
         model::Model<int, double> model;
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto  name = "g" + std::to_string(i);
@@ -399,11 +399,11 @@ TEST_F(TestModelComponentCreator, create_constraint_two_dimensional) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, create_constraint_arg_constraint) {
+TEST_F(TestComponentCreator, create_constraint_arg_constraint) {
     {
         model::Model<int, double> model;
 
-        for (auto i = 0; i < model_handler::ModelComponentCreatorConstant::
+        for (auto i = 0; i < model_handler::ComponentCreatorConstant::
                                  MAX_NUMBER_OF_CONSTRAINT_PROXIES;
              i++) {
             auto name = "g" + std::to_string(i);
@@ -436,7 +436,7 @@ TEST_F(TestModelComponentCreator, create_constraint_arg_constraint) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, minimize_arg_expression_like) {
+TEST_F(TestComponentCreator, minimize_arg_expression_like) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
@@ -463,7 +463,7 @@ TEST_F(TestModelComponentCreator, minimize_arg_expression_like) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, minimize_arg_expression) {
+TEST_F(TestComponentCreator, minimize_arg_expression) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
@@ -490,7 +490,7 @@ TEST_F(TestModelComponentCreator, minimize_arg_expression) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, maximize_arg_expression_like) {
+TEST_F(TestComponentCreator, maximize_arg_expression_like) {
     model::Model<int, double> model;
 
     auto& x = model.create_variables("x", 10, -1, 1);
@@ -517,7 +517,7 @@ TEST_F(TestModelComponentCreator, maximize_arg_expression_like) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelComponentCreator, maximize_arg_expression) {
+TEST_F(TestComponentCreator, maximize_arg_expression) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 10, -1, 1);
     auto&                     p = model.create_expression("p", x.sum() + 1);

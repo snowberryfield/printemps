@@ -3,25 +3,24 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_PRINTER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_PRINTER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_PRINTER_H__
+#define PRINTEMPS_MODEL_HANDLER_PRINTER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelPrinter {
+class Printer {
    private:
     const model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    ModelPrinter(void) {
+    Printer(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelPrinter(const model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
+    Printer(const model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
 
@@ -33,6 +32,7 @@ class ModelPrinter {
     /*************************************************************************/
     inline void setup(
         const model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

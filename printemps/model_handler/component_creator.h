@@ -3,12 +3,12 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_COMPONENT_CREATOR_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_COMPONENT_CREATOR_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_COMPONENT_CREATOR_H__
+#define PRINTEMPS_MODEL_HANDLER_COMPONENT_CREATOR_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
-struct ModelComponentCreatorConstant {
+struct ComponentCreatorConstant {
     /**
      * Since the addresses of created variables, expressions, and constraints
      * must not be reallocated, addresses for them are reserved beforehand, and
@@ -21,19 +21,18 @@ struct ModelComponentCreatorConstant {
 
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelComponentCreator {
+class ComponentCreator {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    ModelComponentCreator(void) {
+    ComponentCreator(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelComponentCreator(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
+    ComponentCreator(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
 
@@ -45,6 +44,7 @@ class ModelComponentCreator {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
     /*************************************************************************/
@@ -60,12 +60,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_variable_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of variable definitions must be equal to or less "
                 "than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
         }
@@ -104,12 +104,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_variable_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of variable definitions must be equal to or less "
                 "than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
         }
@@ -150,12 +150,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_variable_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of variable definitions must be equal to or less "
                 "than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_VARIABLE_PROXIES) +
                     "."));
         }
@@ -195,12 +195,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_expression_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_EXPRESSION_PROXIES) +
                     "."));
         }
@@ -227,12 +227,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_expression_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_EXPRESSION_PROXIES) +
                     "."));
         }
@@ -259,12 +259,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_expression_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_EXPRESSION_PROXIES) +
                     "."));
         }
@@ -294,12 +294,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_expression_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_EXPRESSION_PROXIES) +
                     "."));
         }
@@ -329,12 +329,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_expression_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of expression definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_EXPRESSION_PROXIES) +
                     "."));
         }
@@ -361,12 +361,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_constraint_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_CONSTRAINT_PROXIES) +
                     "."));
         }
@@ -393,12 +393,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_constraint_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_CONSTRAINT_PROXIES) +
                     "."));
         }
@@ -425,12 +425,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_constraint_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_CONSTRAINT_PROXIES) +
                     "."));
         }
@@ -460,12 +460,12 @@ class ModelComponentCreator {
         const int PROXY_INDEX = model.m_constraint_proxies.size();
 
         if (PROXY_INDEX >=
-            ModelComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
+            ComponentCreatorConstant::MAX_NUMBER_OF_CONSTRAINT_PROXIES) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "The number of constraint definitions must be equal to or "
                 "less than " +
-                    std::to_string(ModelComponentCreatorConstant::
+                    std::to_string(ComponentCreatorConstant::
                                        MAX_NUMBER_OF_CONSTRAINT_PROXIES) +
                     "."));
         }

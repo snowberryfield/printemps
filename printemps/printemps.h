@@ -21,7 +21,7 @@
 #include "neighborhood/neighborhood.h"
 #include "preprocess/preprocess.h"
 #include "solution/solution.h"
-#include "linear_programming/linear_programming.h"
+#include "matrix_model/matrix_model.h"
 #include "model_handler/model_handler.h"
 #include "model/model.h"
 #include "solver/solver.h"

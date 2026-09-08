@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelUpdater : public ::testing::Test {
+class TestUpdater : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,7 +20,7 @@ class TestModelUpdater : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_arg_void) {
+TEST_F(TestUpdater, update_arg_void) {
     model::Model<int, double> model;
 
     auto sequence = utility::sequence(10);
@@ -42,7 +42,7 @@ TEST_F(TestModelUpdater, update_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_arg_move) {
+TEST_F(TestUpdater, update_arg_move) {
     model::Model<int, double> model;
 
     auto sequence = utility::sequence(10);
@@ -75,7 +75,7 @@ TEST_F(TestModelUpdater, update_arg_move) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_dependent_variables_and_disabled_constraints) {
+TEST_F(TestUpdater, update_dependent_variables_and_disabled_constraints) {
     model::Model<int, double> model;
     option::Option            option;
 
@@ -106,7 +106,7 @@ TEST_F(TestModelUpdater, update_dependent_variables_and_disabled_constraints) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_variable_bounds) {
+TEST_F(TestUpdater, update_variable_bounds) {
     {
         model::Model<int, double> model;
 
@@ -158,10 +158,50 @@ TEST_F(TestModelUpdater, update_variable_bounds) {
         EXPECT_EQ(100, x(0).lower_bound());
         EXPECT_EQ(0, y(0).lower_bound());
     }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 200);
+        auto& y = model.create_variable("y", 0, 200);
+        model.maximize(x + 3 * y);
+        model.problem_size_reducer_basic().setup(&model);
+        model.updater().update_variable_bounds(100, false, false);
+
+        EXPECT_EQ(100, x(0).upper_bound());
+        EXPECT_EQ(33, y(0).upper_bound());
+    }
+
+    {
+        model::Model<int, double> model;
+
+        auto& x = model.create_variable("x", 0, 100);
+        auto& y = model.create_variable("y", 0, 100);
+        model.minimize(x + 3 * y);
+
+        option::Option option;
+        model.reference().setup(&model);
+        model.reference().update_variable_reference();
+        model.neighborhood().setup(&model, option);
+
+        model.neighborhood().integer().enable();
+        EXPECT_TRUE(model.neighborhood().integer().is_enabled());
+
+        model.problem_size_reducer_basic().setup(&model);
+        // Tighten bounds: y in [0, 1] becomes binary
+        model.updater().update_variable_bounds(3, true, false);
+
+        EXPECT_TRUE(model.neighborhood().integer().is_enabled());
+        EXPECT_EQ(model_component::VariableType::Binary, y(0).type());
+        EXPECT_EQ(1u,
+                  model.reference().variable_type.binary_variable_ptrs.size());
+        EXPECT_EQ(1u,
+                  model.reference().variable_type.integer_variable_ptrs.size());
+    }
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_violative_constraint_ptrs_and_feasibility) {
+TEST_F(TestUpdater, update_violative_constraint_ptrs_and_feasibility) {
     model::Model<int, double> model;
 
     auto&                  x = model.create_variable("x", 0, 10);
@@ -194,7 +234,7 @@ TEST_F(TestModelUpdater, update_violative_constraint_ptrs_and_feasibility) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, update_variable_improvability) {
+TEST_F(TestUpdater, update_variable_improvability) {
     {
         model::Model<int, double> model;
 
@@ -465,7 +505,7 @@ TEST_F(TestModelUpdater, update_variable_improvability) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, reset_variable_objective_improvabilities_arg_void) {
+TEST_F(TestUpdater, reset_variable_objective_improvabilities_arg_void) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -487,7 +527,7 @@ TEST_F(TestModelUpdater, reset_variable_objective_improvabilities_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater,
+TEST_F(TestUpdater,
        reset_variable_objective_improvabilities_arg_variable_ptrs) {
     model::Model<int, double> model;
 
@@ -513,7 +553,7 @@ TEST_F(TestModelUpdater,
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater, reset_variable_feasibility_improvabilities_arg_void) {
+TEST_F(TestUpdater, reset_variable_feasibility_improvabilities_arg_void) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x", 0, 1);
@@ -535,7 +575,7 @@ TEST_F(TestModelUpdater, reset_variable_feasibility_improvabilities_arg_void) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater,
+TEST_F(TestUpdater,
        reset_variable_feasibility_improvabilities_arg_variable_ptrs) {
     model::Model<int, double> model;
 
@@ -561,7 +601,7 @@ TEST_F(TestModelUpdater,
 }
 
 /*****************************************************************************/
-TEST_F(TestModelUpdater,
+TEST_F(TestUpdater,
        reset_variable_feasibility_improvabilities_arg_constraint_ptrs) {
     model::Model<int, double> model;
 

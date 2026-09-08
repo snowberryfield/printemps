@@ -15,7 +15,7 @@ class Model;
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelStateInspector;
+class StateInspector;
 }  // namespace printemps::model_handler
 
 #include "sparse_solution.h"

@@ -3,26 +3,25 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_INITIAL_SOLUTION_HANDLER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_INITIAL_SOLUTION_HANDLER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_INITIAL_SOLUTION_HANDLER_H__
+#define PRINTEMPS_MODEL_HANDLER_INITIAL_SOLUTION_HANDLER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelInitialSolutionHandler {
+class InitialSolutionHandler {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    ModelInitialSolutionHandler(void) {
+    InitialSolutionHandler(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelInitialSolutionHandler(
+    InitialSolutionHandler(
         model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
         this->setup(a_model_ptr);
     }
 
@@ -34,6 +33,7 @@ class ModelInitialSolutionHandler {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 

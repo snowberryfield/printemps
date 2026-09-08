@@ -274,11 +274,14 @@ class MaxSATEvaluationSolver {
         }
 
         /**
-         * MSE 2026 status / exit code mapping. PRINTEMPS does not prove
-         * optimality nor unsatisfiability of hard clauses, so we emit
-         * SATISFIABLE on any feasible incumbent and UNKNOWN otherwise.
-         * UNSATISFIABLE is handled by the main() exception handler.
+         * MSE 2026 status / exit code mapping.
          */
+        if (RESULT.status.termination_status ==
+            solver::TerminationStatus::INFEASIBLE) {
+            std::cout << "s UNSATISFIABLE" << std::endl;
+            return 20;
+        }
+
         if (m_have_emitted_solution) {
             std::cout << "s SATISFIABLE" << std::endl;
             return 10;

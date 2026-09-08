@@ -3,25 +3,24 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_MODEL_UPDATER_H__
-#define PRINTEMPS_MODEL_HANDLER_MODEL_UPDATER_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_UPDATER_H__
+#define PRINTEMPS_MODEL_HANDLER_UPDATER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class ModelUpdater {
+class Updater {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    ModelUpdater(void) {
+    Updater(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    ModelUpdater(model::Model<T_Variable, T_Expression> *a_model_ptr) {
-        this->initialize();
+    Updater(model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
 
@@ -33,6 +32,7 @@ class ModelUpdater {
     /*************************************************************************/
     inline void setup(
         model::Model<T_Variable, T_Expression> *a_model_ptr) noexcept {
+        this->initialize();
         m_model_ptr = a_model_ptr;
     }
 
@@ -155,7 +155,7 @@ class ModelUpdater {
         auto &model = *m_model_ptr;
 
         model_component::Constraint<T_Variable, T_Expression> constraint;
-        if (model.is_minimization() && a_IS_PRIMAL) {
+        if (model.is_minimization() == a_IS_PRIMAL) {
             constraint = model.objective().expression() <= a_OBJECTIVE;
         } else {
             constraint = model.objective().expression() >= a_OBJECTIVE;
@@ -173,29 +173,43 @@ class ModelUpdater {
         }
 
         {
-            const auto RESULT =
-                model.problem_size_reducer_basic()
-                    .remove_implicit_fixed_variables(a_IS_ENABLED_PRINT);
+            model.problem_size_reducer_basic().remove_implicit_fixed_variables(
+                a_IS_ENABLED_PRINT);
 
             /**
-             * If there is new fixed variable, setup the variable category
-             * and the binary/integer neighborhood again.
+             * If there is new fixed variable or updated variable bounds,
+             * setup the variable category and the binary/integer neighborhood
+             * again.
              */
-            if (RESULT.number_of_fixed_variables > 0) {
-                model.reference().update_variable_reference();
-                auto       &neighborhood  = model.neighborhood();
-                const auto &VARIABLE_TYPE = model.reference().variable_type;
+            model.reference().update_variable_reference();
+            auto       &neighborhood  = model.neighborhood();
+            const auto &VARIABLE_TYPE = model.reference().variable_type;
 
-                neighborhood.binary().setup(VARIABLE_TYPE.binary_variable_ptrs);
-                neighborhood.integer().setup(
-                    VARIABLE_TYPE.integer_variable_ptrs);
-                neighborhood.selection().setup(
-                    VARIABLE_TYPE.selection_variable_ptrs);
-                neighborhood.chain().remove_moves_on_fixed_variables();
+            const bool IS_ENABLED_BINARY  = neighborhood.binary().is_enabled();
+            const bool IS_ENABLED_INTEGER = neighborhood.integer().is_enabled();
+            const bool IS_ENABLED_SELECTION =
+                neighborhood.selection().is_enabled();
 
-                model.builder()
-                    .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
+            neighborhood.binary().setup(VARIABLE_TYPE.binary_variable_ptrs);
+            neighborhood.integer().setup(VARIABLE_TYPE.integer_variable_ptrs);
+            neighborhood.selection().setup(
+                VARIABLE_TYPE.selection_variable_ptrs);
+            neighborhood.chain().remove_moves_on_fixed_variables();
+
+            if (IS_ENABLED_BINARY && neighborhood.binary().moves().size() > 0) {
+                neighborhood.binary().enable();
             }
+            if (IS_ENABLED_INTEGER &&
+                neighborhood.integer().moves().size() > 0) {
+                neighborhood.integer().enable();
+            }
+            if (IS_ENABLED_SELECTION &&
+                neighborhood.selection().moves().size() > 0) {
+                neighborhood.selection().enable();
+            }
+
+            model.builder()
+                .setup_positive_and_negative_coefficient_mutable_variable_ptrs();
         }
     }
 

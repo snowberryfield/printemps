@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelEvaluator : public ::testing::Test {
+class TestEvaluator : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,7 +20,7 @@ class TestModelEvaluator : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelEvaluator, evaluate) {
+TEST_F(TestEvaluator, evaluate) {
     /// minimize
     {
         model::Model<int, double> model;
@@ -387,7 +387,7 @@ TEST_F(TestModelEvaluator, evaluate) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelEvaluator, compute_lagrangian) {
+TEST_F(TestEvaluator, compute_lagrangian) {
     model::Model<int, double> model;
 
     auto sequence = utility::sequence(10);
@@ -417,7 +417,7 @@ TEST_F(TestModelEvaluator, compute_lagrangian) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelEvaluator, compute_naive_dual_bound) {
+TEST_F(TestEvaluator, compute_naive_dual_bound) {
     {
         model::Model<int, double> model;
 

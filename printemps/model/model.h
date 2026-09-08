@@ -11,10 +11,10 @@ namespace printemps::model {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class Model {
-    friend class model_handler::ModelBuilder<T_Variable, T_Expression>;
-    friend class model_handler::ModelComponentCreator<T_Variable, T_Expression>;
-    friend class model_handler::ModelEvaluator<T_Variable, T_Expression>;
-    friend class model_handler::ModelUpdater<T_Variable, T_Expression>;
+    friend class model_handler::Builder<T_Variable, T_Expression>;
+    friend class model_handler::ComponentCreator<T_Variable, T_Expression>;
+    friend class model_handler::Evaluator<T_Variable, T_Expression>;
+    friend class model_handler::Updater<T_Variable, T_Expression>;
 
    private:
     std::string m_name;
@@ -38,7 +38,10 @@ class Model {
     bool m_is_defined_objective;
     bool m_is_minimization;
     bool m_is_solved;
-    bool m_is_integer;
+    bool m_is_all_integer_coefficients;
+    bool m_is_all_binary_variables;
+    bool m_is_monotone;
+
     bool m_current_is_feasible;
     bool m_previous_is_feasible;
 
@@ -75,24 +78,24 @@ class Model {
 
     preprocess::Verifier<T_Variable, T_Expression> m_verifier;
 
-    model_handler::Reference<T_Variable, T_Expression>    m_reference_original;
-    model_handler::Reference<T_Variable, T_Expression>    m_reference;
-    model_handler::ModelBuilder<T_Variable, T_Expression> m_builder;
-    model_handler::ModelComponentCreator<T_Variable, T_Expression>
-                                                            m_component_creator;
-    model_handler::ModelEvaluator<T_Variable, T_Expression> m_evaluator;
-    model_handler::ModelUpdater<T_Variable, T_Expression>   m_updater;
-    model_handler::ModelPrinter<T_Variable, T_Expression>   m_printer;
+    model_handler::Reference<T_Variable, T_Expression> m_reference_original;
+    model_handler::Reference<T_Variable, T_Expression> m_reference;
+    model_handler::Builder<T_Variable, T_Expression>   m_builder;
+    model_handler::ComponentCreator<T_Variable, T_Expression>
+                                                       m_component_creator;
+    model_handler::Evaluator<T_Variable, T_Expression> m_evaluator;
+    model_handler::Updater<T_Variable, T_Expression>   m_updater;
+    model_handler::Printer<T_Variable, T_Expression>   m_printer;
     model_handler::ModelMPSHandler<T_Variable, T_Expression>  m_mps_handler;
     model_handler::ModelOPBHandler<T_Variable, T_Expression>  m_opb_handler;
     model_handler::ModelWCNFHandler<T_Variable, T_Expression> m_wcnf_handler;
     model_handler::ModelJSONHandler<T_Variable, T_Expression> m_json_handler;
-    model_handler::ModelLinearProgrammingHandler<T_Variable, T_Expression>
-        m_linear_programming_handler;
-    model_handler::ModelInitialSolutionHandler<T_Variable, T_Expression>
+    model_handler::MatrixModelHandler<T_Variable, T_Expression>
+        m_matrix_model_handler;
+    model_handler::InitialSolutionHandler<T_Variable, T_Expression>
         m_initial_solution_handler;
-    model_handler::ModelStateInspector<T_Variable, T_Expression>
-        m_state_inspector;
+    model_handler::StateInspector<T_Variable, T_Expression> m_state_inspector;
+    model_handler::Inspector<T_Variable, T_Expression>      m_inspector;
 
     /*************************************************************************/
     Model(const Model &) = default;
@@ -116,15 +119,12 @@ class Model {
     void initialize(void) {
         m_name = "";
 
-        m_variable_proxies.reserve(
-            model_handler::ModelComponentCreatorConstant::
-                MAX_NUMBER_OF_VARIABLE_PROXIES);
-        m_expression_proxies.reserve(
-            model_handler::ModelComponentCreatorConstant::
-                MAX_NUMBER_OF_EXPRESSION_PROXIES);
-        m_constraint_proxies.reserve(
-            model_handler::ModelComponentCreatorConstant::
-                MAX_NUMBER_OF_CONSTRAINT_PROXIES);
+        m_variable_proxies.reserve(model_handler::ComponentCreatorConstant::
+                                       MAX_NUMBER_OF_VARIABLE_PROXIES);
+        m_expression_proxies.reserve(model_handler::ComponentCreatorConstant::
+                                         MAX_NUMBER_OF_EXPRESSION_PROXIES);
+        m_constraint_proxies.reserve(model_handler::ComponentCreatorConstant::
+                                         MAX_NUMBER_OF_CONSTRAINT_PROXIES);
         m_objective.initialize();
         m_constraint_compacts.clear();
 
@@ -132,10 +132,13 @@ class Model {
         m_expression_names.clear();
         m_constraint_names.clear();
 
-        m_is_defined_objective = false;
-        m_is_minimization      = true;
-        m_is_solved            = false;
-        m_is_integer           = false;
+        m_is_defined_objective        = false;
+        m_is_minimization             = true;
+        m_is_solved                   = false;
+        m_is_all_integer_coefficients = false;
+        m_is_all_binary_variables     = false;
+        m_is_monotone                 = false;
+
         m_current_is_feasible  = false;
         m_previous_is_feasible = false;
 
@@ -168,9 +171,10 @@ class Model {
         m_opb_handler.setup(this);
         m_wcnf_handler.setup(this);
         m_json_handler.setup(this);
-        m_linear_programming_handler.setup(this);
+        m_matrix_model_handler.setup(this);
         m_initial_solution_handler.setup(this);
         m_state_inspector.setup(this);
+        m_inspector.setup(this);
     }
 
     /*************************************************************************/
@@ -454,8 +458,18 @@ class Model {
     }
 
     /*************************************************************************/
-    inline bool is_integer(void) const noexcept {
-        return m_is_integer;
+    inline bool is_all_integer_coefficients(void) const noexcept {
+        return m_is_all_integer_coefficients;
+    }
+
+    /*************************************************************************/
+    inline bool is_all_binary_variables(void) const noexcept {
+        return m_is_all_binary_variables;
+    }
+
+    /*************************************************************************/
+    inline bool is_monotone(void) const noexcept {
+        return m_is_monotone;
     }
 
     /*************************************************************************/
@@ -598,31 +612,31 @@ class Model {
     }
 
     /*************************************************************************/
-    inline model_handler::ModelBuilder<T_Variable, T_Expression> &builder(
+    inline model_handler::Builder<T_Variable, T_Expression> &builder(
         void) noexcept {
         return m_builder;
     }
 
     /*************************************************************************/
-    inline model_handler::ModelComponentCreator<T_Variable, T_Expression> &
+    inline model_handler::ComponentCreator<T_Variable, T_Expression> &
     component_creator(void) noexcept {
         return m_component_creator;
     }
 
     /*************************************************************************/
-    inline model_handler::ModelEvaluator<T_Variable, T_Expression> &evaluator(
+    inline model_handler::Evaluator<T_Variable, T_Expression> &evaluator(
         void) noexcept {
         return m_evaluator;
     }
 
     /*************************************************************************/
-    inline model_handler::ModelUpdater<T_Variable, T_Expression> &updater(
+    inline model_handler::Updater<T_Variable, T_Expression> &updater(
         void) noexcept {
         return m_updater;
     }
 
     /*************************************************************************/
-    inline const model_handler::ModelPrinter<T_Variable, T_Expression> &printer(
+    inline const model_handler::Printer<T_Variable, T_Expression> &printer(
         void) const noexcept {
         return m_printer;
     }
@@ -652,23 +666,33 @@ class Model {
     }
 
     /*************************************************************************/
-    inline model_handler::ModelLinearProgrammingHandler<T_Variable,
-                                                        T_Expression> &
-    linear_programming_handler(void) noexcept {
-        return m_linear_programming_handler;
+    inline model_handler::MatrixModelHandler<T_Variable, T_Expression> &
+    matrix_model_handler(void) noexcept {
+        return m_matrix_model_handler;
     }
 
     /*************************************************************************/
-    inline model_handler::ModelInitialSolutionHandler<T_Variable,
-                                                      T_Expression> &
+    inline model_handler::InitialSolutionHandler<T_Variable, T_Expression> &
     initial_solution_handler(void) noexcept {
         return m_initial_solution_handler;
     }
 
     /*************************************************************************/
-    inline model_handler::ModelStateInspector<T_Variable, T_Expression> &
+    inline model_handler::StateInspector<T_Variable, T_Expression> &
     state_inspector(void) noexcept {
         return m_state_inspector;
+    }
+
+    /*************************************************************************/
+    inline model_handler::Inspector<T_Variable, T_Expression> &
+    inspector(void) noexcept {
+        return m_inspector;
+    }
+
+    /*************************************************************************/
+    inline const model_handler::Inspector<T_Variable, T_Expression> &
+    inspector(void) const noexcept {
+        return m_inspector;
     }
 };
 using IPModel = Model<int, double>;

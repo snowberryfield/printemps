@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelStateInspector : public ::testing::Test {
+class TestStateInspector : public ::testing::Test {
    protected:
     utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
@@ -33,7 +33,7 @@ class TestModelStateInspector : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, generate_variable_parameter_proxies) {
+TEST_F(TestStateInspector, generate_variable_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -74,7 +74,7 @@ TEST_F(TestModelStateInspector, generate_variable_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, generate_expression_parameter_proxies) {
+TEST_F(TestStateInspector, generate_expression_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& p = model.create_expression("p");
@@ -116,7 +116,7 @@ TEST_F(TestModelStateInspector, generate_expression_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, generate_constraint_parameter_proxies) {
+TEST_F(TestStateInspector, generate_constraint_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -158,7 +158,7 @@ TEST_F(TestModelStateInspector, generate_constraint_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_local_penalty_coefficient_proxies) {
+TEST_F(TestStateInspector, export_local_penalty_coefficient_proxies) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -221,7 +221,7 @@ TEST_F(TestModelStateInspector, export_local_penalty_coefficient_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_update_count_proxies) {
+TEST_F(TestStateInspector, export_update_count_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -276,7 +276,7 @@ TEST_F(TestModelStateInspector, export_update_count_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_violation_count_proxies) {
+TEST_F(TestStateInspector, export_violation_count_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -350,7 +350,7 @@ TEST_F(TestModelStateInspector, export_violation_count_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_dense_solution) {
+TEST_F(TestStateInspector, export_dense_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -470,7 +470,7 @@ TEST_F(TestModelStateInspector, export_dense_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_sparse_solution) {
+TEST_F(TestStateInspector, export_sparse_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -502,7 +502,7 @@ TEST_F(TestModelStateInspector, export_sparse_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_named_solution) {
+TEST_F(TestStateInspector, export_named_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -650,7 +650,7 @@ TEST_F(TestModelStateInspector, export_named_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_named_penalty_coefficients) {
+TEST_F(TestStateInspector, export_named_penalty_coefficients) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -685,7 +685,7 @@ TEST_F(TestModelStateInspector, export_named_penalty_coefficients) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_named_update_counts) {
+TEST_F(TestStateInspector, export_named_update_counts) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -719,7 +719,7 @@ TEST_F(TestModelStateInspector, export_named_update_counts) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelStateInspector, export_named_violation_counts) {
+TEST_F(TestStateInspector, export_named_violation_counts) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");

@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestModelInitialSolutionHandler : public ::testing::Test {
+class TestInitialSolutionHandler : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -20,7 +20,7 @@ class TestModelInitialSolutionHandler : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestModelInitialSolutionHandler, import_solution_arg_dense_solution) {
+TEST_F(TestInitialSolutionHandler, import_solution_arg_dense_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -64,7 +64,7 @@ TEST_F(TestModelInitialSolutionHandler, import_solution_arg_dense_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelInitialSolutionHandler, import_solution_arg_sparse_solution) {
+TEST_F(TestInitialSolutionHandler, import_solution_arg_sparse_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -90,7 +90,7 @@ TEST_F(TestModelInitialSolutionHandler, import_solution_arg_sparse_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelInitialSolutionHandler, import_solution_arg_unordered_map) {
+TEST_F(TestInitialSolutionHandler, import_solution_arg_unordered_map) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -116,7 +116,7 @@ TEST_F(TestModelInitialSolutionHandler, import_solution_arg_unordered_map) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelInitialSolutionHandler, fix_variables) {
+TEST_F(TestInitialSolutionHandler, fix_variables) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -147,7 +147,7 @@ TEST_F(TestModelInitialSolutionHandler, fix_variables) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModelInitialSolutionHandler, unfix_variables) {
+TEST_F(TestInitialSolutionHandler, unfix_variables) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
