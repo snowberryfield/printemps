@@ -125,6 +125,16 @@ PYBIND11_MODULE(_printemps, m) {
         .value("Independent", pp::option::selection_mode::Independent)
         .value("UserDefined", pp::option::selection_mode::UserDefined);
 
+    py::enum_<pp::solver::TerminationStatus>(m, "TerminationStatus")
+        .value("UNKNOWN", pp::solver::TerminationStatus::UNKNOWN)
+        .value("OPTIMAL", pp::solver::TerminationStatus::OPTIMAL)
+        .value("FEASIBLE", pp::solver::TerminationStatus::FEASIBLE)
+        .value("INFEASIBLE", pp::solver::TerminationStatus::INFEASIBLE)
+        .value("TIME_OVER", pp::solver::TerminationStatus::TIME_OVER)
+        .value("ITERATION_OVER", pp::solver::TerminationStatus::ITERATION_OVER)
+        .value("INTERRUPTION", pp::solver::TerminationStatus::INTERRUPTION)
+        .export_values();
+
     // ----- Variable -------------------------------------------------------
     // Variable has deleted copy constructor; pybind11 must never own or copy
     // it. Always returned by reference from a VariableProxy that lives inside
@@ -731,6 +741,9 @@ PYBIND11_MODULE(_printemps, m) {
         .def_readonly("total_violation", &Status::total_violation)
         .def_readonly("is_found_feasible_solution",
                       &Status::is_found_feasible_solution)
+        .def_readonly("termination_status", &Status::termination_status)
+        .def_property_readonly("is_proven_infeasible",
+                                &Status::is_proven_infeasible)
         .def_readonly("elapsed_time", &Status::elapsed_time)
         .def_readonly("number_of_variables", &Status::number_of_variables)
         .def_readonly("number_of_constraints", &Status::number_of_constraints)
