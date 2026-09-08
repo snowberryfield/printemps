@@ -225,7 +225,7 @@ class DependentIntegerVariableExtractor {
             }
         };
 
-        for (int i = 0; i < SIZE; ++i) {
+        for (int i = 0; i < SIZE; i++) {
             if (dfs_order[i] < 0) {
                 dfs(i);
             }
@@ -237,7 +237,7 @@ class DependentIntegerVariableExtractor {
         }
 
         m_extractable_flags.assign(SIZE, true);
-        for (int i = 0; i < SIZE; ++i) {
+        for (int i = 0; i < SIZE; i++) {
             if (scc_size[scc_id[i]] > 1) {
                 m_extractable_flags[i] = false;
             }
