@@ -426,7 +426,7 @@ class ProblemSizeReducerBasic {
                 if (a_constraint_ptr->is_enabled()) {
                     a_constraint_ptr->disable();
                     is_constraint_disabled = true;
-                    return ProblemSizeReducerResult(0, is_constraint_disabled,
+                    return ProblemSizeReducerResult(1, is_constraint_disabled,
                                                     is_variable_bound_updated);
                 }
             } else if ((a_constraint_ptr->sense() ==
