@@ -420,6 +420,84 @@ TEST_F(TestOption, setup) {
             1,      //
             option.pdlp.log_interval);
 
+        /// cdcl
+        EXPECT_EQ(  //
+            false,  //
+            option.cdcl.is_enabled);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.iteration_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.time_max);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.time_offset);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.log_interval);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.conflict_max);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.cdcl.seed);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.cdcl.is_enabled_restart);
+
+        EXPECT_EQ(                        //
+            cdcl_restart_mode::Adaptive,  //
+            option.cdcl.restart_mode);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.initial_conflict_limit);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.restart_exponential_increase_rate);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.restart_adaptive_window);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl
+                .restart_adaptive_literal_block_distance_ratio_threshold);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.cdcl.is_enabled_learned_constraint_reduction);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.learned_constraint_capacity);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.learned_constraint_reduction_rate);
+
+        EXPECT_EQ(  //
+            1,      //
+            option.cdcl.literal_block_distance_protection_threshold);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.variable_activity_decay_rate);
+
+        EXPECT_EQ(  //
+            false,  //
+            option.cdcl.is_enabled_phase_saving);
+
         /// lagrange_dual
         EXPECT_EQ(  //
             true,   //
@@ -604,6 +682,10 @@ TEST_F(TestOption, setup) {
         EXPECT_FLOAT_EQ(     //
             tabu_mode::All,  //
             option.tabu_search.tabu_mode);
+
+        EXPECT_EQ(                    //
+            cdcl_restart_mode::Luby,  //
+            option.cdcl.restart_mode);
     }
 
     {
@@ -634,6 +716,10 @@ TEST_F(TestOption, setup) {
         EXPECT_FLOAT_EQ(     //
             tabu_mode::Any,  //
             option.tabu_search.tabu_mode);
+
+        EXPECT_EQ(                         //
+            cdcl_restart_mode::Geometric,  //
+            option.cdcl.restart_mode);
     }
 }
 
@@ -923,6 +1009,86 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         1,      //
         to_int(output.at("feasible_solutions_capacity")));
+
+    /// cdcl
+    auto cdcl = std::any_cast<utility::json::JsonObject>(obj.at("cdcl"));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(cdcl.at("is_enabled")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("iteration_max")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("time_max")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("time_offset")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("log_interval")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("conflict_max")));
+
+    EXPECT_EQ(  //
+        2,      //
+        to_int(cdcl.at("seed")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(cdcl.at("is_enabled_restart")));
+
+    EXPECT_EQ(       //
+        "Adaptive",  //
+        to_str(cdcl.at("restart_mode")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("initial_conflict_limit")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("restart_exponential_increase_rate")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("restart_adaptive_window")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at(
+            "restart_adaptive_literal_block_distance_ratio_threshold")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(cdcl.at("is_enabled_learned_constraint_reduction")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("learned_constraint_capacity")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("learned_constraint_reduction_rate")));
+
+    EXPECT_EQ(  //
+        1,      //
+        to_int(cdcl.at("literal_block_distance_protection_threshold")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("variable_activity_decay_rate")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(cdcl.at("is_enabled_phase_saving")));
 
     /// lagrange_dual
     auto lagrange_dual =

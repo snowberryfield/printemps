@@ -66,6 +66,12 @@
         "is_enabled_store_feasible_solutions": false,
         "feasible_solutions_capacity": 1000
     },
+    "cdcl": { 
+        "is_enabled": true, 
+        "iteration_max": 100000, 
+        "time_max": 30.0, 
+        "log_interval": 1000
+    }, 
     "lagrange_dual": {
         "is_enabled": false,
         "iteration_max": 10000,

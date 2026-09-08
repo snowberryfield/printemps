@@ -110,6 +110,27 @@
         "is_enabled_pock_chambolle_scaling": false,
         "log_interval": 1
     },
+    "cdcl": { 
+        "is_enabled": false, 
+        "iteration_max": 1 , 
+        "time_max": 0.1,
+        "time_offset": 0.1,
+        "log_interval": 1, 
+        "conflict_max": 1, 
+        "seed": 2, 
+        "is_enabled_restart": false, 
+        "restart_mode": "Adaptive",
+        "initial_conflict_limit": 1, 
+        "restart_exponential_increase_rate": 0.1, 
+        "restart_adaptive_window": 1,
+        "restart_adaptive_literal_block_distance_ratio_threshold": 0.1,
+        "is_enabled_learned_constraint_reduction": false, 
+        "learned_constraint_capacity": 1, 
+        "learned_constraint_reduction_rate": 0.1, 
+        "literal_block_distance_protection_threshold": 1, 
+        "variable_activity_decay_rate": 0.1, 
+        "is_enabled_phase_saving": false
+    }, 
     "lagrange_dual": {
         "is_enabled": true,
         "iteration_max": 1,

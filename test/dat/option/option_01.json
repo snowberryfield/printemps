@@ -10,6 +10,9 @@
     "output": {
         "verbose": "Off"
     },
+    "cdcl": {
+        "restart_mode": "Luby"
+    },
     "tabu_search": {
         "tabu_mode": "All"
     }

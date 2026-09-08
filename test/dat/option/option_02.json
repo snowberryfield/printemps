@@ -10,6 +10,9 @@
     "output": {
         "verbose": "Debug"
     },
+    "cdcl": {
+        "restart_mode": "Geometric"
+    },
     "tabu_search": {
         "tabu_mode": "Any"
     }

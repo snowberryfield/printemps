@@ -22,8 +22,8 @@ inline bool read_json(double *a_parameter, const std::string &a_NAME,
 }
 
 /**************************************************************************/
-inline bool read_json(restart_mode::RestartMode *      a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(restart_mode::RestartMode       *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
@@ -45,8 +45,8 @@ inline bool read_json(restart_mode::RestartMode *      a_parameter,
 
 /*****************************************************************************/
 inline bool read_json(chain_move_reduce_mode::ChainMoveReduceMode *a_parameter,
-                      const std::string &                          a_NAME,
-                      const utility::json::JsonObject &            a_JSON) {
+                      const std::string                           &a_NAME,
+                      const utility::json::JsonObject             &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
             *a_parameter =
@@ -65,8 +65,8 @@ inline bool read_json(chain_move_reduce_mode::ChainMoveReduceMode *a_parameter,
 }
 
 /**************************************************************************/
-inline bool read_json(selection_mode::SelectionMode *  a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(selection_mode::SelectionMode   *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
@@ -131,8 +131,8 @@ inline bool read_json(verbose::Verbose *a_parameter, const std::string &a_NAME,
 }
 
 /**************************************************************************/
-inline bool read_json(tabu_mode::TabuMode *            a_parameter,
-                      const std::string &              a_NAME,
+inline bool read_json(tabu_mode::TabuMode             *a_parameter,
+                      const std::string               &a_NAME,
                       const utility::json::JsonObject &a_JSON) {
     if (a_JSON.find(a_NAME)) {
         if (a_JSON.at(a_NAME).type() == typeid(int)) {
@@ -144,6 +144,26 @@ inline bool read_json(tabu_mode::TabuMode *            a_parameter,
         if (a_JSON.at(a_NAME).type() == typeid(std::string)) {
             *a_parameter =
                 tabu_mode::TabuModeMap.at(a_JSON.get<std::string>(a_NAME));
+            return true;
+        }
+    }
+    return false;
+}
+
+/**************************************************************************/
+inline bool read_json(cdcl_restart_mode::CDCLRestartMode *a_parameter,
+                      const std::string                  &a_NAME,
+                      const utility::json::JsonObject    &a_JSON) {
+    if (a_JSON.find(a_NAME)) {
+        if (a_JSON.at(a_NAME).type() == typeid(int)) {
+            *a_parameter = static_cast<cdcl_restart_mode::CDCLRestartMode>(
+                a_JSON.get<int>(a_NAME));
+            return true;
+        }
+
+        if (a_JSON.at(a_NAME).type() == typeid(std::string)) {
+            *a_parameter = cdcl_restart_mode::CDCLRestartModeMap.at(
+                a_JSON.get<std::string>(a_NAME));
             return true;
         }
     }

@@ -12,6 +12,7 @@
 #include "improvability_screening_mode.h"
 #include "verbose.h"
 #include "tabu_mode.h"
+#include "cdcl_restart_mode.h"
 
 #endif
 /*****************************************************************************/

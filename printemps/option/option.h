@@ -20,6 +20,7 @@
 #include "lagrange_dual_option.h"
 #include "local_search_option.h"
 #include "tabu_search_option.h"
+#include "cdcl_option.h"
 
 namespace printemps::option {
 /*****************************************************************************/
@@ -32,6 +33,7 @@ struct Option {
     NeighborhoodOption neighborhood;
     OutputOption       output;
     PDLPOption         pdlp;
+    CDCLOption         cdcl;
     LagrangeDualOption lagrange_dual;
     LocalSearchOption  local_search;
     TabuSearchOption   tabu_search;
@@ -55,6 +57,7 @@ struct Option {
         this->restart.initialize();
         this->neighborhood.initialize();
         this->output.initialize();
+        this->cdcl.initialize();
         this->pdlp.initialize();
         this->lagrange_dual.initialize();
         this->local_search.initialize();
@@ -74,6 +77,7 @@ struct Option {
         this->restart.print();
         this->neighborhood.print();
         this->output.print();
+        this->cdcl.print();
         this->pdlp.print();
         this->lagrange_dual.print();
         this->local_search.print();
@@ -128,6 +132,11 @@ struct Option {
                     option_object.at("output")));
         }
 
+        if (option_object.find("cdcl")) {
+            option.cdcl = CDCLOption(std::any_cast<utility::json::JsonObject>(
+                option_object.at("cdcl")));
+        }
+
         if (option_object.find("pdlp")) {
             option.pdlp = PDLPOption(std::any_cast<utility::json::JsonObject>(
                 option_object.at("pdlp")));
@@ -164,6 +173,7 @@ struct Option {
         obj.emplace_back("restart", this->restart.to_json());
         obj.emplace_back("neighborhood", this->neighborhood.to_json());
         obj.emplace_back("output", this->output.to_json());
+        obj.emplace_back("cdcl", this->cdcl.to_json());
         obj.emplace_back("pdlp", this->pdlp.to_json());
         obj.emplace_back("lagrange_dual", this->lagrange_dual.to_json());
         obj.emplace_back("local_search", this->local_search.to_json());

@@ -697,6 +697,100 @@ TEST_F(TestReadJson, read_json_int_tabu_mode) {
     }
 }
 
+/*****************************************************************************/
+TEST_F(TestReadJson, read_json_int_cdcl_restart_mode) {
+    using namespace printemps;
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, 0);  // Geometric
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Geometric, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Geometric, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, 1);  // Luby
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Luby, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Luby, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, 2);  // Adaptive
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Adaptive, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Adaptive, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, std::string("Geometric"));
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Geometric, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Geometric, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, std::string("Luby"));
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Luby, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Luby, parameter);
+    }
+
+    {
+        utility::json::JsonObject object;
+        std::string               key       = "restart_mode";
+        std::string               wrong_key = "wrong";
+
+        object.emplace_back(key, std::string("Adaptive"));
+
+        option::cdcl_restart_mode::CDCLRestartMode parameter;
+        EXPECT_TRUE(option::read_json(&parameter, key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Adaptive, parameter);
+
+        EXPECT_FALSE(option::read_json(&parameter, wrong_key, object));
+        EXPECT_EQ(option::cdcl_restart_mode::Adaptive, parameter);
+    }
+}
+
 }  // namespace
 /*****************************************************************************/
 // END
