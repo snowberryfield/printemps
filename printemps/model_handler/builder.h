@@ -25,7 +25,7 @@ class Builder {
                 model.problem_size_reducer_basic().run(a_IS_ENABLED_PRINT);
 
             if (RESULT.is_reduced()) {
-                this->update_derived_components();
+                this->update_derived_components(false);
             }
 
             /**
@@ -37,7 +37,7 @@ class Builder {
                                         .extract_implicit_equality_constraints(
                                             a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
                 }
             }
@@ -51,7 +51,7 @@ class Builder {
                     model.problem_size_reducer_special()
                         .remove_redundant_set_constraints(a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
                 }
             }
@@ -64,7 +64,7 @@ class Builder {
                     model.problem_size_reducer_special()
                         .remove_redundant_set_variables(a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
                 }
             }
@@ -77,7 +77,7 @@ class Builder {
                     model.problem_size_reducer_special()
                         .remove_duplicated_constraints(a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
                 }
             }
@@ -100,7 +100,7 @@ class Builder {
                         .remove_implicit_fixed_variables_from_precedence_constraints(
                             a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
                 }
             }
@@ -119,7 +119,8 @@ class Builder {
                                 .small_constraint_groups(),
                             a_IS_ENABLED_PRINT);
                 if (RESULT.is_reduced()) {
-                    this->update_derived_components();
+                    this->update_derived_components(false);
+                    continue_flag = true;
                     continue_flag = true;
                 }
             }
@@ -147,19 +148,19 @@ class Builder {
                         NUMBER_OF_EXTRACTED_DEPENDENT_INTEGER_VARIABLES == 0) {
                         break;
                     }
-                    this->update_derived_components();
+                    this->update_derived_components(false);
                     continue_flag = true;
 
                         if (model.dependent_variable_eliminator().run(
                             a_IS_ENABLED_PRINT) > 0) {
-                        this->update_derived_components();
+                        this->update_derived_components(false);
                         continue_flag = true;
                     }
 
                     const auto RESULT = model.problem_size_reducer_basic().run(
                         a_IS_ENABLED_PRINT);
                     if (RESULT.is_reduced()) {
-                        this->update_derived_components();
+                        this->update_derived_components(false);
                         continue_flag = true;
                     }
                 }
@@ -208,7 +209,7 @@ class Builder {
         /**
          * Initialize the derived components.
          */
-        this->update_derived_components();
+        this->update_derived_components(true);
 
         /**
          * Store original categorization results. The final categorization would
@@ -234,7 +235,7 @@ class Builder {
                 selection_extractor(m_model_ptr);
             selection_extractor.run(a_OPTION.neighborhood.selection_mode,
                                     a_IS_ENABLED_PRINT);
-            this->update_derived_components();
+            this->update_derived_components(false);
         }
 
         /**
@@ -250,7 +251,7 @@ class Builder {
              * Update fixed variables.
              */
             if (IS_SOLVED) {
-                this->update_derived_components();
+                this->update_derived_components(false);
             }
         }
 
@@ -325,11 +326,18 @@ class Builder {
             }
         }
 
+        /**
+         * Finalize name maps.
+         */
+        model.reference().update_variable_name_map();
+        model.reference().update_contraint_name_map();
+
         model.problem_size_reducer_basic().set_is_preprocess(false);
     }
 
     /*************************************************************************/
-    inline void update_derived_components(void) {
+    inline void update_derived_components(
+        const bool a_IS_ENABLED_UPDATE_NAME_MAP = true) {
         auto &model = *m_model_ptr;
         for (auto &&proxy : model.constraint_proxies()) {
             for (auto &&constraint : proxy.flat_indexed_constraints()) {
@@ -339,8 +347,10 @@ class Builder {
         }
         model.reference().update_variable_reference();
         model.reference().update_constraint_reference();
+        if (a_IS_ENABLED_UPDATE_NAME_MAP) {
         model.reference().update_variable_name_map();
         model.reference().update_contraint_name_map();
+        }
 
         this->setup_constraint_compacts();
         this->setup_variable_objective_sensitivities();
@@ -408,7 +418,8 @@ class Builder {
     /*************************************************************************/
     inline void setup_is_all_binary_variables(void) {
         auto &model                     = *m_model_ptr;
-        model.m_is_all_binary_variables = model.inspector().compute_is_all_binary_variables();
+        model.m_is_all_binary_variables =
+            model.inspector().compute_is_all_binary_variables();
     }
 
     /*************************************************************************/
@@ -447,6 +458,12 @@ class Builder {
     /*************************************************************************/
     inline void setup_variable_objective_sensitivities(void) {
         auto &model = *m_model_ptr;
+
+        for (auto &&proxy : model.variable_proxies()) {
+            for (auto &&variable : proxy.flat_indexed_variables()) {
+                variable.set_objective_sensitivity(0);
+            }
+        }
 
         for (auto &&sensitivity :
              model.objective().expression().sensitivities()) {

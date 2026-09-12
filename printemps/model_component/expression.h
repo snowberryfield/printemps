@@ -350,7 +350,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         const auto COEFFICIENT = it->second;
         m_sensitivities.erase(it);
 
-        if (std::abs(COEFF) < constant::EPSILON_10) {
+        if (std::abs(COEFFICIENT) < constant::EPSILON_10) {
             return;
         }
 
@@ -537,13 +537,11 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         structure.constant_value              = m_constant_value;
         structure.number_of_mutable_variables = 0;
 
-        auto SENSITIVITIES_PAIR_VECTOR = this->sensitivities_pair_vector(false);
-
-        for (const auto &sensitivity : SENSITIVITIES_PAIR_VECTOR) {
+        for (const auto &sensitivity : m_sensitivities) {
             auto variable_ptr = sensitivity.first;
             auto coefficient  = sensitivity.second;
 
-            if (sensitivity.first->is_fixed()) {
+            if (variable_ptr->is_fixed()) {
                 structure.constant_value += coefficient * variable_ptr->value();
             } else {
                 structure.number_of_mutable_variables++;
@@ -564,7 +562,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
         structure.variable_ptrs.reserve(structure.number_of_mutable_variables);
         structure.coefficients.reserve(structure.number_of_mutable_variables);
 
-        if (!utility::is_integer(m_constant_value)) {
+        if (!utility::is_integer(structure.constant_value)) {
             structure.is_integer = false;
         }
 
@@ -597,7 +595,7 @@ class Expression : public multi_array::AbstractMultiArrayElement {
                 structure.has_only_plus_or_minus_one_coefficient = false;
             }
 
-            if (coefficient == -m_constant_value) {
+            if (coefficient == -structure.constant_value) {
                 structure.has_bin_packing_variable = true;
             }
 
