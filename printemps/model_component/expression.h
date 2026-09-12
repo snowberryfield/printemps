@@ -342,14 +342,32 @@ class Expression : public multi_array::AbstractMultiArrayElement {
     inline void substitute(
         Variable<T_Variable, T_Expression>         *a_variable_ptr,
         const Expression<T_Variable, T_Expression> &a_EXPRESSION) {
-        *this += m_sensitivities[a_variable_ptr] * a_EXPRESSION;
-        m_sensitivities.erase(a_variable_ptr);
+        auto it = m_sensitivities.find(a_variable_ptr);
+        if (it == m_sensitivities.end()) {
+            return;
+        }
 
-        for (auto it = m_sensitivities.begin(); it != m_sensitivities.end();) {
-            if (std::abs(it->second) < constant::EPSILON_10) {
-                it = m_sensitivities.erase(it);
+        const auto COEFFICIENT = it->second;
+        m_sensitivities.erase(it);
+
+        if (std::abs(COEFF) < constant::EPSILON_10) {
+            return;
+        }
+
+        m_constant_value += COEFFICIENT * a_EXPRESSION.m_constant_value;
+
+        for (const auto &append : a_EXPRESSION.m_sensitivities) {
+            auto target_it = m_sensitivities.find(append.first);
+            if (target_it != m_sensitivities.end()) {
+                target_it->second += COEFFICIENT * append.second;
+                if (std::abs(target_it->second) < constant::EPSILON_10) {
+                    m_sensitivities.erase(target_it);
+                }
             } else {
-                ++it;
+                const auto NEW_COEFFICIENT = COEFFICIENT * append.second;
+                if (std::abs(NEW_COEFFICIENT) >= constant::EPSILON_10) {
+                    m_sensitivities.emplace(append.first, NEW_COEFFICIENT);
+                }
             }
         }
     }
