@@ -150,11 +150,8 @@ class Builder {
                     this->update_derived_components();
                     continue_flag = true;
 
-                    while (true) {
                         if (model.dependent_variable_eliminator().run(
-                                a_IS_ENABLED_PRINT) == 0) {
-                            break;
-                        }
+                            a_IS_ENABLED_PRINT) > 0) {
                         this->update_derived_components();
                         continue_flag = true;
                     }

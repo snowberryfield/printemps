@@ -126,21 +126,7 @@ TEST_F(TestDependentIntegerVariableExtractor, run) {
             EXPECT_FALSE(h.is_enabled());
         }
 
-        /// Eliminating (Round 1-1)
-        {
-            dependent_variable_eliminator.run(false);
-
-            model.builder().update_derived_components();
-
-            auto& sensitivities_objective =
-                model.objective().expression().sensitivities();
-
-            EXPECT_EQ(3, sensitivities_objective.at(&x(0)));
-            EXPECT_EQ(4, sensitivities_objective.at(&y(0)));
-            EXPECT_EQ(5, sensitivities_objective.at(&z(0)));
-        }
-
-        /// Eliminating (Round 1-2)
+        /// Eliminating
         {
             dependent_variable_eliminator.run(false);
 
@@ -233,7 +219,7 @@ TEST_F(TestDependentIntegerVariableExtractor, run) {
             }
         }
 
-        /// Eliminating (Round 1-1)
+        /// Eliminating
         {
             dependent_variable_eliminator.run(false);
 
@@ -242,9 +228,8 @@ TEST_F(TestDependentIntegerVariableExtractor, run) {
             auto& sensitivities_objective =
                 model.objective().expression().sensitivities();
 
-            EXPECT_EQ(3, sensitivities_objective.at(&x(0)));
-            EXPECT_EQ(4, sensitivities_objective.at(&y(0)));
-            EXPECT_EQ(5, sensitivities_objective.at(&z(0)));
+            EXPECT_EQ(13, sensitivities_objective.at(&x(0)));
+            EXPECT_EQ(9, sensitivities_objective.at(&y(0)));
 
             auto& sensitivities_w =
                 w(0).dependent_expression_ptr()->sensitivities();

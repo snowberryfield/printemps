@@ -20,6 +20,7 @@
 #include "bidirectional_map.h"
 #include "range.h"
 #include "union_find.h"
+#include "topological_sorter.h"
 #include "graph/graph.h"
 #include "json/json.h"
 #include "binary_matrix.h"

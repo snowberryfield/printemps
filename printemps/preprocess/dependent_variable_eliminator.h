@@ -60,21 +60,79 @@ class DependentVariableEliminator {
     }
 
     /*************************************************************************/
+    inline void flatten_dependent_expressions(
+        const std::vector<model_component::Variable<T_Variable, T_Expression> *>
+                  &a_DEPENDENT_VARIABLE_PTRS,
+        const bool a_IS_ENABLED_PRINT) {
+        if (a_DEPENDENT_VARIABLE_PTRS.empty()) {
+            return;
+        }
+
+        utility::TopologicalSorter<
+            model_component::Variable<T_Variable, T_Expression> *>
+            sorter(a_DEPENDENT_VARIABLE_PTRS);
+
+        for (auto *variable_ptr_target : a_DEPENDENT_VARIABLE_PTRS) {
+            auto *expression_ptr =
+                variable_ptr_target->dependent_expression_ptr();
+            if (expression_ptr == nullptr) {
+                continue;
+            }
+            for (auto &&sensitivity : expression_ptr->sensitivities()) {
+                auto *variable_ptr_source = sensitivity.first;
+                if (sorter.has_node(variable_ptr_source)) {
+                    sorter.add_edge(variable_ptr_source, variable_ptr_target);
+                }
+            }
+        }
+        const auto SORTED_VARIABLE_PTRS = sorter.sort();
+        for (auto *variable_ptr_source : SORTED_VARIABLE_PTRS) {
+            auto *expression_ptr =
+                variable_ptr_source->dependent_expression_ptr();
+            if (expression_ptr == nullptr) {
+                continue;
+            }
+
+            for (auto *variable_ptr_target :
+                 sorter.successors(variable_ptr_source)) {
+                auto *expression_ptr_target =
+                    variable_ptr_target->dependent_expression_ptr();
+                if (expression_ptr_target == nullptr) {
+                    continue;
+                }
+                if (expression_ptr_target->sensitivities().find(
+                        variable_ptr_source) !=
+                    expression_ptr_target->sensitivities().end()) {
+                    expression_ptr_target->substitute(variable_ptr_source,
+                                                      *expression_ptr);
+                    utility::print_message(
+                        "The dependent variable " +
+                            variable_ptr_source->name() +
+                            " in the dependent expression of " +
+                            variable_ptr_target->name() + " was eliminated. ",
+                        a_IS_ENABLED_PRINT);
+                }
+            }
+        }
+    }
+
+    /*************************************************************************/
     inline int eliminate_dependent_variables_from_objective(
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
                   &a_DEPENDENT_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PRINT) {
+        if (a_DEPENDENT_VARIABLE_PTRS.empty()) {
+            return 0;
+        }
+
         int   number_of_eliminated_dependent_variables = 0;
-        auto &objective_sensitivities =
-            m_model_ptr->objective().expression().sensitivities();
+        auto &objective_expression = m_model_ptr->objective().expression();
 
         for (const auto &variable_ptr : a_DEPENDENT_VARIABLE_PTRS) {
-            if (objective_sensitivities.find(variable_ptr) !=
-                objective_sensitivities.end()) {
-                m_model_ptr->objective().expression().substitute(
-                    variable_ptr,  //
-                    *(variable_ptr->dependent_expression_ptr()));
-
+            if (objective_expression.sensitivities().find(variable_ptr) !=
+                objective_expression.sensitivities().end()) {
+                objective_expression.substitute(
+                    variable_ptr, *(variable_ptr->dependent_expression_ptr()));
                 number_of_eliminated_dependent_variables++;
 
                 utility::print_message(
@@ -91,22 +149,29 @@ class DependentVariableEliminator {
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
                   &a_DEPENDENT_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PRINT) {
+        if (a_DEPENDENT_VARIABLE_PTRS.empty()) {
+            return 0;
+        }
+
         int number_of_eliminated_dependent_variables = 0;
 
         for (const auto &variable_ptr : a_DEPENDENT_VARIABLE_PTRS) {
             for (auto &&constraint_ptr :
                  variable_ptr->related_constraint_ptrs()) {
-                constraint_ptr->expression().substitute(
-                    variable_ptr,  //
-                    *(variable_ptr->dependent_expression_ptr()));
+                auto &expression = constraint_ptr->expression();
+                if (expression.sensitivities().find(variable_ptr) !=
+                    expression.sensitivities().end()) {
+                    expression.substitute(
+                        variable_ptr,
+                        *(variable_ptr->dependent_expression_ptr()));
+                    number_of_eliminated_dependent_variables++;
 
-                number_of_eliminated_dependent_variables++;
-
-                utility::print_message(
-                    "The dependent variable " + variable_ptr->name() +
-                        " in the constraint " + constraint_ptr->name() +
-                        " was eliminated. ",
-                    a_IS_ENABLED_PRINT);
+                    utility::print_message(
+                        "The dependent variable " + variable_ptr->name() +
+                            " in the constraint " + constraint_ptr->name() +
+                            " was eliminated. ",
+                        a_IS_ENABLED_PRINT);
+                }
             }
         }
         return number_of_eliminated_dependent_variables;
@@ -117,40 +182,31 @@ class DependentVariableEliminator {
         const std::vector<model_component::Variable<T_Variable, T_Expression> *>
                   &a_DEPENDENT_VARIABLE_PTRS,
         const bool a_IS_ENABLED_PRINT) {
-        int number_of_eliminated_dependent_variables = 0;
-        std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *,
-            std::vector<
-                model_component::Expression<T_Variable, T_Expression> *>>
-            variable_to_expression_ptrs;
+        if (a_DEPENDENT_VARIABLE_PTRS.empty()) {
+            return 0;
+        }
 
-        for (auto &&proxy : m_model_ptr->expression_proxies()) {
-            for (auto &&expression : proxy.flat_indexed_expressions()) {
-                for (auto &&sensitivity : expression.sensitivities()) {
-                    variable_to_expression_ptrs[sensitivity.first].push_back(
-                        &expression);
+        int number_of_eliminated_dependent_variables = 0;
+
+        for (const auto &variable_ptr : a_DEPENDENT_VARIABLE_PTRS) {
+            for (auto &&proxy : m_model_ptr->expression_proxies()) {
+                for (auto &&expression : proxy.flat_indexed_expressions()) {
+                    if (expression.sensitivities().find(variable_ptr) !=
+                        expression.sensitivities().end()) {
+                        expression.substitute(
+                            variable_ptr,
+                            *(variable_ptr->dependent_expression_ptr()));
+                        number_of_eliminated_dependent_variables++;
+
+                        utility::print_message(
+                            "The dependent variable " + variable_ptr->name() +
+                                " in the expression " + expression.name() +
+                                " was eliminated. ",
+                            a_IS_ENABLED_PRINT);
+                    }
                 }
             }
         }
-
-        for (auto &&variable_ptr : a_DEPENDENT_VARIABLE_PTRS) {
-            auto it = variable_to_expression_ptrs.find(variable_ptr);
-            if (it == variable_to_expression_ptrs.end())
-                continue;
-
-            for (auto &expression_ptr : it->second) {
-                expression_ptr->substitute(
-                    variable_ptr, *variable_ptr->dependent_expression_ptr());
-                number_of_eliminated_dependent_variables++;
-
-                utility::print_message(
-                    "The dependent variable " + variable_ptr->name() +
-                        " in the expression " + expression_ptr->name() +
-                        " was eliminated. ",
-                    a_IS_ENABLED_PRINT);
-            }
-        }
-
         return number_of_eliminated_dependent_variables;
     }
 
@@ -162,6 +218,9 @@ class DependentVariableEliminator {
 
         int  number_of_eliminated_dependent_variables = 0;
         auto dependent_variable_ptrs = this->collect_dependent_variable_ptrs();
+
+        this->flatten_dependent_expressions(dependent_variable_ptrs,
+                                            a_IS_ENABLED_PRINT);
 
         number_of_eliminated_dependent_variables +=
             this->eliminate_dependent_variables_from_objective(
