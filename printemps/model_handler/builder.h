@@ -151,7 +151,7 @@ class Builder {
                     this->update_derived_components(false);
                     continue_flag = true;
 
-                        if (model.dependent_variable_eliminator().run(
+                    if (model.dependent_variable_eliminator().run(
                             a_IS_ENABLED_PRINT) > 0) {
                         this->update_derived_components(false);
                         continue_flag = true;
@@ -348,8 +348,8 @@ class Builder {
         model.reference().update_variable_reference();
         model.reference().update_constraint_reference();
         if (a_IS_ENABLED_UPDATE_NAME_MAP) {
-        model.reference().update_variable_name_map();
-        model.reference().update_contraint_name_map();
+            model.reference().update_variable_name_map();
+            model.reference().update_contraint_name_map();
         }
 
         this->setup_constraint_compacts();
@@ -417,7 +417,7 @@ class Builder {
 
     /*************************************************************************/
     inline void setup_is_all_binary_variables(void) {
-        auto &model                     = *m_model_ptr;
+        auto &model = *m_model_ptr;
         model.m_is_all_binary_variables =
             model.inspector().compute_is_all_binary_variables();
     }

@@ -50,11 +50,10 @@ class Inspector {
         auto &model = *this->m_model_ptr;
         for (auto &&proxy : model.variable_proxies()) {
             for (auto &&variable : proxy.flat_indexed_variables()) {
-                if (variable.type() != model_component::VariableType::Binary &&
-                    variable.type() !=
-                        model_component::VariableType::Selection &&
-                    variable.type() !=
-                        model_component::VariableType::DependentBinary) {
+                if (variable.is_fixed()) {
+                    continue;
+                }
+                if (variable.type() == model_component::VariableType::Integer) {
                     return false;
                 }
             }
