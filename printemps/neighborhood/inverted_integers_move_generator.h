@@ -106,50 +106,53 @@ class InvertedIntegersMoveGenerator
                     }
                 }
                 const int MOVES_SIZE = a_moves_ptr->size();
+                const int NUM_WORDS  = (MOVES_SIZE + 63) / 64;
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static)
 #endif
-                for (auto i = 0; i < MOVES_SIZE; i++) {
-                    if (!(*a_moves_ptr)[i]
-                             .associated_constraint_ptr->is_feasible()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
+                for (auto w = 0; w < NUM_WORDS; w++) {
+                    const int     start_i = w * 64;
+                    const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
+                    std::uint64_t word    = 0;
 
-                    (*a_flags)[i] = 1;
-
-                    if (!(*a_moves_ptr)[i].is_available) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
-                    if ((*a_moves_ptr)[i].has_fixed_variable()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
-                    if ((*a_moves_ptr)[i].has_bound_violation()) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
-                    if (a_ACCEPT_ALL) {
-                        /** nothing to do */
-                    } else {
-                        if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            (*a_moves_ptr)[i]
-                                .has_objective_improvable_variable()) {
+                    for (auto i = start_i; i < end_i; i++) {
+                        if (!(*a_moves_ptr)[i]
+                                 .associated_constraint_ptr->is_feasible()) {
                             continue;
                         }
 
-                        if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            (*a_moves_ptr)[i]
-                                .has_feasibility_improvable_variable()) {
+                        if (!(*a_moves_ptr)[i].is_available) {
                             continue;
                         }
-                        (*a_flags)[i] = 0;
+
+                        if ((*a_moves_ptr)[i].has_fixed_variable()) {
+                            continue;
+                        }
+
+                        if ((*a_moves_ptr)[i].has_bound_violation()) {
+                            continue;
+                        }
+
+                        if (a_ACCEPT_ALL) {
+                            word |= (1ULL << (i - start_i));
+                        } else {
+                            if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
+                                (*a_moves_ptr)[i]
+                                    .has_objective_improvable_variable()) {
+                                word |= (1ULL << (i - start_i));
+                                continue;
+                            }
+
+                            if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
+                                (*a_moves_ptr)[i]
+                                    .has_feasibility_improvable_variable()) {
+                                word |= (1ULL << (i - start_i));
+                                continue;
+                            }
+                        }
                     }
+                    a_flags->set_word(w, word);
                 }
             };
         this->m_move_updater = move_updater;

@@ -99,35 +99,41 @@ class SelectionMoveGenerator
                 }
 
                 const int MOVES_SIZE = a_moves_ptr->size();
+                const int NUM_WORDS  = (MOVES_SIZE + 63) / 64;
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto i = 0; i < MOVES_SIZE; i++) {
-                    (*a_flags)[i] = 1;
-                    if ((*a_moves_ptr)[i].alterations[0].first ==
-                        (*a_moves_ptr)[i].alterations[1].first) {
-                        (*a_flags)[i] = 0;
-                        continue;
-                    }
-
-                    if (a_ACCEPT_ALL) {
-                        /** nothing to do */
-                    } else {
-                        if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                            (*a_moves_ptr)[i]
-                                .has_objective_improvable_variable()) {
+                for (auto w = 0; w < NUM_WORDS; w++) {
+                    const int     start_i = w * 64;
+                    const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
+                    std::uint64_t word    = 0;
+                    for (auto i = start_i; i < end_i; i++) {
+                        if ((*a_moves_ptr)[i].alterations[0].first ==
+                            (*a_moves_ptr)[i].alterations[1].first) {
                             continue;
                         }
 
-                        if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                            (*a_moves_ptr)[i]
-                                .has_feasibility_improvable_variable()) {
-                            continue;
+                        if (a_ACCEPT_ALL) {
+                            word |= (1ULL << (i - start_i));
+                        } else {
+                            if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
+                                (*a_moves_ptr)[i]
+                                    .has_objective_improvable_variable()) {
+                                word |= (1ULL << (i - start_i));
+                                continue;
+                            }
+
+                            if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
+                                (*a_moves_ptr)[i]
+                                    .has_feasibility_improvable_variable()) {
+                                word |= (1ULL << (i - start_i));
+                                continue;
+                            }
                         }
-                        (*a_flags)[i] = 0;
                     }
+                    a_flags->set_word(w, word);
                 }
             };
         this->m_move_updater = move_updater;

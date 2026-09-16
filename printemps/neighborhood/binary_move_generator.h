@@ -81,15 +81,23 @@ class BinaryMoveGenerator
                 [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
 #endif
             ) {
+                const int NUM_WORDS = (VARIABLES_SIZE + 63) / 64;
+
                 if (a_ACCEPT_ALL) {
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                        (*a_moves_ptr)[i].alterations.front().second =
-                            1 - mutable_variable_ptrs[i]->value();
-                        (*a_flags)[i] = 1;
+                    for (auto w = 0; w < NUM_WORDS; w++) {
+                        const int     start_i = w * 64;
+                        const int     end_i   = std::min(start_i + 64, VARIABLES_SIZE);
+                        std::uint64_t word    = 0;
+                        for (auto i = start_i; i < end_i; i++) {
+                            (*a_moves_ptr)[i].alterations.front().second =
+                                1 - mutable_variable_ptrs[i]->value();
+                            word |= (1ULL << (i - start_i));
+                        }
+                        a_flags->set_word(w, word);
                     }
                     return;
                 }
@@ -100,15 +108,19 @@ class BinaryMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                        if (mutable_variable_ptrs[i]
-                                ->is_objective_improvable()) {
-                            (*a_moves_ptr)[i].alterations.front().second =
-                                1 - mutable_variable_ptrs[i]->value();
-                            (*a_flags)[i] = 1;
-                        } else {
-                            (*a_flags)[i] = 0;
+                    for (auto w = 0; w < NUM_WORDS; w++) {
+                        const int     start_i = w * 64;
+                        const int     end_i   = std::min(start_i + 64, VARIABLES_SIZE);
+                        std::uint64_t word    = 0;
+                        for (auto i = start_i; i < end_i; i++) {
+                            if (mutable_variable_ptrs[i]
+                                    ->is_objective_improvable()) {
+                                (*a_moves_ptr)[i].alterations.front().second =
+                                    1 - mutable_variable_ptrs[i]->value();
+                                word |= (1ULL << (i - start_i));
+                            }
                         }
+                        a_flags->set_word(w, word);
                     }
                     return;
                 }
@@ -119,15 +131,19 @@ class BinaryMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                    for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                        if (mutable_variable_ptrs[i]
-                                ->is_feasibility_improvable()) {
-                            (*a_moves_ptr)[i].alterations.front().second =
-                                1 - mutable_variable_ptrs[i]->value();
-                            (*a_flags)[i] = 1;
-                        } else {
-                            (*a_flags)[i] = 0;
+                    for (auto w = 0; w < NUM_WORDS; w++) {
+                        const int     start_i = w * 64;
+                        const int     end_i   = std::min(start_i + 64, VARIABLES_SIZE);
+                        std::uint64_t word    = 0;
+                        for (auto i = start_i; i < end_i; i++) {
+                            if (mutable_variable_ptrs[i]
+                                    ->is_feasibility_improvable()) {
+                                (*a_moves_ptr)[i].alterations.front().second =
+                                    1 - mutable_variable_ptrs[i]->value();
+                                word |= (1ULL << (i - start_i));
+                            }
                         }
+                        a_flags->set_word(w, word);
                     }
                     return;
                 }
@@ -136,14 +152,18 @@ class BinaryMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    if (mutable_variable_ptrs[i]->is_improvable()) {
-                        (*a_moves_ptr)[i].alterations.front().second =
-                            1 - mutable_variable_ptrs[i]->value();
-                        (*a_flags)[i] = 1;
-                    } else {
-                        (*a_flags)[i] = 0;
+                for (auto w = 0; w < NUM_WORDS; w++) {
+                    const int     start_i = w * 64;
+                    const int     end_i   = std::min(start_i + 64, VARIABLES_SIZE);
+                    std::uint64_t word    = 0;
+                    for (auto i = start_i; i < end_i; i++) {
+                        if (mutable_variable_ptrs[i]->is_improvable()) {
+                            (*a_moves_ptr)[i].alterations.front().second =
+                                1 - mutable_variable_ptrs[i]->value();
+                            word |= (1ULL << (i - start_i));
+                        }
                     }
+                    a_flags->set_word(w, word);
                 }
             };
         this->m_move_updater = move_updater;

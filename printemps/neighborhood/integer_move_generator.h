@@ -87,69 +87,67 @@ class IntegerMoveGenerator
 #endif
             ) {
                 const int DELTA_MAX = 10000;
+                const int MOVES_SIZE = 4 * VARIABLES_SIZE;
+                const int NUM_WORDS  = (MOVES_SIZE + 63) / 64;
+
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto i = 0; i < VARIABLES_SIZE; i++) {
-                    const auto value = mutable_variable_ptrs[i]->value();
-                    const auto lower_bound =
-                        mutable_variable_ptrs[i]->lower_bound();
-                    const auto upper_bound =
-                        mutable_variable_ptrs[i]->upper_bound();
+                for (auto w = 0; w < NUM_WORDS; w++) {
+                    const int     start_var = w * 16;
+                    const int     end_var   = std::min(start_var + 16, VARIABLES_SIZE);
+                    std::uint64_t word      = 0;
 
-                    if (a_ACCEPT_ALL ||
-                        (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                         mutable_variable_ptrs[i]->is_objective_improvable()) ||
-                        (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
-                         mutable_variable_ptrs[i]
-                             ->is_feasibility_improvable())) {
-                        if (value == upper_bound) {
-                            (*a_flags)[4 * i] = 0;
-                        } else {
-                            (*a_moves_ptr)[4 * i].alterations.front().second =
-                                value + 1;
-                            (*a_flags)[4 * i] = 1;
-                        }
+                    for (auto i = start_var; i < end_var; i++) {
+                        const int  bit_offset  = (i - start_var) * 4;
+                        const auto value       = mutable_variable_ptrs[i]->value();
+                        const auto lower_bound =
+                            mutable_variable_ptrs[i]->lower_bound();
+                        const auto upper_bound =
+                            mutable_variable_ptrs[i]->upper_bound();
 
-                        if (value == lower_bound) {
-                            (*a_flags)[4 * i + 1] = 0;
-                        } else {
-                            (*a_moves_ptr)[4 * i + 1]
-                                .alterations.front()
-                                .second           = value - 1;
-                            (*a_flags)[4 * i + 1] = 1;
-                        }
+                        if (a_ACCEPT_ALL ||
+                            (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
+                             mutable_variable_ptrs[i]->is_objective_improvable()) ||
+                            (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
+                             mutable_variable_ptrs[i]
+                                 ->is_feasibility_improvable())) {
+                            if (value != upper_bound) {
+                                (*a_moves_ptr)[4 * i].alterations.front().second =
+                                    value + 1;
+                                word |= (1ULL << bit_offset);
+                            }
 
-                        if (value >= upper_bound - 4 ||
-                            upper_bound == constant::INT_HALF_MAX) {
-                            (*a_flags)[4 * i + 2] = 0;
-                        } else {
-                            const auto DELTA =
-                                std::min(DELTA_MAX, (upper_bound - value) / 2);
-                            (*a_moves_ptr)[4 * i + 2]
-                                .alterations.front()
-                                .second           = value + DELTA;
-                            (*a_flags)[4 * i + 2] = 1;
-                        }
+                            if (value != lower_bound) {
+                                (*a_moves_ptr)[4 * i + 1]
+                                    .alterations.front()
+                                    .second = value - 1;
+                                word |= (1ULL << (bit_offset + 1));
+                            }
 
-                        if (value <= lower_bound + 4 ||
-                            lower_bound == constant::INT_HALF_MIN) {
-                            (*a_flags)[4 * i + 3] = 0;
-                        } else {
-                            const auto DELTA =
-                                std::max(-DELTA_MAX, (lower_bound - value) / 2);
-                            (*a_moves_ptr)[4 * i + 3]
-                                .alterations.front()
-                                .second           = value + DELTA;
-                            (*a_flags)[4 * i + 3] = 1;
-                        }
-                    } else {
-                        for (auto j = 0; j < 4; j++) {
-                            (*a_flags)[4 * i]     = 0;
-                            (*a_flags)[4 * i + j] = 0;
+                            if (value < upper_bound - 4 &&
+                                upper_bound != constant::INT_HALF_MAX) {
+                                const auto DELTA =
+                                    std::min(DELTA_MAX, (upper_bound - value) / 2);
+                                (*a_moves_ptr)[4 * i + 2]
+                                    .alterations.front()
+                                    .second = value + DELTA;
+                                word |= (1ULL << (bit_offset + 2));
+                            }
+
+                            if (value > lower_bound + 4 &&
+                                lower_bound != constant::INT_HALF_MIN) {
+                                const auto DELTA =
+                                    std::max(-DELTA_MAX, (lower_bound - value) / 2);
+                                (*a_moves_ptr)[4 * i + 3]
+                                    .alterations.front()
+                                    .second = value + DELTA;
+                                word |= (1ULL << (bit_offset + 3));
+                            }
                         }
                     }
+                    a_flags->set_word(w, word);
                 }
             };
         this->m_move_updater = move_updater;

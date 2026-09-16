@@ -221,6 +221,14 @@ class Neighborhood {
         if (a_OPTION.neighborhood.is_enabled_user_defined_move) {
             m_user_defined.setup();
         }
+
+        auto total_max_moves = 0;
+        for (const auto &move_generator_ptr : m_move_generator_ptrs) {
+            if (move_generator_ptr->is_enabled()) {
+                total_max_moves += move_generator_ptr->moves().size();
+            }
+        }
+        m_move_ptrs.reserve(total_max_moves);
     }
 
     /*************************************************************************/
@@ -229,7 +237,9 @@ class Neighborhood {
                              const bool a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                              const bool a_IS_ENABLED_PARALLEL,            //
                              const int  a_NUMBER_OF_THREADS) {
-        auto number_of_candidate_moves = 0;
+        m_move_ptrs.clear();
+        int number_of_updated_moves = 0;
+
         for (auto &&move_generator_ptr : m_move_generator_ptrs) {
             if (move_generator_ptr->is_enabled()) {
                 move_generator_ptr->update_moves(
@@ -238,24 +248,21 @@ class Neighborhood {
                     a_ACCEPT_FEASIBILITY_IMPROVABLE,  //
                     a_IS_ENABLED_PARALLEL,            //
                     a_NUMBER_OF_THREADS);
-                auto &flags = move_generator_ptr->flags();
-                number_of_candidate_moves +=
-                    std::accumulate(flags.begin(), flags.end(), 0);
-            }
-        }
-        auto &move_ptrs = m_move_ptrs;
-        move_ptrs.resize(number_of_candidate_moves);
-        auto index                   = 0;
-        int  number_of_updated_moves = 0;
-        for (const auto &move_generator_ptr : m_move_generator_ptrs) {
-            if (move_generator_ptr->is_enabled()) {
-                auto     &moves     = move_generator_ptr->moves();
-                auto     &flags     = move_generator_ptr->flags();
-                const int MOVE_SIZE = move_generator_ptr->moves().size();
 
-                for (auto i = 0; i < MOVE_SIZE; i++) {
-                    if (flags[i]) {
-                        move_ptrs[index++] = &moves[i];
+                auto       &moves      = move_generator_ptr->moves();
+                const auto &flag_words = move_generator_ptr->flags().words();
+                const int   NUM_WORDS  = flag_words.size();
+
+                for (auto w = 0; w < NUM_WORDS; ++w) {
+                    auto word = flag_words[w];
+                    if (word == 0) {
+                        continue;
+                    }
+                    const int base_index = w * 64;
+                    while (word != 0) {
+                        const int bit_pos = utility::countr_zero(word);
+                        m_move_ptrs.push_back(&moves[base_index + bit_pos]);
+                        word &= (word - 1);
                     }
                 }
                 number_of_updated_moves += moves.size();

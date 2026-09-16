@@ -6,18 +6,20 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 #define PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 
+#include "bit_flags.h"
+
 namespace printemps::neighborhood {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AbstractMoveGenerator {
    protected:
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
-                       std::vector<short> *, const bool, const bool, const bool,
+                       BitFlags *, const bool, const bool, const bool,
                        const bool, const int)>
         m_move_updater;
 
     std::vector<Move<T_Variable, T_Expression>> m_moves;
-    std::vector<short>                          m_flags;
+    BitFlags                                    m_flags;
     bool                                        m_is_enabled;
 
    public:
@@ -29,7 +31,7 @@ class AbstractMoveGenerator {
     /*************************************************************************/
     virtual void initialize(void) {
         m_move_updater = [](std::vector<Move<T_Variable, T_Expression>> *,  //
-                            std::vector<short> *,                           //
+                            BitFlags *,                                     //
                             const bool,                                     //
                             const bool,                                     //
                             const bool,                                     //
@@ -76,13 +78,21 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline std::vector<short> &flags(void) {
+    inline BitFlags &flags(void) {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline const std::vector<short> &flags(void) const {
+    inline const BitFlags &flags(void) const {
         return m_flags;
+    }
+
+    /*************************************************************************/
+    inline void set_flags(const BitFlags &a_FLAGS) {
+        /**
+         * NOTE: This method is for test.
+         */
+        m_flags = a_FLAGS;
     }
 
     /*************************************************************************/
