@@ -190,7 +190,10 @@ class Evaluator {
 
         const double OBJECTIVE =
             MODEL.m_is_defined_objective
-                ? MODEL.m_objective.evaluate(a_MOVE) * MODEL.sign()
+                ? (MODEL.m_objective.value() +
+                   variable_ptr->objective_sensitivity() *
+                       variable_value_diff) *
+                      MODEL.sign()
                 : 0.0;
 
         const double OBJECTIVE_IMPROVEMENT =
@@ -275,7 +278,10 @@ class Evaluator {
         }
         const double OBJECTIVE =
             MODEL.m_is_defined_objective
-                ? MODEL.m_objective.evaluate(a_MOVE) * MODEL.sign()
+                ? (MODEL.m_objective.value() +
+                   variable_ptr->objective_sensitivity() *
+                       variable_value_diff) *
+                      MODEL.sign()
                 : 0.0;
 
         const double OBJECTIVE_IMPROVEMENT =
