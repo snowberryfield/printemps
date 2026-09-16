@@ -253,7 +253,7 @@ class Neighborhood {
                 const auto &flag_words = move_generator_ptr->flags().words();
                 const int   NUM_WORDS  = flag_words.size();
 
-                for (auto w = 0; w < NUM_WORDS; ++w) {
+                for (int w = 0; w < NUM_WORDS; ++w) {
                     auto word = flag_words[w];
                     if (word == 0) {
                         continue;

@@ -34,7 +34,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
     {
         utility::BinaryMatrix binary_matrix(3, 3);
 
-        for (auto i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
         }
         auto result = binary_matrix.inverse_and_rank();
@@ -47,7 +47,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
     {
         utility::BinaryMatrix binary_matrix(3, 3);
 
-        for (auto i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
         }
         binary_matrix[0][1] = 1;
@@ -63,7 +63,7 @@ TEST_F(TestBinaryMatrix, inverse_and_rank) {
     {
         utility::BinaryMatrix binary_matrix(3, 3);
 
-        for (auto i = 0; i < 3; i++) {
+        for (int i = 0; i < 3; i++) {
             binary_matrix[i][i] = 1;
         }
         binary_matrix[2][2] = 0;
@@ -82,8 +82,8 @@ TEST_F(TestBinaryMatrix, reachability) {
     binary_matrix[3][0] = 1;
     auto reachability   = binary_matrix.reachability();
 
-    for (auto i = 0; i < 4; i++) {
-        for (auto j = 0; j < 4; j++) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
             EXPECT_EQ(1, reachability[i][j]);
         }
     }

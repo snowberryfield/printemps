@@ -49,7 +49,7 @@ TEST_F(TestSelectionMoveGenerator, setup) {
     EXPECT_EQ(N, static_cast<int>(moves.size()));
     EXPECT_EQ(N, static_cast<int>(flags.size()));
 
-    for (auto i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         if (moves[i].alterations[1].first->value() == 1) {
             EXPECT_EQ(0, flags[i]);
         } else {

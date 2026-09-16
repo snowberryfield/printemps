@@ -37,7 +37,7 @@ class TwoFlipMoveGenerator
         this->m_moves.resize(2 * PAIRS_SIZE);
         this->m_flags.resize(2 * PAIRS_SIZE);
 
-        for (auto i = 0; i < PAIRS_SIZE; i++) {
+        for (int i = 0; i < PAIRS_SIZE; i++) {
             auto &move = this->m_moves[2 * i];
 
             move.associated_constraint_ptr = nullptr;
@@ -83,12 +83,12 @@ class TwoFlipMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto w = 0; w < NUM_WORDS; w++) {
+                for (int w = 0; w < NUM_WORDS; w++) {
                     const int     start_i = w * 64;
                     const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
                     std::uint64_t word    = 0;
 
-                    for (auto i = start_i; i < end_i; i++) {
+                    for (int i = start_i; i < end_i; i++) {
                         if (!(*a_moves_ptr)[i].is_available) {
                             continue;
                         }

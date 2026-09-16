@@ -55,7 +55,7 @@ class ModelOPBHandler {
         const int NUMBER_OF_VARIABLES = a_OPB.variable_names.size();
         auto     &variable_proxy = model.component_creator().create_variables(
             "variables", NUMBER_OF_VARIABLES);
-        for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
+        for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             const auto &VARIABLE_NAME = a_OPB.variable_names[i];
             variable_proxy(i).set_bound(0, 1);
             variable_proxy(i).set_name(VARIABLE_NAME);
@@ -67,7 +67,7 @@ class ModelOPBHandler {
         auto &negated_variable_proxy =
             model.component_creator().create_variables(
                 "negated_variables", NUMBER_OF_NEGATED_VARIABLES);
-        for (auto i = 0; i < NUMBER_OF_NEGATED_VARIABLES; i++) {
+        for (int i = 0; i < NUMBER_OF_NEGATED_VARIABLES; i++) {
             const auto &NEGATED_VARIABLE_NAME =
                 "~" + a_OPB.negated_variable_names[i];
             negated_variable_proxy(i).set_bound(0, 1);
@@ -81,7 +81,7 @@ class ModelOPBHandler {
             model.component_creator().create_variables(
                 "product_variables", NUMBER_OF_PRODUCT_VARIABLES);
 
-        for (auto i = 0; i < NUMBER_OF_PRODUCT_VARIABLES; i++) {
+        for (int i = 0; i < NUMBER_OF_PRODUCT_VARIABLES; i++) {
             const auto &PRODUCT_VARIABLE_NAME =
                 a_OPB.product_variable_names[i].first;
             product_variable_proxy(i).set_bound(0, 1);
@@ -99,7 +99,7 @@ class ModelOPBHandler {
 
         const int NUMBER_OF_SOFT_CONSTRAINTS = a_OPB.soft_constraints.size();
 
-        for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
+        for (int i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
             const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             switch (SOFT_CONSTRAINT.sense) {
                 case opb::OPBConstraintSense::Less: {
@@ -124,7 +124,7 @@ class ModelOPBHandler {
             model.component_creator().create_variables(
                 "slack_variables_less_plus", number_of_soft_constraints_less);
 
-        for (auto i = 0; i < number_of_soft_constraints_less; i++) {
+        for (int i = 0; i < number_of_soft_constraints_less; i++) {
             const auto &SLACK_VARIABLE_NAME_LESS_PLUS =
                 a_OPB.soft_constraints[i].name + "_less_plus";
             soft_constraint_slack_proxy_less_plus(i).set_bound(0, 1);
@@ -142,7 +142,7 @@ class ModelOPBHandler {
                 "slack_variables_equal_minus",
                 number_of_soft_constraints_equal);
 
-        for (auto i = 0; i < number_of_soft_constraints_equal; i++) {
+        for (int i = 0; i < number_of_soft_constraints_equal; i++) {
             const auto &SLACK_VARIABLE_NAME_EQUAL_PLUS =
                 a_OPB.soft_constraints[i].name + "_equal_plus";
             soft_constraint_slack_proxy_equal_plus(i).set_bound(0, 1);
@@ -165,7 +165,7 @@ class ModelOPBHandler {
                 "slack_variables_greater_minus",
                 number_of_soft_constraints_greater);
 
-        for (auto i = 0; i < number_of_soft_constraints_greater; i++) {
+        for (int i = 0; i < number_of_soft_constraints_greater; i++) {
             const auto &SLACK_VARIABLE_NAME_GREATER_MINUS =
                 a_OPB.soft_constraints[i].name + "_greater_minus";
             soft_constraint_slack_proxy_greater_minus(i).set_bound(0, 1);
@@ -200,7 +200,7 @@ class ModelOPBHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
+        for (int i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
             const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             auto        expression =
                 model_component::Expression<T_Variable,
@@ -293,7 +293,7 @@ class ModelOPBHandler {
             }
         }
 
-        for (auto i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
+        for (int i = 0; i < NUMBER_OF_SOFT_CONSTRAINTS; i++) {
             const auto &SOFT_CONSTRAINT = a_OPB.soft_constraints[i];
             switch (SOFT_CONSTRAINT.sense) {
                 case opb::OPBConstraintSense::Less: {
@@ -337,7 +337,7 @@ class ModelOPBHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < NUMBER_OF_HARD_CONSTRAINTS; i++) {
+        for (int i = 0; i < NUMBER_OF_HARD_CONSTRAINTS; i++) {
             const auto &HARD_CONSTRAINT = a_OPB.hard_constraints[i];
             auto        expression =
                 model_component::Expression<T_Variable,
@@ -403,7 +403,7 @@ class ModelOPBHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (auto i = 0; i < NUMBER_OF_NEGATED_VARIABLE_CONSTRAINTS; i++) {
+            for (int i = 0; i < NUMBER_OF_NEGATED_VARIABLE_CONSTRAINTS; i++) {
                 const auto &NEGATED_VARIABLE_NAME =
                     a_OPB.negated_variable_names[i];
                 negated_variable_constraint_proxy(i) =
@@ -428,7 +428,7 @@ class ModelOPBHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (auto i = 0; i < NUMBER_OF_PRODUCT_VARIABLE_CONSTRAINTS; i++) {
+            for (int i = 0; i < NUMBER_OF_PRODUCT_VARIABLE_CONSTRAINTS; i++) {
                 const auto &PRODUCT_VARIABLE_NAME =
                     a_OPB.product_variable_names[i].first;
                 const int PRODUCT_SIZE =

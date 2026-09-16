@@ -58,15 +58,15 @@ TEST_F(TestFixedSizeHashMap, setup) {
     std::unordered_map<model_component::Variable<int, double>*, double>
         unordered_map;
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 20; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 20; j++) {
             unordered_map[&x(i, j)] = random_integer();
         }
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
-            for (auto k = 0; k < 40; k++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
+            for (int k = 0; k < 40; k++) {
                 unordered_map[&y(i, j, k)] = random_integer();
             }
         }

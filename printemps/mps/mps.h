@@ -209,7 +209,7 @@ struct MPS {
         const std::string COLUMN_NAME(a_ITEMS[0]);
         const int         WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
 
-        for (auto i = 0; i < WIDTH; i++) {
+        for (int i = 0; i < WIDTH; i++) {
             const auto k = 2 * i;
 
             const std::string EXPRESSION_NAME(a_ITEMS[k + 1]);
@@ -257,7 +257,7 @@ struct MPS {
         }
 
         const int WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
-        for (auto i = 0; i < WIDTH; i++) {
+        for (int i = 0; i < WIDTH; i++) {
             const auto k = 2 * i;
 
             const std::string ROW_NAME(a_ITEMS[k + 1]);
@@ -286,7 +286,7 @@ struct MPS {
         constexpr auto Greater = MPSConstraintSense::Greater;
 
         const int WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
-        for (auto i = 0; i < WIDTH; i++) {
+        for (int i = 0; i < WIDTH; i++) {
             const auto k = 2 * i;
 
             name     = std::string(a_ITEMS[k + 1]);

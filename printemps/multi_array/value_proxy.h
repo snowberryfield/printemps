@@ -277,7 +277,7 @@ inline void print_values(
     for (const auto &item : a_VALUE_PROXIES) {
         auto &proxy              = item.second;
         int   number_of_elements = proxy.number_of_elements();
-        for (auto i = 0; i < number_of_elements; i++) {
+        for (int i = 0; i < number_of_elements; i++) {
             utility::print(a_CATEGORY + "." + proxy.flat_indexed_names(i) +
                            " = " +
                            std::to_string(proxy.flat_indexed_values(i)));
@@ -295,7 +295,7 @@ utility::json::JsonObject create_json_object(
     for (const auto &item : a_VALUE_PROXIES) {
         auto &    proxy              = item.second;
         const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             object.emplace_back(proxy.flat_indexed_names(i),
                                 proxy.flat_indexed_values(i));
         }
@@ -324,9 +324,9 @@ utility::json::JsonObject create_json_array(
         int       dimension            = 0;
         str += "\"" + item.first + "\" ";
         str += "[ ";
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             const auto INDEX = proxy.multi_dimensional_index(i);
-            for (auto j = dimension; j < NUMBER_OF_DIMENSIONS - 1; j++) {
+            for (int j = dimension; j < NUMBER_OF_DIMENSIONS - 1; j++) {
                 if (INDEX[j + 1] == 0) {
                     str += "[ ";
                     dimension++;
@@ -337,7 +337,7 @@ utility::json::JsonObject create_json_array(
 
             str += std::to_string(proxy.flat_indexed_values(i)) + " ";
 
-            for (auto j = dimension; j > 0; j--) {
+            for (int j = dimension; j > 0; j--) {
                 if (INDEX[j] == proxy.shape()[j] - 1) {
                     str += "] ";
                     dimension--;

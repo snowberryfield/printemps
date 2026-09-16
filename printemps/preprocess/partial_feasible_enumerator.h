@@ -134,7 +134,7 @@ class PartialFeasibleEnumerator {
                     model_component::Variable<T_Variable, T_Expression>*, int>>
                     solution;
                 solution.reserve(number_of_mutable_variables);
-                for (auto i = 0; i < number_of_mutable_variables; i++) {
+                for (int i = 0; i < number_of_mutable_variables; i++) {
                     solution.push_back({VARIABLE_PTRS[i], (mask >> i) & 1});
                 }
 
@@ -250,7 +250,7 @@ class PartialFeasibleEnumerator {
                 "are found:",
                 true);
 
-            for (auto i = 0; i < SMALL_CONSTRAINT_GROUPS_SIZE; i++) {
+            for (int i = 0; i < SMALL_CONSTRAINT_GROUPS_SIZE; i++) {
                 const auto& constraint_group = m_small_constraint_groups[i];
                 utility::print_info(
                     " -- Group " + utility::to_string(i, "%d") + " : #Vars = " +

@@ -158,7 +158,7 @@ inline bool is_integer(const std::string& a_ARG) {
 /*****************************************************************************/
 inline std::string indent_space(const int a_INDENT_LEVEL) {
     std::string result = "";
-    for (auto i = 0; i < a_INDENT_LEVEL; i++) {
+    for (int i = 0; i < a_INDENT_LEVEL; i++) {
         result += "    ";
     }
 

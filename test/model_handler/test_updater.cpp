@@ -514,14 +514,14 @@ TEST_F(TestUpdater, reset_variable_objective_improvabilities_arg_void) {
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).set_is_objective_improvable(true);
         EXPECT_TRUE(y(i).is_objective_improvable());
     }
     model.updater().reset_variable_objective_improvabilities();
 
     EXPECT_FALSE(x(0).is_objective_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_FALSE(y(i).is_objective_improvable());
     }
 }
@@ -537,7 +537,7 @@ TEST_F(TestUpdater,
 
     x(0).set_is_objective_improvable(true);
     EXPECT_TRUE(x(0).is_objective_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).set_is_objective_improvable(true);
         EXPECT_TRUE(y(i).is_objective_improvable());
     }
@@ -547,7 +547,7 @@ TEST_F(TestUpdater,
     EXPECT_FALSE(x(0).is_objective_improvable());
     EXPECT_FALSE(y(0).is_objective_improvable());
     EXPECT_FALSE(y(9).is_objective_improvable());
-    for (auto i = 1; i < 9; i++) {
+    for (int i = 1; i < 9; i++) {
         EXPECT_TRUE(y(i).is_objective_improvable());
     }
 }
@@ -562,14 +562,14 @@ TEST_F(TestUpdater, reset_variable_feasibility_improvabilities_arg_void) {
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
     model.updater().reset_variable_feasibility_improvabilities();
 
     EXPECT_FALSE(x(0).is_feasibility_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_FALSE(y(i).is_feasibility_improvable());
     }
 }
@@ -585,7 +585,7 @@ TEST_F(TestUpdater,
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
@@ -595,7 +595,7 @@ TEST_F(TestUpdater,
     EXPECT_FALSE(x(0).is_feasibility_improvable());
     EXPECT_FALSE(y(0).is_feasibility_improvable());
     EXPECT_FALSE(y(9).is_feasibility_improvable());
-    for (auto i = 1; i < 9; i++) {
+    for (int i = 1; i < 9; i++) {
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
 }
@@ -616,7 +616,7 @@ TEST_F(TestUpdater,
 
     x(0).set_is_feasibility_improvable(true);
     EXPECT_TRUE(x(0).is_feasibility_improvable());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).set_is_feasibility_improvable(true);
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
@@ -628,7 +628,7 @@ TEST_F(TestUpdater,
     EXPECT_FALSE(y(0).is_feasibility_improvable());
     EXPECT_FALSE(y(1).is_feasibility_improvable());
     EXPECT_FALSE(y(9).is_feasibility_improvable());
-    for (auto i = 2; i < 9; i++) {
+    for (int i = 2; i < 9; i++) {
         EXPECT_TRUE(y(i).is_feasibility_improvable());
     }
 }

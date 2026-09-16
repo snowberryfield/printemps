@@ -70,12 +70,12 @@ class Evaluator {
         const int CONSTRAINT_PROXIES_SIZE   = MODEL.m_constraint_proxies.size();
         bool      is_feasibility_improvable = false;
 
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             auto &constraints =
                 MODEL.m_constraint_proxies[i].flat_indexed_constraints();
 
             const int CONSTRAINTS_SIZE = constraints.size();
-            for (auto j = 0; j < CONSTRAINTS_SIZE; j++) {
+            for (int j = 0; j < CONSTRAINTS_SIZE; j++) {
                 if (!constraints[j].is_enabled()) {
                     continue;
                 }
@@ -410,7 +410,7 @@ class Evaluator {
                 double violation_diff_negative = 0.0;
                 double violation_diff_positive = 0.0;
 
-                for (auto i = index_min; i <= index_max; i++) {
+                for (int i = index_min; i <= index_max; i++) {
                     auto &constraint_ptr = RELATED_CONSTRAINT_PTRS[i];
                     if (!constraint_ptr->is_enabled()) {
                         continue;

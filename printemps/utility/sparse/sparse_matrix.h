@@ -68,10 +68,10 @@ struct SparseMatrix {
 
         const int NONZERO_SIZE = this->values.size();
 
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             this->row_ptrs[this->row_indices[i] + 1]++;
         }
-        for (auto i = 0; i < this->number_of_rows; i++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
             this->row_ptrs[i + 1] += this->row_ptrs[i];
         }
 
@@ -85,7 +85,7 @@ struct SparseMatrix {
         std::vector<double> c_temp(this->number_of_columns, 0);
         double              norm_infty = 0.0;
 
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             const auto VALUE = std::fabs(this->values[i]);
             r_temp[this->row_indices[i]] += VALUE;
             c_temp[this->column_indices[i]] += VALUE;
@@ -105,12 +105,12 @@ struct SparseMatrix {
         Diagonal  row_scaler(this->number_of_rows);
         Diagonal  column_scaler(this->number_of_columns);
 
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             const auto VALUE = std::fabs(this->values[i]);
             row_scaler[this->row_indices[i]] += VALUE;
             column_scaler[this->column_indices[i]] += VALUE;
         }
-        for (auto i = 0; i < this->number_of_rows; i++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
             if (row_scaler[i] < constant::EPSILON_10) {
                 row_scaler[i] = 1.0;
             } else {
@@ -118,14 +118,14 @@ struct SparseMatrix {
             }
         }
 
-        for (auto i = 0; i < this->number_of_columns; i++) {
+        for (int i = 0; i < this->number_of_columns; i++) {
             if (column_scaler[i] < constant::EPSILON_10) {
                 column_scaler[i] = 1.0;
             } else {
                 column_scaler[i] = sqrt(column_scaler[i]);
             }
         }
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             const auto ROW_INDEX    = this->row_indices[i];
             const auto COLUMN_INDEX = this->column_indices[i];
             this->values[i] /=
@@ -143,8 +143,8 @@ struct SparseMatrix {
         Diagonal  row_scaler(this->number_of_rows);
         Diagonal  column_scaler(this->number_of_columns);
 
-        for (auto k = 0; k < a_NUMBER_OF_ITERATIONS; k++) {
-            for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int k = 0; k < a_NUMBER_OF_ITERATIONS; k++) {
+            for (int i = 0; i < NONZERO_SIZE; i++) {
                 const auto VALUE = std::fabs(this->values[i]);
                 row_scaler[this->row_indices[i]] =
                     std::max(row_scaler[this->row_indices[i]], VALUE);
@@ -152,7 +152,7 @@ struct SparseMatrix {
                     std::max(column_scaler[this->column_indices[i]], VALUE);
             }
 
-            for (auto i = 0; i < this->number_of_rows; i++) {
+            for (int i = 0; i < this->number_of_rows; i++) {
                 if (row_scaler[i] < constant::EPSILON_10) {
                     row_scaler[i] = 1.0;
                 } else {
@@ -160,7 +160,7 @@ struct SparseMatrix {
                 }
             }
 
-            for (auto i = 0; i < this->number_of_columns; i++) {
+            for (int i = 0; i < this->number_of_columns; i++) {
                 if (column_scaler[i] < constant::EPSILON_10) {
                     column_scaler[i] = 1.0;
                 } else {
@@ -168,7 +168,7 @@ struct SparseMatrix {
                 }
             }
 
-            for (auto i = 0; i < NONZERO_SIZE; i++) {
+            for (int i = 0; i < NONZERO_SIZE; i++) {
                 const auto ROW_INDEX    = this->row_indices[i];
                 const auto COLUMN_INDEX = this->column_indices[i];
                 this->values[i] /=
@@ -201,7 +201,7 @@ struct SparseMatrix {
                              return this->column_indices[a_FIRST] <
                                     this->column_indices[a_SECOND];
                          });
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             values_trans[i]         = this->values[permutation[i]];
             row_indices_trans[i]    = this->row_indices[permutation[i]];
             column_indices_trans[i] = this->column_indices[permutation[i]];
@@ -228,7 +228,7 @@ struct SparseMatrix {
 #endif
         for (int i = 0; i < this->number_of_rows; i++) {
             (*a_result_ptr)[i] = 0;
-            for (auto j = ROW_PTRS[i]; j < ROW_PTRS[i + 1]; j++) {
+            for (int j = ROW_PTRS[i]; j < ROW_PTRS[i + 1]; j++) {
                 (*a_result_ptr)[i] += VALUES[j] * a_X[COLUMN_INDICES[j]];
             }
         }
@@ -252,7 +252,7 @@ struct SparseMatrix {
 
         *a_result_ptr = *this;
 
-        for (auto i = 0; i < this->number_of_rows; i++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
             for (int j = this->row_ptrs[i]; j < this->row_ptrs[i + 1]; j++) {
                 a_result_ptr->values[j] *= a_DIAGONAL[i];
             }
@@ -277,7 +277,7 @@ struct SparseMatrix {
 
         *a_result_ptr          = *this;
         const int NONZERO_SIZE = this->values.size();
-        for (auto i = 0; i < NONZERO_SIZE; i++) {
+        for (int i = 0; i < NONZERO_SIZE; i++) {
             a_result_ptr->values[i] *=
                 a_DIAGONAL[a_result_ptr->column_indices[i]];
         }
@@ -292,7 +292,7 @@ struct SparseMatrix {
 
     /*************************************************************************/
     inline void print_as_sparse(void) const {
-        for (auto i = 0; i < this->number_of_rows; i++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
             for (int j = this->row_ptrs[i]; j < this->row_ptrs[i + 1]; j++) {
                 std::cout << i << " " << this->column_indices[j] << " "
                           << this->values[j] << std::endl;
@@ -305,14 +305,14 @@ struct SparseMatrix {
             this->number_of_rows,
             std::vector<double>(this->number_of_columns, 0));
 
-        for (auto i = 0; i < this->number_of_rows; i++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
             for (int j = this->row_ptrs[i]; j < this->row_ptrs[i + 1]; j++) {
                 dense[i][this->column_indices[j]] = this->values[j];
             }
         }
 
-        for (auto i = 0; i < this->number_of_rows; i++) {
-            for (auto j = 0; j < this->number_of_columns; j++) {
+        for (int i = 0; i < this->number_of_rows; i++) {
+            for (int j = 0; j < this->number_of_columns; j++) {
                 std::cout << dense[i][j] << " ";
             }
             std::cout << std::endl;

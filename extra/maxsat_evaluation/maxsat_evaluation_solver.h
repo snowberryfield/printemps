@@ -229,7 +229,7 @@ class MaxSATEvaluationSolver {
             const auto &VALUES = PROXY.flat_indexed_values();
             const int   N      = static_cast<int>(VALUES.size());
             v_line.reserve(N);
-            for (auto i = 0; i < N; i++) {
+            for (int i = 0; i < N; i++) {
                 v_line.push_back(VALUES[i] != 0 ? '1' : '0');
             }
         }
@@ -264,7 +264,7 @@ class MaxSATEvaluationSolver {
                 std::string v_line;
                 const int   N = static_cast<int>(VALUES.size());
                 v_line.reserve(N);
-                for (auto i = 0; i < N; i++) {
+                for (int i = 0; i < N; i++) {
                     v_line.push_back(VALUES[i] != 0 ? '1' : '0');
                 }
                 std::cout << "o " << COST << "\n";

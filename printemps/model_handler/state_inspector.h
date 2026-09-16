@@ -54,7 +54,7 @@ class StateInspector {
                 proxy.index(), proxy.shape());
             variable_parameter_proxy.fill(a_VALUE);
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 variable_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_variables(i).name();
             }
@@ -81,7 +81,7 @@ class StateInspector {
                 proxy.index(), proxy.shape());
             expression_parameter_proxy.fill(a_VALUE);
             int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 expression_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_expressions(i).name();
             }
@@ -107,7 +107,7 @@ class StateInspector {
                 proxy.index(), proxy.shape());
             constraint_parameter_proxy.fill(a_VALUE);
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 constraint_parameter_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
             }
@@ -133,7 +133,7 @@ class StateInspector {
 
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 local_penalty_coefficient_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
                 local_penalty_coefficient_proxy.flat_indexed_values(i) =
@@ -164,7 +164,7 @@ class StateInspector {
 
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 update_count_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_variables(i).name();
                 update_count_proxy.flat_indexed_values(i) =
@@ -191,7 +191,7 @@ class StateInspector {
 
             const int NUMBER_OF_ELEMENTS = proxy.number_of_elements();
 
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 violation_count_proxy.flat_indexed_names(i) =
                     proxy.flat_indexed_constraints(i).name();
                 violation_count_proxy.flat_indexed_values(i) =
@@ -308,25 +308,25 @@ class StateInspector {
         const auto &CONSTRAINT_NAMES = MODEL.constraint_names();
 
         /// Decision variables
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+        for (int i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
             solution.m_variable_value_proxies[VARIABLE_NAMES[i]] =
                 VARIABLE_PROXIES[i].export_values_and_names();
         }
 
         /// Expression
-        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
+        for (int i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
             solution.m_expression_value_proxies[EXPRESSION_NAMES[i]] =
                 EXPRESSION_PROXIES[i].export_values_and_names();
         }
 
         /// Constraint
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             solution.m_constraint_value_proxies[CONSTRAINT_NAMES[i]] =
                 CONSTRAINT_PROXIES[i].export_values_and_names();
         }
 
         /// Violation
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             solution.m_violation_value_proxies[CONSTRAINT_NAMES[i]] =
                 CONSTRAINT_PROXIES[i].export_violations_and_names();
         }
@@ -367,7 +367,7 @@ class StateInspector {
         const int   CONSTRAINT_PROXIES_SIZE = CONSTRAINT_PROXIES.size();
         const auto &CONSTRAINT_NAMES        = MODEL.constraint_names();
 
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             named_penalty_coefficients[CONSTRAINT_NAMES[i]] =
                 local_penalty_coefficient_proxies[i];
         }
@@ -388,7 +388,7 @@ class StateInspector {
         const int   VARIABLE_PROXIES_SIZE = VARIABLE_PROXIES.size();
         const auto &VARIABLE_NAMES        = MODEL.variable_names();
 
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+        for (int i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
             named_update_counts[VARIABLE_NAMES[i]] = update_count_proxies[i];
         }
         return named_update_counts;
@@ -408,7 +408,7 @@ class StateInspector {
         const int   CONSTRAINT_PROXIES_SIZE = CONSTRAINT_PROXIES.size();
         const auto &CONSTRAINT_NAMES        = MODEL.constraint_names();
 
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             named_violation_counts[CONSTRAINT_NAMES[i]] =
                 violation_count_proxies[i];
         }

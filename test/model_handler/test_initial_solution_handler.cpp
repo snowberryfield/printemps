@@ -33,12 +33,12 @@ TEST_F(TestInitialSolutionHandler, import_solution_arg_dense_solution) {
 
     x_value.value() = 1;
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y_value(i) = 10 * i;
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             z_value(i, j) = 100 * (i + j);
         }
     }
@@ -52,12 +52,12 @@ TEST_F(TestInitialSolutionHandler, import_solution_arg_dense_solution) {
 
     EXPECT_EQ(1, x.value());
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(10 * i, y(i).value());
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             EXPECT_EQ(100 * (i + j), z(i, j).value());
         }
     }

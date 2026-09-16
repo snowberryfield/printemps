@@ -25,7 +25,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
 
     auto& x = model.create_variables("x", 10, 0, 20);
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         x(i) = 2 * i;
     }
     x(0).fix();
@@ -59,7 +59,7 @@ TEST_F(TestIntegerMoveGenerator, setup) {
         }
     }
 
-    for (auto i = 0; i < 8; i++) {
+    for (int i = 0; i < 8; i++) {
         if (moves[4 * i].alterations.front().first->value() ==
             moves[4 * i].alterations.front().first->upper_bound()) {
             EXPECT_EQ(0, flags[4 * i]);

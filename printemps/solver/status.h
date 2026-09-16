@@ -297,7 +297,7 @@ struct Status {
 
         utility::json::JsonObject nonzero_detail;
 
-        for (auto i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             const auto  LABEL = LABELS[i];
             const auto &VARIABLE_PTRS =
                 VARIABLE_REFERENCE_PTRS[i]->mutable_variable_ptrs;
@@ -382,7 +382,7 @@ struct Status {
 
         utility::json::JsonObject variable_detail;
 
-        for (auto i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             const auto  LABEL     = LABELS[i];
             const auto &REFERENCE = (*VARIABLE_REFERENCE_PTRS[i]);
 
@@ -427,7 +427,7 @@ struct Status {
                                          });
                 };
 
-        for (auto i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             const auto  LABEL     = LABELS[i];
             const auto &REFERENCE = (*VARIABLE_TYPE_REFERENCE_PTRS[i]);
 
@@ -477,7 +477,7 @@ struct Status {
 
         utility::json::JsonObject constraint_detail;
 
-        for (auto i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             const auto  LABEL     = LABELS[i];
             const auto &REFERENCE = (*CONSTRAINT_REFERENCE_PTRS[i]);
 
@@ -529,7 +529,7 @@ struct Status {
                         });
                 };
 
-        for (auto i = 0; i < 2; i++) {
+        for (int i = 0; i < 2; i++) {
             const auto  LABEL     = LABELS[i];
             const auto &REFERENCE = (*CONSTRAINT_TYPE_REFERENCE_PTRS[i]);
 

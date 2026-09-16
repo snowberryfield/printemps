@@ -29,7 +29,7 @@ inline int argmax_index_objective_improvement(
     int       argmax      = 0;
     double    max         = a_SCORES[0].objective_improvement;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].objective_improvement > max) {
             argmax = i;
             max    = a_SCORES[i].objective_improvement;
@@ -43,7 +43,7 @@ inline int argmin_index_objective(const std::vector<SolutionScore> &a_SCORES) {
     int       argmin      = 0;
     double    min         = a_SCORES[0].objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].objective < min) {
             argmin = i;
             min    = a_SCORES[i].objective;
@@ -59,7 +59,7 @@ inline int argmin_index_local_penalty(
     double    min         = a_SCORES[0].local_penalty;
     const int SCORES_SIZE = a_SCORES.size();
 
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].local_penalty < min) {
             argmin = i;
             min    = a_SCORES[i].local_penalty;
@@ -74,7 +74,7 @@ inline int argmin_index_global_penalty(
     int       argmin      = 0;
     double    min         = a_SCORES[0].global_penalty;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].global_penalty < min) {
             argmin = i;
             min    = a_SCORES[i].global_penalty;
@@ -89,7 +89,7 @@ inline int argmin_index_local_augmented_objective(
     int       argmin      = 0;
     double    min         = a_SCORES[0].local_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].local_augmented_objective < min) {
             argmin = i;
             min    = a_SCORES[i].local_augmented_objective;
@@ -104,7 +104,7 @@ inline int argmin_index_global_augmented_objective(
     int       argmin      = 0;
     double    min         = a_SCORES[0].global_augmented_objective;
     const int SCORES_SIZE = a_SCORES.size();
-    for (auto i = 1; i < SCORES_SIZE; i++) {
+    for (int i = 1; i < SCORES_SIZE; i++) {
         if (a_SCORES[i].global_augmented_objective < min) {
             argmin = i;
             min    = a_SCORES[i].global_augmented_objective;

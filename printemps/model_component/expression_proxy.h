@@ -61,7 +61,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
          * https://cpprefjp.github.io/reference/vector/vector/resize.html
          */
         m_expressions.reserve(this->number_of_elements());
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             m_expressions.emplace_back(
                 Expression<T_Variable, T_Expression>::create_instance());
         }
@@ -248,7 +248,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] = m_expressions[i].value();
             proxy.flat_indexed_names()[i]  = m_expressions[i].name();
         }
@@ -286,7 +286,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (auto j = 0; j < this->number_of_dimensions(); j++) {
+        for (int j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -296,9 +296,9 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
             expression_ptrs;
         expression_ptrs.reserve(number_of_partial_elements);
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (auto j = 0; j < this->number_of_dimensions(); j++) {
+            for (int j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_expressions[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -335,7 +335,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         }
 
         auto result = Expression<T_Variable, T_Expression>::create_instance();
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             result += m_expressions[i] * a_COEFFICIENTS[i];
         }
 
@@ -362,7 +362,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (auto j = 0; j < this->number_of_dimensions(); j++) {
+        for (int j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -372,9 +372,9 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
             expression_ptrs;
         expression_ptrs.reserve(number_of_partial_elements);
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (auto j = 0; j < this->number_of_dimensions(); j++) {
+            for (int j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_expressions[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -396,7 +396,7 @@ class ExpressionProxy : public multi_array::AbstractMultiArray {
         auto result = Expression<T_Variable, T_Expression>::create_instance();
 
         const int EXPRESSIONS_SIZE = expression_ptrs.size();
-        for (auto i = 0; i < EXPRESSIONS_SIZE; i++) {
+        for (int i = 0; i < EXPRESSIONS_SIZE; i++) {
             result += (*expression_ptrs[i]) * a_COEFFICIENTS[i];
         }
 

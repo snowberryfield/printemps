@@ -47,7 +47,7 @@ class AggregationMoveGenerator
         this->m_moves.resize(4 * BINOMIALS_SIZE);
         this->m_flags.resize(4 * BINOMIALS_SIZE);
 
-        for (auto i = 0; i < BINOMIALS_SIZE; i++) {
+        for (int i = 0; i < BINOMIALS_SIZE; i++) {
             auto &move                     = this->m_moves[4 * i];
             move.associated_constraint_ptr = constraint_ptrs[i];
             move.type                      = MoveType::Aggregation;
@@ -87,7 +87,7 @@ class AggregationMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto i = 0; i < BINOMIALS_SIZE; i++) {
+                for (int i = 0; i < BINOMIALS_SIZE; i++) {
                     {
                         auto  index       = 4 * i;
                         auto &alterations = (*a_moves_ptr)[index].alterations;
@@ -156,12 +156,12 @@ class AggregationMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto w = 0; w < NUM_WORDS; w++) {
+                for (int w = 0; w < NUM_WORDS; w++) {
                     const int     start_i = w * 64;
                     const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
                     std::uint64_t word    = 0;
 
-                    for (auto i = start_i; i < end_i; i++) {
+                    for (int i = start_i; i < end_i; i++) {
                         if (!(*a_moves_ptr)[i]
                                  .associated_constraint_ptr->is_feasible()) {
                             continue;

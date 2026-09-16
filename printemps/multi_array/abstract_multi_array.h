@@ -92,7 +92,7 @@ class AbstractMultiArray {
         std::vector<int> result(m_number_of_dimensions);
 
         int remain = a_FLAT_INDEX;
-        for (auto i = 0; i < m_number_of_dimensions; i++) {
+        for (int i = 0; i < m_number_of_dimensions; i++) {
             result[i] = remain / m_strides[i];
             remain    = remain % m_strides[i];
         }
@@ -109,7 +109,7 @@ class AbstractMultiArray {
          * generating std::vector<int>.
          */
         int remain = a_FLAT_INDEX;
-        for (auto i = 0; i < m_number_of_dimensions; i++) {
+        for (int i = 0; i < m_number_of_dimensions; i++) {
             (*a_multi_dimensional_index)[i] = remain / m_strides[i];
             remain                          = remain % m_strides[i];
         }
@@ -127,7 +127,7 @@ class AbstractMultiArray {
         std::string label  = "";
         std::string format = "%" + std::to_string(m_max_digits) + "d";
 
-        for (auto i = 0; i < m_number_of_dimensions; i++) {
+        for (int i = 0; i < m_number_of_dimensions; i++) {
             label += utility::to_string(multi_dimensional_index[i], format);
             if (i != m_number_of_dimensions - 1) {
                 label += ", ";

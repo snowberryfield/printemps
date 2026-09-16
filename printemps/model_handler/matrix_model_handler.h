@@ -159,7 +159,7 @@ class MatrixModelHandler {
          * the mapped mutable variables.
          */
         const int MUTABLE_VARIABLES_SIZE = m_variable_index_map.size();
-        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+        for (int i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
             (*a_variable_initial_solution_ptr)[i] =
                 m_variable_index_map.reverse_at(i)->value();
         }
@@ -176,7 +176,7 @@ class MatrixModelHandler {
          * detects if the bounds correspond to unbounded conditions.
          */
         const int MUTABLE_VARIABLES_SIZE = m_variable_index_map.size();
-        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+        for (int i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
             const auto &VARIABLE_PTR = m_variable_index_map.reverse_at(i);
             (*a_variable_lower_bounds_ptr)[i] = VARIABLE_PTR->lower_bound();
             (*a_variable_upper_bounds_ptr)[i] = VARIABLE_PTR->upper_bound();
@@ -200,7 +200,7 @@ class MatrixModelHandler {
          * (=) constraints.
          */
         const int ENABLED_CONSTRAINTS_SIZE = m_constraint_index_map.size();
-        for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
             const auto &CONSTRAINT_PTR = m_constraint_index_map.reverse_at(i);
             const auto &EXPRESSION     = CONSTRAINT_PTR->expression();
 
@@ -242,11 +242,11 @@ class MatrixModelHandler {
         a_dual_upper_bounds_ptr->setup(ENABLED_CONSTRAINTS_SIZE,
                                        std::numeric_limits<double>::max());
 
-        for (auto i = a_LESS_RANGE.first; i < a_LESS_RANGE.second; i++) {
+        for (int i = a_LESS_RANGE.first; i < a_LESS_RANGE.second; i++) {
             (*a_dual_lower_bounds_ptr)[i] = 0.0;
         }
 
-        for (auto i = a_GREATER_RANGE.first; i < a_GREATER_RANGE.second; i++) {
+        for (int i = a_GREATER_RANGE.first; i < a_GREATER_RANGE.second; i++) {
             (*a_dual_lower_bounds_ptr)[i] = 0.0;
         }
     }
@@ -265,7 +265,7 @@ class MatrixModelHandler {
         const int ENABLED_CONSTRAINTS_SIZE = m_constraint_index_map.size();
         std::vector<std::tuple<int, int, double>> row_records;
 
-        for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
             const auto &CONSTRAINT_PTR = m_constraint_index_map.reverse_at(i);
             const auto &EXPRESSION     = CONSTRAINT_PTR->expression();
 
@@ -311,7 +311,7 @@ class MatrixModelHandler {
          *  - Equal (=):    -constant_value <=  sum(a_j x_j) <= -constant_value
          */
         const int ENABLED_CONSTRAINTS_SIZE = m_constraint_index_map.size();
-        for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
             const auto &CONSTRAINT_PTR = m_constraint_index_map.reverse_at(i);
             const auto &EXPRESSION     = CONSTRAINT_PTR->expression();
 
@@ -410,7 +410,7 @@ class MatrixModelHandler {
             &variable_lower_bounds, &variable_upper_bounds,
             &is_variable_lower_unbounded, &is_variable_upper_unbounded);
 
-        for (auto i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
+        for (int i = 0; i < MUTABLE_VARIABLES_SIZE; i++) {
             const auto &VARIABLE_PTR  = m_variable_index_map.reverse_at(i);
             objective_coefficients[i] = VARIABLE_PTR->objective_sensitivity();
         }

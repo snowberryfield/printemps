@@ -31,7 +31,7 @@ TEST_F(TestKnapsack, knapsack) {
     std::vector<int> volumes;
     std::vector<int> prices;
 
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         prices.push_back(rand() % 100);
         weights.push_back(prices.back() + rand() % 10);
         volumes.push_back(prices.back() + rand() % 10);
@@ -71,7 +71,7 @@ TEST_F(TestKnapsack, knapsack) {
     model.maximize(total_price);
 
     /// initial value definition
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         x(n) = 0;
     }
 

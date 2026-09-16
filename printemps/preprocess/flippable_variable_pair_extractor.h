@@ -75,13 +75,13 @@ class FlippableVariablePairExtractor {
         std::vector<FlippableVariablePair<T_Variable, T_Expression>> pairs;
         pairs.reserve(VARIABLES_SIZE);
 
-        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+        for (int i = 0; i < VARIABLES_SIZE; i++) {
             std::unordered_set<
                 model_component::Constraint<T_Variable, T_Expression> *>
                 constraint_ptrs_first(
                     variable_ptrs[i]->related_constraint_ptrs().begin(),
                     variable_ptrs[i]->related_constraint_ptrs().end());
-            for (auto j = i + 1; j < VARIABLES_SIZE; j++) {
+            for (int j = i + 1; j < VARIABLES_SIZE; j++) {
                 std::unordered_set<
                     model_component::Constraint<T_Variable, T_Expression> *>
                     constraint_ptrs_second(

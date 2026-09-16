@@ -34,7 +34,7 @@ TEST_F(TestRandomUtility, generate_random) {
     std::vector<int> random_integers;
     std::vector<int> random_positive_integers;
 
-    for (auto i = 0; i < 100000; i++) {
+    for (int i = 0; i < 100000; i++) {
         random_integers.push_back(random_integer_generator.generate_random());
         random_positive_integers.push_back(
             random_positive_integer_generator.generate_random());
@@ -65,14 +65,14 @@ TEST_F(TestRandomUtility, seed) {
         std::vector<int> random_integers_1;
         std::vector<int> random_integers_2;
 
-        for (auto i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100000; i++) {
             random_integers_1.push_back(
                 random_integer_generator_1.generate_random());
             random_integers_2.push_back(
                 random_integer_generator_2.generate_random());
         }
 
-        for (auto i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100000; i++) {
             EXPECT_EQ(0, random_integers_1[i] - random_integers_2[i]);
         }
     }
@@ -84,14 +84,14 @@ TEST_F(TestRandomUtility, seed) {
         std::vector<int> random_integers_1;
         std::vector<int> random_integers_2;
 
-        for (auto i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100000; i++) {
             random_integers_1.push_back(
                 random_integer_generator_1.generate_random());
             random_integers_2.push_back(
                 random_integer_generator_2.generate_random());
         }
 
-        for (auto i = 0; i < 100000; i++) {
+        for (int i = 0; i < 100000; i++) {
             EXPECT_EQ(0, random_integers_1[i] - random_integers_2[i]);
         }
     }

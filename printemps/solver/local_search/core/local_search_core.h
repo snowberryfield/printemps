@@ -569,7 +569,7 @@ class LocalSearchCore {
     schedule(static)                                                          \
     num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
-            for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
+            for (int i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.
@@ -617,7 +617,7 @@ class LocalSearchCore {
             constraint_ptrs.clear();
             number_of_performed_moves = 0;
             move.initialize();
-            for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
+            for (int i = 0; i < NUMBER_OF_MOVES; i++) {
                 auto& score    = trial_solution_scores[move_indices[i]];
                 auto& move_ptr = TRIAL_MOVE_PTRS[move_indices[i]];
 

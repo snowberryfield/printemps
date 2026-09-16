@@ -140,8 +140,8 @@ struct Move {
     /*************************************************************************/
     inline bool has_duplicate_variable(void) const {
         const int ALTERATIONS_SIZE = this->alterations.size();
-        for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
-            for (auto j = i + 1; j < ALTERATIONS_SIZE; j++) {
+        for (int i = 0; i < ALTERATIONS_SIZE; i++) {
+            for (int j = i + 1; j < ALTERATIONS_SIZE; j++) {
                 if (this->alterations[i].first == this->alterations[j].first) {
                     return true;
                 }
@@ -167,7 +167,7 @@ struct Move {
         auto intersection_ptrs = union_ptrs;
 
         const int ALTERATIONS_SIZE = this->alterations.size();
-        for (auto i = 1; i < ALTERATIONS_SIZE; i++) {
+        for (int i = 1; i < ALTERATIONS_SIZE; i++) {
             auto &related_constraint_ptrs_vector =
                 this->alterations[i].first->related_constraint_ptrs();
             std::unordered_set<
@@ -325,7 +325,7 @@ inline bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
      */
     const int ALTERATIONS_SIZE = a_MOVE_FIRST.alterations.size();
 
-    for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+    for (int i = 0; i < ALTERATIONS_SIZE; i++) {
         if (a_MOVE_FIRST.alterations[i] != a_MOVE_SECOND.alterations[i]) {
             return false;
         }

@@ -50,7 +50,7 @@ class IntegerMoveGenerator
         this->m_moves.resize(4 * VARIABLES_SIZE);
         this->m_flags.resize(4 * VARIABLES_SIZE);
 
-        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+        for (int i = 0; i < VARIABLES_SIZE; i++) {
             auto &move = this->m_moves[4 * i];
 
             move.associated_constraint_ptr = nullptr;
@@ -94,12 +94,12 @@ class IntegerMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto w = 0; w < NUM_WORDS; w++) {
+                for (int w = 0; w < NUM_WORDS; w++) {
                     const int     start_var = w * 16;
                     const int     end_var   = std::min(start_var + 16, VARIABLES_SIZE);
                     std::uint64_t word      = 0;
 
-                    for (auto i = start_var; i < end_var; i++) {
+                    for (int i = start_var; i < end_var; i++) {
                         const int  bit_offset  = (i - start_var) * 4;
                         const auto value       = mutable_variable_ptrs[i]->value();
                         const auto lower_bound =

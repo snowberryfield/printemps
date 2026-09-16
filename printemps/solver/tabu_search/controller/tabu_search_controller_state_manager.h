@@ -153,7 +153,7 @@ class TabuSearchControllerStateManager {
             std::vector<utility::ucb1::Action<std::pair<int, int>>> actions;
 
             const int THREAD_PATTERNS_SIZE = thread_patterns.size();
-            for (auto i = 0; i < THREAD_PATTERNS_SIZE; i++) {
+            for (int i = 0; i < THREAD_PATTERNS_SIZE; i++) {
                 if (thread_patterns[i].first == thread_patterns[i].second ||
                     thread_patterns[i].first == 1) {
                     actions.push_back(thread_patterns[i]);

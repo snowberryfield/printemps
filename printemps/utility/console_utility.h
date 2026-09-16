@@ -30,7 +30,7 @@ inline void print_dot_line(const bool a_IS_ENABLED) {
     if (!a_IS_ENABLED) {
         return;
     }
-    for (auto i = 0; i < 40; i++) {
+    for (int i = 0; i < 40; i++) {
         std::cout << "- ";
     }
     std::cout << std::endl;
@@ -51,7 +51,7 @@ inline void print_line_break(int        a_NUMBER_OF_LINE_BREAKS,
     if (!a_IS_ENABLED) {
         return;
     }
-    for (auto i = 0; i < a_NUMBER_OF_LINE_BREAKS; i++) {
+    for (int i = 0; i < a_NUMBER_OF_LINE_BREAKS; i++) {
         std::cout << std::endl;
     }
 }
@@ -71,7 +71,7 @@ inline void print(const std::string &a_LINE, const bool a_IS_ENABLED) {
     constexpr int NUMBER_OF_CHARACTERS_PER_LINE = 80;
 
     int number_of_lines = (str.size() - 1) / NUMBER_OF_CHARACTERS_PER_LINE + 1;
-    for (auto i = 0; i < number_of_lines; i++) {
+    for (int i = 0; i < number_of_lines; i++) {
         if (i == number_of_lines - 1) {
             std::cout << str.substr(i * NUMBER_OF_CHARACTERS_PER_LINE)
                       << std::endl;
@@ -97,7 +97,7 @@ inline void print_with_label(const std::string &a_HEADER_LABEL,
 
     int number_of_lines =
         (a_MESSAGE.size() - 1) / NUMBER_OF_CHARACTERS_PER_LINE + 1;
-    for (auto i = 0; i < number_of_lines; i++) {
+    for (int i = 0; i < number_of_lines; i++) {
         std::string label = (i == 0) ? LABEL_FIRST_ROW : LABEL_OTHER_ROW;
         if (i == number_of_lines - 1) {
             std::cout << label

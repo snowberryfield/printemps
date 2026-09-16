@@ -35,7 +35,7 @@ int main(void) {
 
     std::vector<int> item_volumes;
 
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         item_volumes.push_back(rand() % 50);
     }
 
@@ -57,7 +57,7 @@ int main(void) {
     auto& total_volume  //
         = model.create_expressions("total_volume", number_of_bins);
 
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         total_volume(m) =
             x.dot({printemps::model_component::Range::All, m}, item_volumes);
     }
@@ -72,7 +72,7 @@ int main(void) {
     /// sum_{m=1}^{M} x_{n, m} = 1 (n=1,...,N),
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         constraint_selection(n) =
             x.selection({n, printemps::model_component::Range::All});
     }
@@ -80,7 +80,7 @@ int main(void) {
     /// sum_{n=1}^{N} v_{n} x_{n, m} <= C (m=1,...,M)
     auto& constraint_total_volume =
         model.create_constraints("total_volume", number_of_bins);
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         constraint_total_volume(m) = (total_volume(m) <= bin_capacity * y(m));
     }
 
@@ -90,7 +90,7 @@ int main(void) {
      * give preference to the younger numbered bins.
      */
     auto& constraint_cut = model.create_constraints("cut", number_of_bins - 1);
-    for (auto m = 0; m < number_of_bins - 1; m++) {
+    for (int m = 0; m < number_of_bins - 1; m++) {
         constraint_cut(m) = (y(m + 1) <= y(m));
     }
 
@@ -122,11 +122,11 @@ int main(void) {
     /*************************************************************************/
     /// Initial value definitions
     /*************************************************************************/
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         x(n, rand() % number_of_bins) = 1;
     }
 
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         y(m) = 1;
     }
 

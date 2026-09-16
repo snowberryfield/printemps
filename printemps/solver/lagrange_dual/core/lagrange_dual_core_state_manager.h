@@ -199,7 +199,7 @@ class LagrangeDualCoreStateManager {
                                  .is_enabled_move_evaluation_parallelization) \
     schedule(static)
 #endif
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINTS_SIZE; i++) {
             const double CONSTRAINT_VALUE =
                 constraint_ptrs[i]->constraint_value();
             const int PROXY_INDEX = constraint_ptrs[i]->proxy_index();

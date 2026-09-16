@@ -86,7 +86,7 @@ TEST_F(TestBuilder, setup_variable_related_constraints) {
     model.builder().setup_variable_constraint_sensitivities();
     model.builder().setup_variable_related_constraint_ptrs();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_TRUE(std::find(x(i).related_constraint_ptrs().begin(),
                               x(i).related_constraint_ptrs().end(),
                               &g(0)) != x(i).related_constraint_ptrs().end());
@@ -100,8 +100,8 @@ TEST_F(TestBuilder, setup_variable_related_constraints) {
                             &g(2)) != x(i).related_constraint_ptrs().end());
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_FALSE(std::find(y(i, j).related_constraint_ptrs().begin(),
                                    y(i, j).related_constraint_ptrs().end(),
                                    &g(0)) !=
@@ -130,12 +130,12 @@ TEST_F(TestBuilder, setup_variable_objective_sensitivities) {
     model.minimize(2 * x.sum() + 5 * y.sum());
     model.builder().setup_variable_objective_sensitivities();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(2, x(i).objective_sensitivity());
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(5, y(i, j).objective_sensitivity());
         }
     }
@@ -149,12 +149,12 @@ TEST_F(TestBuilder, setup_variable_constraint_sensitivities) {
     auto& y = model.create_variables("y", {20, 30}, 0, 1);
     auto& g = model.create_constraints("g", 2);
     auto& p = model.create_expressions("p", 2);
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         p(0) += (i + 1) * x(i);
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             p(1) += (i + j + 1) * y(i, j);
         }
     }
@@ -163,7 +163,7 @@ TEST_F(TestBuilder, setup_variable_constraint_sensitivities) {
 
     model.builder().setup_variable_constraint_sensitivities();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         for (auto&& sensitivity : x(i).constraint_sensitivities()) {
             if (sensitivity.first == &g(0)) {
                 EXPECT_EQ(i + 1, sensitivity.second);
@@ -171,8 +171,8 @@ TEST_F(TestBuilder, setup_variable_constraint_sensitivities) {
         }
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             for (auto&& sensitivity : y(i, j).constraint_sensitivities()) {
                 if (sensitivity.first == &g(1)) {
                     EXPECT_EQ(i + j + 1, sensitivity.second);
@@ -283,11 +283,11 @@ TEST_F(TestBuilder, setup_selections) {
 
     model.builder().setup_selections(selections);
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(&(model.selections()[0]), x(i).selection_ptr());
     }
 
-    for (auto i = 0; i < 5; i++) {
+    for (int i = 0; i < 5; i++) {
         EXPECT_EQ(&(model.selections()[1]), y(i).selection_ptr());
     }
 }

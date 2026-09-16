@@ -66,7 +66,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
          * https://cpprefjp.github.io/reference/vector/vector/resize.html
          */
         m_constraints.reserve(this->number_of_elements());
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             m_constraints.emplace_back(
                 Constraint<T_Variable, T_Expression>::create_instance());
         }
@@ -198,7 +198,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] =
                 m_constraints[i].constraint_value();
             proxy.flat_indexed_names()[i] = m_constraints[i].name();
@@ -212,7 +212,7 @@ class ConstraintProxy : public multi_array::AbstractMultiArray {
         multi_array::ValueProxy<T_Expression> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] = m_constraints[i].violation_value();
             proxy.flat_indexed_names()[i]  = m_constraints[i].name();
         }

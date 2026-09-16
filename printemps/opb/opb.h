@@ -391,7 +391,7 @@ struct OPB {
         std::unordered_set<std::string> variable_names_set;
 
         const int TERM_TOKENS_SIZE = tokens.size();
-        for (auto i = 0; i < TERM_TOKENS_SIZE; i++) {
+        for (int i = 0; i < TERM_TOKENS_SIZE; i++) {
             if (std::isalpha(tokens[i].front()) || tokens[i].front() == '~') {
                 if (i == 0) {
                     throw std::runtime_error(utility::format_error_location(
@@ -571,7 +571,7 @@ struct OPB {
         soft_constraint_lines.reserve(LINES_SIZE);
         hard_constraint_lines.reserve(LINES_SIZE);
 
-        for (auto i = 0; i < LINES_SIZE; i++) {
+        for (int i = 0; i < LINES_SIZE; i++) {
             auto &line = lines[i];
 
             if (line.empty()) {
@@ -603,7 +603,7 @@ struct OPB {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SOFT_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < SOFT_CONSTRAINTS_SIZE; i++) {
             this->soft_constraints[i] =
                 OPB::parse_soft_constraint(lines[soft_constraint_lines[i]], i);
         }
@@ -611,7 +611,7 @@ struct OPB {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < HARD_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < HARD_CONSTRAINTS_SIZE; i++) {
             this->hard_constraints[i] =
                 OPB::parse_hard_constraint(lines[hard_constraint_lines[i]], i);
         }

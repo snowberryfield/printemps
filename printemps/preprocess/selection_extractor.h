@@ -260,7 +260,7 @@ class SelectionExtractor {
         std::vector<model_component::Variable<T_Variable, T_Expression> *>
             extracted_variable_ptrs;
 
-        for (auto i = 0; i < RAW_SELECTIONS_SIZE; i++) {
+        for (int i = 0; i < RAW_SELECTIONS_SIZE; i++) {
             bool has_overlap = false;
             for (auto &&variable_ptr : raw_selections[i].variable_ptrs) {
                 if (variable_ptr->is_fixed_at(0)) {

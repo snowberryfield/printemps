@@ -97,7 +97,7 @@ struct Selection {
                   inserted_constraint_ptrs;
         const int VARIABLES_SIZE = this->variable_ptrs.size();
 
-        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+        for (int i = 0; i < VARIABLES_SIZE; i++) {
             auto &variable_ptr = this->variable_ptrs[i];
             std::vector<Constraint<T_Variable, T_Expression> *>
                 constraint_ptrs = variable_ptr->related_constraint_ptrs();

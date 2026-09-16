@@ -53,11 +53,11 @@ TEST_F(TestSimple2, simple_2) {
     model.minimize(f.sum());
 
     /// initial solution
-    for (auto i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         x(i) = 0;
     }
 
-    for (auto i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         y(i) = 0;
     }
 

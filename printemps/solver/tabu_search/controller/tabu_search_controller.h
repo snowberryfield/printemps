@@ -520,7 +520,7 @@ class TabuSearchController
                          });
 
         int count = 0;
-        for (auto i = 0; i < VARIABLES_SIZE; i++) {
+        for (int i = 0; i < VARIABLES_SIZE; i++) {
             double update_rate =
                 variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
@@ -549,7 +549,7 @@ class TabuSearchController
         }
 
         count = 0;
-        for (auto i = VARIABLES_SIZE - 1; i >= 0; i--) {
+        for (int i = VARIABLES_SIZE - 1; i >= 0; i--) {
             double update_rate =
                 variable_ptrs[i]->update_count() / TOTAL_UPDATE_COUNT;
             update_rate = std::max(0.0, std::min(1.0, update_rate));
@@ -605,7 +605,7 @@ class TabuSearchController
             });
 
         int count = 0;
-        for (auto i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < ENABLED_CONSTRAINTS_SIZE; i++) {
             double satisfaction_rate =
                 1.0 - enabled_constraint_ptrs[i]->violation_count() /
                           TOTAL_UPDATE_COUNT;
@@ -644,7 +644,7 @@ class TabuSearchController
         }
 
         count = 0;
-        for (auto i = ENABLED_CONSTRAINTS_SIZE - 1; i >= 0; i--) {
+        for (int i = ENABLED_CONSTRAINTS_SIZE - 1; i >= 0; i--) {
             double satisfaction_rate =
                 1.0 - enabled_constraint_ptrs[i]->violation_count() /
                           TOTAL_UPDATE_COUNT;

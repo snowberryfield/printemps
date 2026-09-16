@@ -230,7 +230,7 @@ class TabuSearchCore {
             candidate_move_ptrs.clear();
             candidate_move_weights.clear();
 
-            for (auto j = 0; j < TRIAL_MOVES_SIZE; j++) {
+            for (int j = 0; j < TRIAL_MOVES_SIZE; j++) {
                 const bool IS_PERMISSIBLE =
                     move_evaluator.compute_permissibility(*trial_move_ptrs[j],
                                                           0);
@@ -920,7 +920,7 @@ class TabuSearchCore {
     schedule(static)                                                          \
     num_threads(m_option.parallel.number_of_threads_move_evaluation)
 #endif
-            for (auto i = 0; i < NUMBER_OF_MOVES; i++) {
+            for (int i = 0; i < NUMBER_OF_MOVES; i++) {
                 /**
                  * The neighborhood solutions will be evaluated in parallel by
                  * fast or ordinary(slow) evaluation methods.

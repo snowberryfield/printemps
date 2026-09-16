@@ -136,7 +136,7 @@ class Inspector {
 
             const bool IS_FIRST_COEFF_POSITIVE = (first_constraint_coeff > 0);
 
-            for (auto i = start_idx; i < CONSTRAINT_SENSITIVITIES.size(); i++) {
+            for (int i = start_idx; i < CONSTRAINT_SENSITIVITIES.size(); i++) {
                 const auto CONSTRAINT_PTR = CONSTRAINT_SENSITIVITIES[i].first;
                 if (!CONSTRAINT_PTR->is_enabled()) {
                     continue;

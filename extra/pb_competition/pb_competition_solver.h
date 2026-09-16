@@ -75,7 +75,7 @@ class PBCompetitionSolver {
                     .incumbent_holder.feasible_incumbent_solution();
             const auto &VALUE_PRROXY = SOLUTION.variable_value_proxies.front();
             const int   NUMBER_OF_VARIABLES = VALUE_PRROXY.number_of_elements();
-            for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
+            for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
                 if (VALUE_PRROXY.flat_indexed_values(i) == 1) {
                     std::cout << VALUE_PRROXY.flat_indexed_names(i) << " ";
                 } else {

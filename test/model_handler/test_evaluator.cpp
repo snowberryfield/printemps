@@ -135,7 +135,7 @@ TEST_F(TestEvaluator, evaluate) {
 
         {
             neighborhood::Move<int, double> move;
-            for (auto i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);
@@ -316,7 +316,7 @@ TEST_F(TestEvaluator, evaluate) {
 
         {
             neighborhood::Move<int, double> move;
-            for (auto i = 0; i < 5; i++) {
+            for (int i = 0; i < 5; i++) {
                 move.alterations.emplace_back(&x(i), 1);
                 for (auto&& constraint_ptr : x(i).related_constraint_ptrs()) {
                     move.related_constraint_ptrs.push_back(constraint_ptr);

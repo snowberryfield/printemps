@@ -13,7 +13,7 @@ inline std::string trim(const std::string &a_ORIGINAL) {
     int end_position   = a_ORIGINAL.size() - 1;
 
     int size = a_ORIGINAL.size();
-    for (auto i_pos = 0; i_pos < size; i_pos++) {
+    for (int i_pos = 0; i_pos < size; i_pos++) {
         if (a_ORIGINAL[i_pos] == ' ') {
             start_position++;
         } else {
@@ -21,7 +21,7 @@ inline std::string trim(const std::string &a_ORIGINAL) {
         }
     }
 
-    for (auto i_pos = 0; i_pos < size; i_pos++) {
+    for (int i_pos = 0; i_pos < size; i_pos++) {
         if (a_ORIGINAL[a_ORIGINAL.size() - 1 - i_pos] == ' ') {
             end_position--;
         } else {
@@ -136,7 +136,7 @@ inline std::string delete_crlf(const std::string &a_ORIGINAL) {
 inline std::string indent_spaces(const int a_INDENT_LEVEL) {
     std::string indent_width  = "    ";
     std::string indent_spaces = "";
-    for (auto i = 0; i < a_INDENT_LEVEL; i++) {
+    for (int i = 0; i < a_INDENT_LEVEL; i++) {
         indent_spaces += indent_width;
     }
     return indent_spaces;

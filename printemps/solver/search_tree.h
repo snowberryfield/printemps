@@ -60,18 +60,18 @@ class SearchTree {
         const int NEW_SOLUTIONS_SIZE = solutions.size();
         const int OLD_SOLUTION_SIZE  = m_tree.nodes().size();
 
-        for (auto i = OLD_SOLUTION_SIZE; i < NEW_SOLUTIONS_SIZE; i++) {
+        for (int i = OLD_SOLUTION_SIZE; i < NEW_SOLUTIONS_SIZE; i++) {
             m_tree.add_node(i, solutions[i].global_augmented_objective);
         }
 
-        for (auto i = 0; i < OLD_SOLUTION_SIZE; i++) {
-            for (auto j = OLD_SOLUTION_SIZE; j < NEW_SOLUTIONS_SIZE; j++) {
+        for (int i = 0; i < OLD_SOLUTION_SIZE; i++) {
+            for (int j = OLD_SOLUTION_SIZE; j < NEW_SOLUTIONS_SIZE; j++) {
                 m_tree.add_edge(i, j, solutions[i].distance(solutions[j]));
             }
         }
 
-        for (auto i = OLD_SOLUTION_SIZE; i < NEW_SOLUTIONS_SIZE; i++) {
-            for (auto j = i + 1; j < NEW_SOLUTIONS_SIZE; j++) {
+        for (int i = OLD_SOLUTION_SIZE; i < NEW_SOLUTIONS_SIZE; i++) {
+            for (int j = i + 1; j < NEW_SOLUTIONS_SIZE; j++) {
                 m_tree.add_edge(i, j, solutions[i].distance(solutions[j]));
             }
         }
@@ -80,7 +80,7 @@ class SearchTree {
         const auto& MST_NODES             = MINIMUM_SPANNING_TREE.nodes();
         const auto& MST_EDGES             = MINIMUM_SPANNING_TREE.edges();
 
-        for (auto i = 0; i < NEW_SOLUTIONS_SIZE; i++) {
+        for (int i = 0; i < NEW_SOLUTIONS_SIZE; i++) {
             const double DISTANCE = solutions[i].distance(a_INCUMBENT_SOLUTION);
             if (MST_NODES.at(i).edge_indices().size() == 1) {
                 m_frontier_solutions.emplace_back(solutions[i], DISTANCE);

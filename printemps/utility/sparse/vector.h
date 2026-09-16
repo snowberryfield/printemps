@@ -122,7 +122,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] += a_VECTOR[i];
         }
         return *this;
@@ -148,7 +148,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] -= a_VECTOR[i];
         }
         return *this;
@@ -183,7 +183,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] = std::clamp(this->values[i], a_LOWER_BOUNDS[i],
                                          a_UPPER_BOUNDS[i]);
         }
@@ -195,7 +195,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] = std::max(this->values[i], 0.0);
         }
     }
@@ -206,7 +206,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] = std::min(this->values[i], 0.0);
         }
     }
@@ -242,7 +242,7 @@ struct Vector {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->values[i] =
                 FORGET_RATE * this->values[i] + a_LEARNING_RATE * a_VECTOR[i];
         }

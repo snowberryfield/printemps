@@ -610,7 +610,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
         m_extension->related_selection_constraint_ptr_index_min = -1;
         m_extension->related_selection_constraint_ptr_index_max = -1;
 
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINTS_SIZE; i++) {
             if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
                 std::find(m_extension->related_constraint_ptrs.begin(),
                           m_extension->related_constraint_ptrs.end(),
@@ -621,7 +621,7 @@ class Variable : public multi_array::AbstractMultiArrayElement {
             }
         }
 
-        for (auto i = CONSTRAINTS_SIZE - 1; i >= 0; i--) {
+        for (int i = CONSTRAINTS_SIZE - 1; i >= 0; i--) {
             if (RELATED_SELECTION_CONSTRAINT_PTRS[i]->is_enabled() &&
                 std::find(m_extension->related_constraint_ptrs.begin(),
                           m_extension->related_constraint_ptrs.end(),

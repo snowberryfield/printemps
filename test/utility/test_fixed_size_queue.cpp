@@ -34,11 +34,11 @@ TEST_F(TestFixedSizeQueue, size) {
     utility::FixedSizeQueue<int> queue(100);
     EXPECT_EQ(100, queue.max_size());
     EXPECT_EQ(0, queue.size());
-    for (auto i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
         queue.push(i);
         EXPECT_EQ(i + 1, queue.size());
     }
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         queue.push(i);
         EXPECT_EQ(100, queue.size());
     }
@@ -56,7 +56,7 @@ TEST_F(TestFixedSizeQueue, min) {
 
         double sum = 0.0;
 
-        for (auto i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             queue.push(i);
             sum += i;
             if (i < 10) {
@@ -71,7 +71,7 @@ TEST_F(TestFixedSizeQueue, min) {
 
         double sum = 0.0;
 
-        for (auto i = 0; i < 100; i++) {
+        for (int i = 0; i < 100; i++) {
             queue.push(i * 1.0);
             sum += i * 1.0;
             if (i < 10) {

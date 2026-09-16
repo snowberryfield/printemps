@@ -59,7 +59,7 @@ class ModelWCNFHandler {
             model.component_creator().create_variables("variables", NUMBER_OF_VARIABLES);
 
         VariableMap variable_ptrs;
-        for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
+        for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             variable_proxy(i).set_bound(0, 1);
             variable_proxy(i).set_name("x_" + std::to_string(i + 1));
             variable_ptrs[i + 1] = &variable_proxy(i);
@@ -81,7 +81,7 @@ class ModelWCNFHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (auto i = 0; i < NUMBER_OF_HARD_CLAUSES; i++) {
+            for (int i = 0; i < NUMBER_OF_HARD_CLAUSES; i++) {
                 const auto &CLAUSE = a_WCNF.hard_clauses[i];
                 auto        expression =
                     model_component::Expression<T_Variable,
@@ -122,7 +122,7 @@ class ModelWCNFHandler {
         const int NUMBER_OF_SOFT_CLAUSES = a_WCNF.soft_clauses.size();
         auto     &soft_slack_proxy =
             model.component_creator().create_variables("soft_slacks", NUMBER_OF_SOFT_CLAUSES);
-        for (auto i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
+        for (int i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
             soft_slack_proxy(i).set_bound(0, 1);
             soft_slack_proxy(i).set_name("s_" + std::to_string(i + 1));
         }
@@ -138,7 +138,7 @@ class ModelWCNFHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (auto i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
+            for (int i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
                 const auto &CLAUSE = a_WCNF.soft_clauses[i];
                 auto        expression =
                     model_component::Expression<T_Variable,
@@ -167,7 +167,7 @@ class ModelWCNFHandler {
                 soft_clause_proxy(i).set_name(CLAUSE.name);
             }
 
-            for (auto i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
+            for (int i = 0; i < NUMBER_OF_SOFT_CLAUSES; i++) {
                 const auto &CLAUSE = a_WCNF.soft_clauses[i];
                 /**
                  * Cast uint64_t weight to T_Expression (typically double).

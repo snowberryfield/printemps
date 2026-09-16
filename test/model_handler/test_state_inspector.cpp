@@ -170,13 +170,13 @@ TEST_F(TestStateInspector, export_local_penalty_coefficient_proxies) {
     g(0).local_penalty_coefficient_less()    = 1.0;
     g(0).local_penalty_coefficient_greater() = 10.0;
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i).local_penalty_coefficient_less()    = 20.0;
         h(i).local_penalty_coefficient_greater() = 2.0;
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j).local_penalty_coefficient_less()    = 3.0;
             v(i, j).local_penalty_coefficient_greater() = 30.0;
         }
@@ -231,13 +231,13 @@ TEST_F(TestStateInspector, export_update_count_proxies) {
     model.builder().setup_unique_names();
     x(0).increment_update_count();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).increment_update_count();
         y(i).increment_update_count();
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             z(i, j).increment_update_count();
             z(i, j).increment_update_count();
             z(i, j).increment_update_count();
@@ -290,12 +290,12 @@ TEST_F(TestStateInspector, export_violation_count_proxies) {
     x = 0;
 
     g(0) = x >= 1.0;
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i) = x <= -1.0;
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j) = x == 1.0;
         }
     }
@@ -304,13 +304,13 @@ TEST_F(TestStateInspector, export_violation_count_proxies) {
 
     g(0).update_violation_count();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i).update_violation_count();
         h(i).update_violation_count();
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j).update_violation_count();
             v(i, j).update_violation_count();
             v(i, j).update_violation_count();
@@ -366,12 +366,12 @@ TEST_F(TestStateInspector, export_dense_solution) {
     auto& v = model.create_constraints("v", {20, 30});
 
     p = random_integer() * x;
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         q(i) = random_integer() * y(i);
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             r(i, j) = random_integer() * z(i, j) + random_integer();
             v(i, j) = r(i, j) == random_integer();
         }
@@ -380,12 +380,12 @@ TEST_F(TestStateInspector, export_dense_solution) {
                    random_integer() * r.sum());
 
     x = random_integer();
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i) = random_integer();
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             z(i, j) = random_integer();
         }
     }
@@ -405,13 +405,13 @@ TEST_F(TestStateInspector, export_dense_solution) {
     EXPECT_EQ(x.value(), solution.variable_value_proxies[0].value());
 
     EXPECT_EQ(y.index(), solution.variable_value_proxies[1].index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(y(i).value(), solution.variable_value_proxies[1](i));
     }
 
     EXPECT_EQ(z.index(), solution.variable_value_proxies[2].index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(z(i, j).value(),
                       solution.variable_value_proxies[2](i, j));
         }
@@ -421,13 +421,13 @@ TEST_F(TestStateInspector, export_dense_solution) {
     EXPECT_EQ(p.value(), solution.expression_value_proxies[0].value());
 
     EXPECT_EQ(q.index(), solution.expression_value_proxies[1].index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(q(i).value(), solution.expression_value_proxies[1](i));
     }
 
     EXPECT_EQ(r.index(), solution.expression_value_proxies[2].index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(r(i, j).value(),
                       solution.expression_value_proxies[2](i, j));
         }
@@ -438,14 +438,14 @@ TEST_F(TestStateInspector, export_dense_solution) {
               solution.constraint_value_proxies[0].value());
 
     EXPECT_EQ(h.index(), solution.constraint_value_proxies[1].index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(h(i).constraint_value(),
                   solution.constraint_value_proxies[1](i));
     }
 
     EXPECT_EQ(v.index(), solution.constraint_value_proxies[2].index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(v(i, j).constraint_value(),
                       solution.constraint_value_proxies[2](i, j));
         }
@@ -455,14 +455,14 @@ TEST_F(TestStateInspector, export_dense_solution) {
     EXPECT_EQ(g.violation_value(), solution.violation_value_proxies[0].value());
 
     EXPECT_EQ(h.index(), solution.constraint_value_proxies[1].index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(h(i).violation_value(),
                   solution.violation_value_proxies[1](i));
     }
 
     EXPECT_EQ(v.index(), solution.violation_value_proxies[2].index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(v(i, j).violation_value(),
                       solution.violation_value_proxies[2](i, j));
         }
@@ -482,12 +482,12 @@ TEST_F(TestStateInspector, export_sparse_solution) {
     model.builder().setup_unique_names();
 
     x = 10;
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i) = random_integer();
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             z(i, j) = random_integer();
         }
     }
@@ -518,12 +518,12 @@ TEST_F(TestStateInspector, export_named_solution) {
     auto& v = model.create_constraints("v", {20, 30});
 
     p = random_integer() * x;
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         q(i) = random_integer() * y(i);
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             r(i, j) = random_integer() * z(i, j) + random_integer();
             v(i, j) = r(i, j) == random_integer();
         }
@@ -532,12 +532,12 @@ TEST_F(TestStateInspector, export_named_solution) {
                    random_integer() * r.sum());
 
     x = random_integer();
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i) = random_integer();
     }
 
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             z(i, j) = random_integer();
         }
     }
@@ -562,15 +562,15 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(y.index(), named_solution.variables("y").index());
     EXPECT_EQ(y.index(), named_solution.variables().at("y").index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(y(i).value(), named_solution.variables("y")(i));
         EXPECT_EQ(y(i).value(), named_solution.variables().at("y")(i));
     }
 
     EXPECT_EQ(z.index(), named_solution.variables("z").index());
     EXPECT_EQ(z.index(), named_solution.variables().at("z").index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(z(i, j).value(), named_solution.variables("z")(i, j));
             EXPECT_EQ(z(i, j).value(),
                       named_solution.variables().at("z")(i, j));
@@ -584,15 +584,15 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(q.index(), named_solution.expressions("q").index());
     EXPECT_EQ(q.index(), named_solution.expressions().at("q").index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(q(i).value(), named_solution.expressions("q")(i));
         EXPECT_EQ(q(i).value(), named_solution.expressions().at("q")(i));
     }
 
     EXPECT_EQ(r.index(), named_solution.expressions("r").index());
     EXPECT_EQ(r.index(), named_solution.expressions().at("r").index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(r(i, j).value(), named_solution.expressions("r")(i, j));
             EXPECT_EQ(r(i, j).value(),
                       named_solution.expressions().at("r")(i, j));
@@ -607,7 +607,7 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(h.index(), named_solution.constraints("h").index());
     EXPECT_EQ(h.index(), named_solution.constraints().at("h").index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(h(i).constraint_value(), named_solution.constraints("h")(i));
         EXPECT_EQ(h(i).constraint_value(),
                   named_solution.constraints().at("h")(i));
@@ -615,8 +615,8 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(v.index(), named_solution.constraints("v").index());
     EXPECT_EQ(v.index(), named_solution.constraints().at("v").index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(v(i, j).constraint_value(),
                       named_solution.constraints("v")(i, j));
             EXPECT_EQ(v(i, j).constraint_value(),
@@ -631,7 +631,7 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(h.index(), named_solution.violations("h").index());
     EXPECT_EQ(h.index(), named_solution.violations().at("h").index());
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         EXPECT_EQ(h(i).violation_value(), named_solution.violations("h")(i));
         EXPECT_EQ(h(i).violation_value(),
                   named_solution.violations().at("h")(i));
@@ -639,8 +639,8 @@ TEST_F(TestStateInspector, export_named_solution) {
 
     EXPECT_EQ(v.index(), named_solution.violations("v").index());
     EXPECT_EQ(v.index(), named_solution.violations().at("v").index());
-    for (auto i = 0; i < 20; i++) {
-        for (auto j = 0; j < 30; j++) {
+    for (int i = 0; i < 20; i++) {
+        for (int j = 0; j < 30; j++) {
             EXPECT_EQ(v(i, j).violation_value(),
                       named_solution.violations("v")(i, j));
             EXPECT_EQ(v(i, j).violation_value(),
@@ -662,13 +662,13 @@ TEST_F(TestStateInspector, export_named_penalty_coefficients) {
     g(0).local_penalty_coefficient_less()    = 1.0;
     g(0).local_penalty_coefficient_greater() = 10.0;
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i).local_penalty_coefficient_less()    = 20.0;
         h(i).local_penalty_coefficient_greater() = 2.0;
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j).local_penalty_coefficient_less()    = 3.0;
             v(i, j).local_penalty_coefficient_greater() = 30.0;
         }
@@ -695,13 +695,13 @@ TEST_F(TestStateInspector, export_named_update_counts) {
     model.builder().setup_unique_names();
     x(0).increment_update_count();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         y(i).increment_update_count();
         y(i).increment_update_count();
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             z(i, j).increment_update_count();
             z(i, j).increment_update_count();
             z(i, j).increment_update_count();
@@ -732,12 +732,12 @@ TEST_F(TestStateInspector, export_named_violation_counts) {
     x = 0;
 
     g(0) = x >= 1.0;
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i) = x <= -1.0;
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j) = x == 1.0;
         }
     }
@@ -746,13 +746,13 @@ TEST_F(TestStateInspector, export_named_violation_counts) {
 
     g(0).update_violation_count();
 
-    for (auto i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++) {
         h(i).update_violation_count();
         h(i).update_violation_count();
     }
 
-    for (auto i = 0; i < 10; i++) {
-        for (auto j = 0; j < 10; j++) {
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10; j++) {
             v(i, j).update_violation_count();
             v(i, j).update_violation_count();
             v(i, j).update_violation_count();

@@ -57,11 +57,11 @@ int main(void) {
     /// x_{n, m, k} (i=1,...,N/3, j=1,...,N/3, k=1,...,N)
     auto& expression_block =
         model.create_expressions("expression_block", {N / 3, N / 3, N});
-    for (auto i = 0; i < N / 3; i++) {
-        for (auto j = 0; j < N / 3; j++) {
-            for (auto k = 0; k < N; k++) {
-                for (auto n = i * N / 3; n < (i + 1) * N / 3; n++) {
-                    for (auto m = j * N / 3; m < (j + 1) * N / 3; m++) {
+    for (int i = 0; i < N / 3; i++) {
+        for (int j = 0; j < N / 3; j++) {
+            for (int k = 0; k < N; k++) {
+                for (int n = i * N / 3; n < (i + 1) * N / 3; n++) {
+                    for (int m = j * N / 3; m < (j + 1) * N / 3; m++) {
                         expression_block(i, j, k) += x(n, m, k);
                     }
                 }
@@ -83,8 +83,8 @@ int main(void) {
     /// \sum_{n=1}^{N} x_{n, m, k} = 1 (m=1,...,N, k=1,...,N)
     auto& constraint_number =
         model.create_constraints("constraint_number", {N, N});
-    for (auto n = 0; n < N; n++) {
-        for (auto m = 0; m < N; m++) {
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < N; m++) {
             constraint_number(n, m) =
                 x.selection({n, m, printemps::model_component::Range::All});
         }
@@ -92,8 +92,8 @@ int main(void) {
 
     /// \sum_{m=1}^{N} x_{n, m, k} = 1 (n=1,...,N, k=1,...,N)
     auto& constraint_row = model.create_constraints("constraint_row", {N, N});
-    for (auto m = 0; m < N; m++) {
-        for (auto k = 0; k < N; k++) {
+    for (int m = 0; m < N; m++) {
+        for (int k = 0; k < N; k++) {
             constraint_row(m, k) =
                 x.selection({printemps::model_component::Range::All, m, k});
         }
@@ -102,8 +102,8 @@ int main(void) {
     /// \sum_{k=1}^{N} x_{n, m, k} = 1 (n=1,...,N, m=1,...,N),
     auto& constraint_column =
         model.create_constraints("constraint_column", {N, N});
-    for (auto n = 0; n < N; n++) {
-        for (auto k = 0; k < N; k++) {
+    for (int n = 0; n < N; n++) {
+        for (int k = 0; k < N; k++) {
             constraint_column(n, k) =
                 x.selection({n, printemps::model_component::Range::All, k});
         }
@@ -113,9 +113,9 @@ int main(void) {
     /// (i=1,...,N/3, j=1,...,N/3, k=1,...,N)
     auto& constraint_block =
         model.create_constraints("constraint_block", {N / 3, N / 3, N});
-    for (auto i = 0; i < N / 3; i++) {
-        for (auto j = 0; j < N / 3; j++) {
-            for (auto k = 0; k < N; k++) {
+    for (int i = 0; i < N / 3; i++) {
+        for (int j = 0; j < N / 3; j++) {
+            for (int k = 0; k < N; k++) {
                 constraint_block(i, j, k) = expression_block(i, j, k) == 1;
             }
         }
@@ -128,8 +128,8 @@ int main(void) {
     /*************************************************************************/
     /// Initial value definitions
     /*************************************************************************/
-    for (auto n = 0; n < N; n++) {
-        for (auto m = 0; m < N; m++) {
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < N; m++) {
             if (initial[n][m] > 0) {
                 x(n, m, initial[n][m] - 1).fix_by(1);
             }
@@ -150,18 +150,18 @@ int main(void) {
     /// Print result
     /*************************************************************************/
     std::vector<std::vector<int>> answer(N);
-    for (auto n = 0; n < N; n++) {
+    for (int n = 0; n < N; n++) {
         answer[n].resize(N);
-        for (auto m = 0; m < N; m++) {
-            for (auto k = 0; k < N; k++) {
+        for (int m = 0; m < N; m++) {
+            for (int k = 0; k < N; k++) {
                 answer[n][m] +=
                     (k + 1) * result.solution.variables("x").values(n, m, k);
             }
         }
     }
 
-    for (auto n = 0; n < N; n++) {
-        for (auto m = 0; m < N; m++) {
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < N; m++) {
             std::cout << answer[n][m] << " ";
         }
         std::cout << std::endl;

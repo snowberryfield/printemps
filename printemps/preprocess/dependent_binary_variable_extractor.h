@@ -167,7 +167,7 @@ class DependentBinaryVariableExtractor {
                 }
                 const auto NOMIAL = constraint_ptr->to_multinomial_constraint();
                 const int  VARIABLES_SIZE = NOMIAL.variable_ptrs.size();
-                for (auto i = 1; i < VARIABLES_SIZE; i++) {
+                for (int i = 1; i < VARIABLES_SIZE; i++) {
                     is_consistent &= uf.unite(NOMIAL.variable_ptrs[0],
                                               NOMIAL.variable_ptrs[i], 0);
                 }
@@ -214,7 +214,7 @@ class DependentBinaryVariableExtractor {
             if (MEMBERS_SIZE <= 1) {
                 continue;
             }
-            for (auto i = 0; i < MEMBERS_SIZE; i++) {
+            for (int i = 0; i < MEMBERS_SIZE; i++) {
                 auto variable_ptr = group.members[i].first;
                 if (variable_ptr == representative_variable_ptr) {
                     continue;

@@ -75,7 +75,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
          * default constructor of Variable class is deleted.
          */
         m_variables.reserve(this->number_of_elements());
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             m_variables.emplace_back(
                 Variable<T_Variable, T_Expression>::create_instance());
         }
@@ -331,7 +331,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         multi_array::ValueProxy<T_Variable> proxy(m_index, m_shape);
 
         const int NUMBER_OF_ELEMENTS = this->number_of_elements();
-        for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+        for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
             proxy.flat_indexed_values()[i] = m_variables[i].value();
             proxy.flat_indexed_names()[i]  = m_variables[i].name();
         }
@@ -354,7 +354,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
             sensitivities;
         sensitivities.reserve(this->number_of_elements());
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             sensitivities[m_variables[i].reference()] = 1;
         }
         auto result = Expression<T_Variable, T_Expression>::create_instance();
@@ -375,7 +375,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (auto j = 0; j < this->number_of_dimensions(); j++) {
+        for (int j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -384,9 +384,9 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
         variable_ptrs.reserve(number_of_partial_elements);
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (auto j = 0; j < this->number_of_dimensions(); j++) {
+            for (int j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_variables[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -434,7 +434,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
             sensitivities;
         sensitivities.reserve(this->number_of_elements());
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             sensitivities[m_variables[i].reference()] = a_COEFFICIENTS[i];
         }
 
@@ -465,7 +465,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         }
 
         int number_of_partial_elements = 1;
-        for (auto j = 0; j < this->number_of_dimensions(); j++) {
+        for (int j = 0; j < this->number_of_dimensions(); j++) {
             if (a_MULTI_DIMENSIONAL_INDEX[j] == Range::All) {
                 number_of_partial_elements *= m_shape[j];
             }
@@ -474,9 +474,9 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         std::vector<Variable<T_Variable, T_Expression> *> variable_ptrs;
         variable_ptrs.reserve(number_of_partial_elements);
 
-        for (auto i = 0; i < this->number_of_elements(); i++) {
+        for (int i = 0; i < this->number_of_elements(); i++) {
             bool is_covered = true;
-            for (auto j = 0; j < this->number_of_dimensions(); j++) {
+            for (int j = 0; j < this->number_of_dimensions(); j++) {
                 if (a_MULTI_DIMENSIONAL_INDEX[j] != Range::All &&
                     m_variables[i].multi_dimensional_index()[j] !=
                         a_MULTI_DIMENSIONAL_INDEX[j]) {
@@ -500,7 +500,7 @@ class VariableProxy : public multi_array::AbstractMultiArray {
         sensitivities.reserve(number_of_partial_elements);
 
         int number_of_variable_ptrs = variable_ptrs.size();
-        for (auto i = 0; i < number_of_variable_ptrs; i++) {
+        for (int i = 0; i < number_of_variable_ptrs; i++) {
             sensitivities[variable_ptrs[i]] = a_COEFFICIENTS[i];
         }
 

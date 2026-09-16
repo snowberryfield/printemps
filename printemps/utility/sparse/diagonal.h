@@ -57,7 +57,7 @@ struct Diagonal {
     /*************************************************************************/
     inline Diagonal operator*=(const double& a_VALUE) {
         const int SIZE = this->size();
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->diagonal_vector[i] *= a_VALUE;
         }
         return *this;
@@ -73,7 +73,7 @@ struct Diagonal {
 
         const int SIZE = this->size();
 
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             this->diagonal_vector[i] *= a_DIAGONAL.diagonal_vector[i];
         }
         return *this;
@@ -90,7 +90,7 @@ struct Diagonal {
         *a_result_ptr = a_VECTOR;
 
         const int SIZE = this->size();
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             a_result_ptr->values[i] *= this->diagonal_vector[i];
         }
     }
@@ -117,7 +117,7 @@ struct Diagonal {
         }
 
         const int SIZE = this->size();
-        for (auto i = 0; i < SIZE; i++) {
+        for (int i = 0; i < SIZE; i++) {
             a_result_ptr->values[i] *= this->diagonal_vector[i];
         }
     }

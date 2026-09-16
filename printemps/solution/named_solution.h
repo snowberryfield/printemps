@@ -158,7 +158,7 @@ class NamedSolution {
         for (const auto& item : m_variable_value_proxies) {
             const auto& proxy              = item.second;
             int         number_of_elements = proxy.number_of_elements();
-            for (auto i = 0; i < number_of_elements; i++) {
+            for (int i = 0; i < number_of_elements; i++) {
                 ofs << proxy.flat_indexed_names(i) << " "
                     << proxy.flat_indexed_values(i) << std::endl;
             }

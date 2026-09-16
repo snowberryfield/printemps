@@ -44,11 +44,11 @@ struct DenseSolution {
         int       distance     = 0;
         const int PROXIES_SIZE = this->variable_value_proxies.size();
 
-        for (auto i = 0; i < PROXIES_SIZE; i++) {
+        for (int i = 0; i < PROXIES_SIZE; i++) {
             const auto &FIRST  = this->variable_value_proxies[i];
             const auto &SECOND = a_SOLUTION.variable_value_proxies[i];
             const int   NUMBER_OF_ELEMENTS = FIRST.number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
+            for (int j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 if (FIRST.flat_indexed_values(j) !=
                     SECOND.flat_indexed_values(j)) {
                     distance += std::abs(FIRST.flat_indexed_values(j) -
@@ -68,7 +68,7 @@ struct DenseSolution {
             const auto &NAMES              = proxy.flat_indexed_names();
             const auto &VALUES             = proxy.flat_indexed_values();
             const int   NUMBER_OF_ELEMENTS = NAMES.size();
-            for (auto i = 0; i < NUMBER_OF_ELEMENTS; i++) {
+            for (int i = 0; i < NUMBER_OF_ELEMENTS; i++) {
                 if (VALUES[i] != 0) {
                     sparse_solution.variables[NAMES[i]] = VALUES[i];
                 }

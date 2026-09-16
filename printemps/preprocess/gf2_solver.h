@@ -142,7 +142,7 @@ class GF2Solver {
          */
         auto solution = inverse.dot(constant_values);
 
-        for (auto i = 0; i < GF2S_SIZE; i++) {
+        for (int i = 0; i < GF2S_SIZE; i++) {
             variable_map.reverse_at(i)->fix_by(solution[i]);
         }
 

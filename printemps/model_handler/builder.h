@@ -367,10 +367,10 @@ class Builder {
         const int EXPRESSION_PROXIES_SIZE = model.expression_proxies().size();
         const int CONSTRAINT_PROXIES_SIZE = model.constraint_proxies().size();
 
-        for (auto i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
+        for (int i = 0; i < VARIABLE_PROXIES_SIZE; i++) {
             const int NUMBER_OF_ELEMENTS =
                 model.variable_proxies()[i].number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
+            for (int j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &variable =
                     model.variable_proxies()[i].flat_indexed_variables(j);
 
@@ -383,10 +383,10 @@ class Builder {
         }
 
         /// Expression
-        for (auto i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
+        for (int i = 0; i < EXPRESSION_PROXIES_SIZE; i++) {
             const int NUMBER_OF_ELEMENTS =
                 model.expression_proxies()[i].number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
+            for (int j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &expression =
                     model.expression_proxies()[i].flat_indexed_expressions(j);
 
@@ -399,10 +399,10 @@ class Builder {
         }
 
         /// Constraint
-        for (auto i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINT_PROXIES_SIZE; i++) {
             const int NUMBER_OF_ELEMENTS =
                 model.constraint_proxies()[i].number_of_elements();
-            for (auto j = 0; j < NUMBER_OF_ELEMENTS; j++) {
+            for (int j = 0; j < NUMBER_OF_ELEMENTS; j++) {
                 auto &constraint =
                     model.constraint_proxies()[i].flat_indexed_constraints(j);
 

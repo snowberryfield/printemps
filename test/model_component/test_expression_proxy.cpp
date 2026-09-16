@@ -346,7 +346,7 @@ TEST_F(TestExpressionProxy, scalar_sum_arg_void) {
         model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.sum();
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -366,7 +366,7 @@ TEST_F(TestExpressionProxy, scalar_sum_arg_indices) {
         model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.sum({model_component::Range::All});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -392,7 +392,7 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_vector) {
         model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.dot(sensitivities);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -417,7 +417,7 @@ TEST_F(TestExpressionProxy, scalar_dot_arg_indice_vector) {
     expression =
         variable_proxy.dot({model_component::Range::All}, sensitivities);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -975,7 +975,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_void) {
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
@@ -983,7 +983,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_void) {
         model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.sum();
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -999,7 +999,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
@@ -1007,7 +1007,7 @@ TEST_F(TestExpressionProxy, one_dimensional_sum_arg_indices) {
         model_component::Expression<int, double>::create_instance();
     expression = variable_proxy.sum({model_component::Range::All});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1025,12 +1025,12 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_vector) {
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
     std::vector<double> sensitivities;
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
 
@@ -1038,7 +1038,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_vector) {
         model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.dot(sensitivities);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1056,12 +1056,12 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
     auto& variable_proxy   = model.create_variables("x", 2);
     auto& expression_proxy = model.create_expressions("e", 2);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
     std::vector<double> sensitivities;
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
 
@@ -1069,7 +1069,7 @@ TEST_F(TestExpressionProxy, one_dimensional_dot_arg_indice_vector) {
         model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.dot(sensitivities);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1525,7 +1525,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_void) {
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
@@ -1533,7 +1533,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_void) {
         model_component::Expression<int, double>::create_instance();
     expression = expression_proxy.sum();
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1549,7 +1549,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
@@ -1565,7 +1565,7 @@ TEST_F(TestExpressionProxy, two_dimensional_sum_arg_indices) {
     expression_01 = expression_proxy.sum(
         {model_component::Range::All, model_component::Range::All});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 
@@ -1595,12 +1595,12 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_vector) {
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
     std::vector<double> sensitivities;
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities.push_back(random_integer());
     }
     ASSERT_THROW(expression_proxy.dot(sensitivities), std::runtime_error);
@@ -1613,26 +1613,26 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
     auto& variable_proxy   = model.create_variables("x", {2, 3});
     auto& expression_proxy = model.create_expressions("e", {2, 3});
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         expression_proxy[i] = variable_proxy[i];
     }
 
     std::vector<double> sensitivities_0;
     auto                sum_0 = 0;
-    for (auto i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
         sensitivities_0.push_back(random_integer());
         sum_0 += sensitivities_0.back();
     }
 
     std::vector<double> sensitivities_1;
     auto                sum_1 = 0;
-    for (auto i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         sensitivities_1.push_back(random_integer());
         sum_1 += sensitivities_1.back();
     }
 
     std::vector<double> sensitivities_01;
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         sensitivities_01.push_back(random_integer());
     }
 
@@ -1646,7 +1646,7 @@ TEST_F(TestExpressionProxy, two_dimensional_dot_arg_indice_vector) {
     expression_1 =
         expression_proxy.dot({0, model_component::Range::All}, sensitivities_1);
 
-    for (auto i = 0; i < variable_proxy.number_of_elements(); i++) {
+    for (int i = 0; i < variable_proxy.number_of_elements(); i++) {
         variable_proxy[i] = 1;
     }
 

@@ -57,7 +57,7 @@ class ModelMPSHandler {
          */
         const int NUMBER_OF_VARIABLES = a_MPS.variable_names.size();
 
-        for (auto i = 0; i < NUMBER_OF_VARIABLES; i++) {
+        for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             const auto &VARIABLE_NAME = a_MPS.variable_names[i];
             const auto &VARIABLE      = a_MPS.variables.at(VARIABLE_NAME);
 
@@ -95,7 +95,7 @@ class ModelMPSHandler {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (auto i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
+        for (int i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
             const auto &CONSTRAINT_NAME = a_MPS.constraint_names[i];
             const auto &CONSTRAINT      = a_MPS.constraints.at(CONSTRAINT_NAME);
             auto        expression =

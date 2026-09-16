@@ -99,12 +99,12 @@ TEST_F(TestVectorUtility, sequence) {
     int max = 100;
 
     std::vector<int> seq_1 = utility::sequence(max);
-    for (auto i = 0; i < max; i++) {
+    for (int i = 0; i < max; i++) {
         EXPECT_EQ(i, seq_1[i]);
     }
 
     std::vector<int> seq_2 = utility::sequence(min, max);
-    for (auto i = min; i < max; i++) {
+    for (int i = min; i < max; i++) {
         EXPECT_EQ(i, seq_1[i]);
     }
 }

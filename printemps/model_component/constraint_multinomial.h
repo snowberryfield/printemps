@@ -59,7 +59,7 @@ struct ConstraintMultinomial {
         const int SENSITIVITIES_SIZE = SENSITIVITIES_PAIR_VECTOR.size();
         this->constant_value         = EXPRESSION.constant_value();
 
-        for (auto i = 0; i < SENSITIVITIES_SIZE; i++) {
+        for (int i = 0; i < SENSITIVITIES_SIZE; i++) {
             if (SENSITIVITIES_PAIR_VECTOR[i].first->is_fixed()) {
                 this->constant_value +=
                     SENSITIVITIES_PAIR_VECTOR[i].second *

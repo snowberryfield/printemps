@@ -252,15 +252,15 @@ class ProblemSizeReducerSpecial {
             model_component::Variable<T_Variable, T_Expression> *>>
             variable_ptr_sets(CONSTRAINTS_SIZE);
 
-        for (auto i = 0; i < CONSTRAINTS_SIZE; i++) {
+        for (int i = 0; i < CONSTRAINTS_SIZE; i++) {
             for (const auto &sensitivity :
                  constraint_ptrs[i]->expression().sensitivities()) {
                 variable_ptr_sets[i].insert(sensitivity.first);
             }
         }
 
-        for (auto i = 0; i < CONSTRAINTS_SIZE - 1; i++) {
-            for (auto j = i + 1; j < CONSTRAINTS_SIZE; j++) {
+        for (int i = 0; i < CONSTRAINTS_SIZE - 1; i++) {
+            for (int j = i + 1; j < CONSTRAINTS_SIZE; j++) {
                 bool is_included = true;
                 for (const auto &variable_ptr : variable_ptr_sets[j]) {
                     if (variable_ptr_sets[i].find(variable_ptr) ==
@@ -458,7 +458,7 @@ class ProblemSizeReducerSpecial {
             auto &additional_constraint_proxy =
                 m_model_ptr->component_creator().create_constraints(
                     "additional", number_of_disabled_constraints);
-            for (auto i = 0; i < number_of_disabled_constraints; i++) {
+            for (int i = 0; i < number_of_disabled_constraints; i++) {
                 additional_constraint_proxy(i) = additional_constraints[i];
                 additional_constraint_proxy(i).set_name(
                     additional_constraints[i].name());

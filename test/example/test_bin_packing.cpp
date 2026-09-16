@@ -31,7 +31,7 @@ TEST_F(TestBinpacking, bin_packing) {
 
     std::vector<int> item_volumes;
 
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         item_volumes.push_back(rand() % 50);
     }
 
@@ -53,7 +53,7 @@ TEST_F(TestBinpacking, bin_packing) {
     auto& total_volume  //
         = model.create_expressions("total_volume", number_of_bins);
 
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         total_volume(m) = x.dot({model_component::Range::All, m}, item_volumes);
     }
 
@@ -65,18 +65,18 @@ TEST_F(TestBinpacking, bin_packing) {
     /*************************************************************************/
     auto& constraint_selection =
         model.create_constraints("selection", number_of_items);
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         constraint_selection(n) = x.selection({n, model_component::Range::All});
     }
 
     auto& constraint_cut = model.create_constraints("cut", number_of_bins - 1);
-    for (auto m = 0; m < number_of_bins - 1; m++) {
+    for (int m = 0; m < number_of_bins - 1; m++) {
         constraint_cut(m) = (y(m + 1) <= y(m));
     }
 
     auto& constraint_total_volume =
         model.create_constraints("total_volume", number_of_bins);
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         constraint_total_volume(m) = (total_volume(m) <= bin_capacity * y(m));
     }
 
@@ -86,23 +86,23 @@ TEST_F(TestBinpacking, bin_packing) {
     auto& objective = model.create_expression("objective");
 
     objective = number_of_used_bins;
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         objective += 1E-5 * m * total_volume(m);
     }
 
     model.minimize(objective);
 
-    for (auto n = 0; n < number_of_items; n++) {
-        for (auto m = 0; m < number_of_bins; m++) {
+    for (int n = 0; n < number_of_items; n++) {
+        for (int m = 0; m < number_of_bins; m++) {
             x(n, m) = 0;
         }
     }
 
-    for (auto n = 0; n < number_of_items; n++) {
+    for (int n = 0; n < number_of_items; n++) {
         x(n, rand() % number_of_bins) = 1;
     }
 
-    for (auto m = 0; m < number_of_bins; m++) {
+    for (int m = 0; m < number_of_bins; m++) {
         y(m) = 1;
     }
 

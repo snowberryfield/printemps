@@ -102,7 +102,7 @@ TEST_F(TestSparseSparseMatrix, pock_chambolle_scaling) {
     // Checked by printing as dense form.
     // sparse_matrix.print_as_dense();
 
-    for (auto i = 0; i < static_cast<int>(sparse_matrix.values.size()); i++) {
+    for (int i = 0; i < static_cast<int>(sparse_matrix.values.size()); i++) {
         auto invert_scaled =
             sparse_matrix.values[i] *
             sparse_matrix.row_scaler[sparse_matrix.row_indices[i]] *
@@ -124,7 +124,7 @@ TEST_F(TestSparseSparseMatrix, ruiz_scaling) {
     // Checked by printing as dense form.
     // sparse_matrix.print_as_dense();
 
-    for (auto i = 0; i < static_cast<int>(sparse_matrix.values.size()); i++) {
+    for (int i = 0; i < static_cast<int>(sparse_matrix.values.size()); i++) {
         auto invert_scaled =
             sparse_matrix.values[i] *
             sparse_matrix.row_scaler[sparse_matrix.row_indices[i]] *

@@ -28,14 +28,14 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
 
     x(0).fix_by(0);
     x(1).fix_by(1);
-    for (auto i = 2; i < N; i++) {
+    for (int i = 2; i < N; i++) {
         x(i) = i % 2;
     }
 
     auto move_updater =
         [&x, N](std::vector<neighborhood::Move<int, double>>* a_moves_ptr) {
             a_moves_ptr->resize(N);
-            for (auto i = 0; i < N; i++) {
+            for (int i = 0; i < N; i++) {
                 (*a_moves_ptr)[i].type = neighborhood::MoveType::UserDefined;
                 (*a_moves_ptr)[i].alterations.clear();
                 (*a_moves_ptr)[i].alterations.emplace_back(&x(i),
@@ -53,7 +53,7 @@ TEST_F(TestUserDefinedMoveGenerator, setup) {
     EXPECT_EQ(N, static_cast<int>(moves.size()));
     EXPECT_EQ(N, static_cast<int>(flags.size()));
 
-    for (auto i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         EXPECT_EQ(neighborhood::MoveType::UserDefined, moves[i].type);
         EXPECT_EQ(1, static_cast<int>(moves[i].alterations.size()));
         EXPECT_EQ(moves[i].alterations[0].second,

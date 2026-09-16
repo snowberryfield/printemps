@@ -56,7 +56,7 @@ TEST_F(TestChainMoveGenerator, deduplicate_moves) {
     neighborhood::Move<int, double> move_2;
     move_2.overlap_rate = 0.3;
 
-    for (auto i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
         model.neighborhood().chain().register_move(move_0);
         model.neighborhood().chain().register_move(move_1);
         model.neighborhood().chain().register_move(move_2);
@@ -99,7 +99,7 @@ TEST_F(TestChainMoveGenerator, reduce_moves) {
     const int N                   = 5000;
     const int CHAIN_MOVE_CAPACITY = 10000;
 
-    for (auto i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         model.neighborhood().chain().register_move(move);
     }
 
@@ -107,7 +107,7 @@ TEST_F(TestChainMoveGenerator, reduce_moves) {
     EXPECT_EQ(N, static_cast<int>(model.neighborhood().chain().moves().size()));
     EXPECT_EQ(N, static_cast<int>(model.neighborhood().chain().flags().size()));
 
-    for (auto i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         model.neighborhood().chain().register_move(move);
     }
 
@@ -117,7 +117,7 @@ TEST_F(TestChainMoveGenerator, reduce_moves) {
     EXPECT_EQ(CHAIN_MOVE_CAPACITY,
               static_cast<int>(model.neighborhood().chain().flags().size()));
 
-    for (auto i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         model.neighborhood().chain().register_move(move);
     }
 

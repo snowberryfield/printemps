@@ -455,7 +455,7 @@ class LagrangeDualCore {
                                  .is_enabled_move_evaluation_parallelization) \
     schedule(static)
 #endif
-            for (auto i = 0; i < VARIABLES_SIZE; i++) {
+            for (int i = 0; i < VARIABLES_SIZE; i++) {
                 if (variable_ptrs[i]->is_fixed()) {
                     continue;
                 }

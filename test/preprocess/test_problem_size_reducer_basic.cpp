@@ -46,7 +46,7 @@ TEST_F(TestProblemSizeReducerBasic, run) {
     EXPECT_TRUE(x(2).is_fixed());
     EXPECT_EQ(4, x(2).value());
 
-    for (auto i = 3; i < 10; i++) {
+    for (int i = 3; i < 10; i++) {
         EXPECT_TRUE(x(i).is_fixed());
         EXPECT_EQ(-10, x(i).value());
     }
@@ -65,7 +65,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_insensitive_variables) {
             problem_size_reducer_basic(&model);
         problem_size_reducer_basic.remove_insensitive_variables(false);
 
-        for (auto i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
@@ -81,7 +81,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_insensitive_variables) {
             problem_size_reducer_basic(&model);
         problem_size_reducer_basic.remove_insensitive_variables(false);
 
-        for (auto i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
@@ -97,7 +97,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_insensitive_variables) {
             problem_size_reducer_basic(&model);
         problem_size_reducer_basic.remove_insensitive_variables(false);
 
-        for (auto i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(1, x(i).value());
         }
@@ -113,7 +113,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_insensitive_variables) {
             problem_size_reducer_basic(&model);
         problem_size_reducer_basic.remove_insensitive_variables(false);
 
-        for (auto i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++) {
             EXPECT_TRUE(x(i).is_fixed());
             EXPECT_EQ(0, x(i).value());
         }
@@ -600,7 +600,7 @@ TEST_F(TestProblemSizeReducerBasic, remove_implicit_fixed_variables) {
     EXPECT_EQ(5, x(0).value());
     EXPECT_TRUE(x(0).is_fixed());
 
-    for (auto i = 1; i < 10; i++) {
+    for (int i = 1; i < 10; i++) {
         EXPECT_FALSE(x(i).is_fixed());
     }
 }

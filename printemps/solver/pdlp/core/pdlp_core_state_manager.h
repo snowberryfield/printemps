@@ -59,7 +59,7 @@ class PDLPCoreStateManager {
 
         m_state.primal.objective_lower_bound = 0.0;
         m_state.primal.objective_upper_bound = 0.0;
-        for (auto i = 0; i < NUMBER_OF_COLUMNS; i++) {
+        for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
             const auto COEFFICIENT =
                 m_instance_ptr->objective_coefficients[i];
             if (COEFFICIENT > 0) {
@@ -194,7 +194,7 @@ class PDLPCoreStateManager {
             1.0, INSTANCE.dual_objective_coefficients  //
         );
 
-        for (auto i = 0; i < INSTANCE.number_of_variables; i++) {
+        for (int i = 0; i < INSTANCE.number_of_variables; i++) {
             m_state.primal.direction[i] = 0.0;
 
             if (a_PRIMAL_CENTER[i] >= INSTANCE.variable_upper_bounds[i] &&
@@ -212,7 +212,7 @@ class PDLPCoreStateManager {
                 m_state.primal_weight;
         }
 
-        for (auto i = 0; i < INSTANCE.number_of_constraints; i++) {
+        for (int i = 0; i < INSTANCE.number_of_constraints; i++) {
             m_state.dual.direction[i] = 0.0;
 
             if (a_DUAL_CENTER[i] >= INSTANCE.dual_upper_bounds[i] &&
@@ -478,7 +478,7 @@ class PDLPCoreStateManager {
             m_state.dual.solution_average, 1.0,
             m_instance_ptr->objective_coefficients);
 
-        for (auto i = 0; i < m_instance_ptr->number_of_variables; i++) {
+        for (int i = 0; i < m_instance_ptr->number_of_variables; i++) {
             if (m_instance_ptr->is_variable_upper_unbounded[i] == 1) {
                 m_state.primal.reduced_cost_coefficients[i] =
                     std::max(m_state.primal.reduced_cost_coefficients[i], 0.0);
@@ -492,7 +492,7 @@ class PDLPCoreStateManager {
 
         double reduced_cost = 0.0;
 
-        for (auto i = 0; i < m_instance_ptr->number_of_variables; i++) {
+        for (int i = 0; i < m_instance_ptr->number_of_variables; i++) {
             if (m_state.primal.reduced_cost_coefficients[i] > 0) {
                 reduced_cost += m_state.primal.reduced_cost_coefficients[i] *
                                 m_instance_ptr->variable_lower_bounds[i];
@@ -525,7 +525,7 @@ class PDLPCoreStateManager {
         {
             int start = m_instance_ptr->less_constraint_index_range.first;
             int end   = m_instance_ptr->less_constraint_index_range.second;
-            for (auto i = start; i < end; i++) {
+            for (int i = start; i < end; i++) {
                 /// original less constraints were converted into greater ones.
                 m_state.dual.buffer[i] = std::max(m_state.dual.buffer[i], 0.0);
             }
@@ -534,7 +534,7 @@ class PDLPCoreStateManager {
         {
             int start = m_instance_ptr->greater_constraint_index_range.first;
             int end   = m_instance_ptr->greater_constraint_index_range.second;
-            for (auto i = start; i < end; i++) {
+            for (int i = start; i < end; i++) {
                 m_state.dual.buffer[i] = std::max(m_state.dual.buffer[i], 0.0);
             }
         }

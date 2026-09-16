@@ -44,12 +44,12 @@ class ChainMoveGenerator
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (auto w = 0; w < NUM_WORDS; w++) {
+                for (int w = 0; w < NUM_WORDS; w++) {
                     const int     start_i = w * 64;
                     const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
                     std::uint64_t word    = 0;
 
-                    for (auto i = start_i; i < end_i; i++) {
+                    for (int i = start_i; i < end_i; i++) {
                         if (!(*a_moves_ptr)[i].is_available) {
                             continue;
                         }
@@ -164,7 +164,7 @@ class ChainMoveGenerator
                  */
                 const int ALTERATIONS_SIZE = a_LHS.alterations.size();
 
-                for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+                for (int i = 0; i < ALTERATIONS_SIZE; i++) {
                     int address_difference  //
                         = reinterpret_cast<std::uint_fast64_t>(
                               a_LHS.alterations[i].first) -
@@ -181,7 +181,7 @@ class ChainMoveGenerator
                  * Finally, compare the values of variables.
                  */
 
-                for (auto i = 0; i < ALTERATIONS_SIZE; i++) {
+                for (int i = 0; i < ALTERATIONS_SIZE; i++) {
                     int value_difference  //
                         = a_LHS.alterations[i].second -
                           a_RHS.alterations[i].second;
