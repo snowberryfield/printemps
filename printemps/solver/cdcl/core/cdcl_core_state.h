@@ -22,6 +22,7 @@ struct CDCLCoreState {
 
     std::vector<int>        trail;
     std::vector<int>        trail_level_offsets;
+    int                     qhead;
     CDCLConstraintReference conflict_constraint_index;
 
     std::vector<double> activity;
@@ -63,6 +64,7 @@ struct CDCLCoreState {
 
         this->trail.clear();
         this->trail_level_offsets.clear();
+        this->qhead                     = 0;
         this->conflict_constraint_index = {CDCLConstraintType::NONE,
                                            CDCLCoreConstant::NO_CONFLICT};
 

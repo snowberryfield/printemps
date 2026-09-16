@@ -1,0 +1,317 @@
+/*****************************************************************************/
+// Copyright (c) 2020-2025 Yuji KOGUMA
+// Released under the MIT license
+// https://opensource.org/licenses/mit-license.php
+/*****************************************************************************/
+#include <gtest/gtest.h>
+#include <printemps.h>
+
+namespace {
+using namespace printemps;
+using namespace printemps::solver::cdcl::core;
+
+/*****************************************************************************/
+// Helper: MatrixModel からPB制約を持つCDCLCoreを構築して解く
+static CDCLCoreTerminationStatus solve_from_matrix_model(
+    matrix_model::MatrixModel& matrix_model, double time_max = 30.0,
+    int iteration_max = 1000000) {
+    option::Option opt;
+    opt.cdcl.time_max      = time_max;
+    opt.cdcl.iteration_max = iteration_max;
+    opt.cdcl.log_interval  = 1000;
+    opt.output.verbose     = option::verbose::Off;
+
+    CDCLCore solver(&matrix_model, std::nullopt, opt);
+    solver.run();
+    return solver.result().termination_status;
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, float_constraint_normalization_test) {
+    // Test 0.5 x0 + 0.25 x1 <= 0.75 -> scaled to 2 x0 + 1 x1 <= 3
+    matrix_model::MatrixModel m;
+    m.number_of_constraints                  = 1;
+    m.number_of_variables                    = 2;
+    m.constraint_coefficients.row_ptrs       = {0, 2};
+    m.constraint_coefficients.column_indices = {0, 1};
+    m.constraint_coefficients.values         = {0.5, 0.25};
+    m.constraint_lower_bounds.values = {std::numeric_limits<double>::lowest()};
+    m.constraint_upper_bounds.values = {0.75};
+    m.less_constraint_index_range    = {0, 1};
+    m.equal_constraint_index_range   = {0, 0};
+    m.greater_constraint_index_range = {0, 0};
+    for (int i = 0; i < 2; i++) {
+        m.variable_lower_bounds.values.push_back(0.0);
+        m.variable_upper_bounds.values.push_back(1.0);
+    }
+    m.is_minimization = true;
+
+    EXPECT_EQ(solve_from_matrix_model(m), CDCLCoreTerminationStatus::FEASIBLE);
+}
+
+/*****************************************************************************/
+// Helper: 単純な sum x_i >= rhs インスタンスを作成
+static matrix_model::MatrixModel make_ge_instance(int N, double rhs,
+                                                  bool is_equality = false) {
+    matrix_model::MatrixModel m;
+    m.number_of_variables   = N;
+    m.number_of_constraints = 1;
+
+    m.constraint_coefficients.row_ptrs.resize(2);
+    m.constraint_coefficients.row_ptrs[0] = 0;
+    m.constraint_coefficients.row_ptrs[1] = N;
+    for (int i = 0; i < N; i++) {
+        m.constraint_coefficients.column_indices.push_back(i);
+        m.constraint_coefficients.values.push_back(1.0);
+    }
+
+    m.constraint_lower_bounds.values.push_back(rhs);
+    m.constraint_upper_bounds.values.push_back(static_cast<double>(N));
+
+    if (is_equality) {
+        m.equal_constraint_index_range   = {0, 1};
+        m.less_constraint_index_range    = {0, 0};
+        m.greater_constraint_index_range = {1, 1};
+    } else {
+        m.less_constraint_index_range    = {0, 0};
+        m.equal_constraint_index_range   = {0, 0};
+        m.greater_constraint_index_range = {0, 1};
+    }
+
+    for (int i = 0; i < N; i++) {
+        m.variable_lower_bounds.values.push_back(0.0);
+        m.variable_upper_bounds.values.push_back(1.0);
+    }
+    m.is_minimization = true;
+    return m;
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, literal_test) {
+    // x0+x1+x2 >= 2: feasible
+    auto m = make_ge_instance(3, 2.0);
+    EXPECT_EQ(solve_from_matrix_model(m), CDCLCoreTerminationStatus::FEASIBLE);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, pb_constraint_test) {
+    // 2*x0 + 3*x1 + x2 >= 4: feasible
+    matrix_model::MatrixModel m;
+    m.number_of_variables   = 3;
+    m.number_of_constraints = 1;
+
+    m.constraint_coefficients.row_ptrs       = {0, 3};
+    m.constraint_coefficients.column_indices = {0, 1, 2};
+    m.constraint_coefficients.values         = {2.0, 3.0, 1.0};
+    m.constraint_lower_bounds.values.push_back(4.0);
+    m.constraint_upper_bounds.values.push_back(6.0);
+
+    m.less_constraint_index_range    = {0, 0};
+    m.equal_constraint_index_range   = {0, 0};
+    m.greater_constraint_index_range = {0, 1};
+
+    for (int i = 0; i < 3; i++) {
+        m.variable_lower_bounds.values.push_back(0.0);
+        m.variable_upper_bounds.values.push_back(1.0);
+    }
+    m.is_minimization = true;
+
+    option::Option opt;
+    opt.cdcl.time_max      = 10.0;
+    opt.cdcl.iteration_max = 100000;
+    opt.output.verbose     = option::verbose::Off;
+
+    CDCLCore solver(&m, std::nullopt, opt);
+    solver.run();
+
+    ASSERT_EQ(solver.result().termination_status,
+              CDCLCoreTerminationStatus::FEASIBLE);
+    ASSERT_EQ(solver.result().solution.size(), 3u);
+
+    // 2*x0 + 3*x1 + x2 >= 4 must hold
+    const std::vector<int64_t> coeffs = {2, 3, 1};
+    int64_t                    lhs    = 0;
+    for (int i = 0; i < 3; i++)
+        lhs += coeffs[i] * solver.result().solution[i];
+    EXPECT_GE(lhs, 4);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, pb_infeasible_test) {
+    // x0 + x1 >= 3: infeasible (only 2 variables)
+    auto m = make_ge_instance(2, 3.0);
+    EXPECT_EQ(solve_from_matrix_model(m),
+              CDCLCoreTerminationStatus::INFEASIBLE);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_solve_feasible_problem) {
+    // x0 + x1 + x2 >= 1: feasible
+    auto m = make_ge_instance(3, 1.0);
+    EXPECT_EQ(solve_from_matrix_model(m), CDCLCoreTerminationStatus::FEASIBLE);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_solve_infeasible_problem) {
+    // x0 + x1 >= 3: infeasible
+    auto m = make_ge_instance(2, 3.0);
+    EXPECT_EQ(solve_from_matrix_model(m),
+              CDCLCoreTerminationStatus::INFEASIBLE);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_state_and_statistics_test) {
+    CDCLCoreState state;
+    EXPECT_EQ(state.number_of_assigned_zeros, 0);
+    EXPECT_EQ(state.number_of_assigned_ones, 0);
+    EXPECT_EQ(state.total_learned_count, 0);
+    EXPECT_EQ(state.total_learned_literal_block_distance, 0);
+    EXPECT_EQ(state.total_learned_length, 0);
+    EXPECT_EQ(state.last_literal_block_distance, 0);
+    EXPECT_EQ(state.last_learned_length, 0);
+    EXPECT_EQ(state.number_of_restarts, 0);
+    EXPECT_EQ(state.number_of_decisions, 0);
+    EXPECT_EQ(state.number_of_propagations, 0);
+
+    matrix_model::MatrixModel m = make_ge_instance(4, 2.0);
+    option::Option            opt;
+    CDCLCoreStateManager      manager(&m, opt);
+
+    EXPECT_EQ(manager.number_of_assigned_zeros(), 0);
+    EXPECT_EQ(manager.number_of_assigned_ones(), 0);
+    EXPECT_EQ(manager.number_of_assigned_variables(), 0);
+
+    // Test on_variable_assigned
+    manager.on_variable_assigned(1);
+    EXPECT_EQ(manager.number_of_assigned_ones(), 1);
+    EXPECT_EQ(manager.number_of_assigned_zeros(), 0);
+
+    manager.on_variable_assigned(0);
+    EXPECT_EQ(manager.number_of_assigned_ones(), 1);
+    EXPECT_EQ(manager.number_of_assigned_zeros(), 1);
+
+    // Test on_learned_constraint_added
+    CardinalityConstraint c(0, 1, {0, 1}, {2});
+    c.literal_block_distance = 2;
+    manager.on_learned_constraint_added(c);
+
+    EXPECT_EQ(manager.last_literal_block_distance(), 2);
+    EXPECT_EQ(manager.last_learned_length(), 3);
+    EXPECT_EQ(manager.total_learned_count(), 1);
+    EXPECT_DOUBLE_EQ(manager.average_learned_literal_block_distance(), 2.0);
+    EXPECT_DOUBLE_EQ(manager.average_learned_length(), 3.0);
+
+    CardinalityConstraint c2(1, 1, {0}, {3});
+    c2.literal_block_distance = 4;
+    manager.on_learned_constraint_added(c2);
+
+    EXPECT_EQ(manager.last_literal_block_distance(), 4);
+    EXPECT_EQ(manager.last_learned_length(), 2);
+    EXPECT_EQ(manager.total_learned_count(), 2);
+    EXPECT_DOUBLE_EQ(manager.average_learned_literal_block_distance(), 3.0);
+    EXPECT_DOUBLE_EQ(manager.average_learned_length(), 2.5);
+
+    // Test on_restart, on_decision, on_propagation
+    manager.on_restart();
+    EXPECT_EQ(manager.number_of_restarts(), 1);
+
+    manager.on_decision();
+    EXPECT_EQ(manager.number_of_decisions(), 1);
+
+    manager.on_propagation(3);
+    EXPECT_EQ(manager.number_of_propagations(), 3);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_solve_statistics_test) {
+    // Problem requiring decisions and propagations
+    matrix_model::MatrixModel m = make_ge_instance(5, 3.0);
+    option::Option            opt;
+    opt.cdcl.time_max      = 10.0;
+    opt.cdcl.iteration_max = 10000;
+    opt.output.verbose     = option::verbose::Inner;
+
+    CDCLCore solver(&m, std::nullopt, opt);
+    solver.run();
+
+    const auto& res = solver.result();
+    EXPECT_EQ(res.termination_status, CDCLCoreTerminationStatus::FEASIBLE);
+    EXPECT_GT(res.number_of_decisions + res.number_of_propagations, 0);
+}
+
+/*****************************************************************************/
+/*****************************************************************************/
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_solve_mps_instance) {
+    std::vector<std::string> CANDIDATES = {
+        "./air05.mps",
+        "air05.mps",
+        "../printemps_benchmark/instance/MIPLIB2017_Benchmark/bnatt400.mps",
+        "/Volumes/Data/mps/bnatt400.mps",
+        "../printemps_benchmark/instance/MIPLIB2017_Benchmark/ex10.mps",
+        "/Volumes/Data/mps/ex10.mps",
+        "scratch/ex9.mps",
+        "/Volumes/Data/mps/ex9.mps"};
+
+    std::string MPS_PATH = "";
+    for (const auto& path : CANDIDATES) {
+        std::ifstream f(path.c_str());
+        if (f.good()) {
+            MPS_PATH = path;
+            break;
+        }
+    }
+
+    if (MPS_PATH.empty()) {
+        GTEST_SKIP() << "No suitable MPS benchmark file found";
+    }
+
+    mps::MPS mps_data;
+    mps_data.read_mps(MPS_PATH);
+
+    model::Model<int, double> model;
+    model.mps_handler().import(mps_data, false);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = true;
+    opt.output.verbose                 = option::verbose::Off;
+    model.builder().build(opt, false);
+
+    auto matrix_model = model.matrix_model_handler().export_matrix_model();
+
+    option::Option cdcl_opt;
+    cdcl_opt.cdcl.time_max  = 15.0;
+    cdcl_opt.output.verbose = option::verbose::Off;
+
+    CDCLCore solver(&matrix_model, std::nullopt, cdcl_opt);
+    solver.run();
+
+    EXPECT_EQ(solver.result().termination_status,
+              CDCLCoreTerminationStatus::FEASIBLE);
+}
+
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_controller_test) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 3, 0, 1);
+    model.create_constraint("c1", x(0) + x(1) - x(2) == 0);
+    model.create_constraint("c2", x(0) + x(2) == 1);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = false;
+    opt.pdlp.is_enabled                = false;
+    opt.lagrange_dual.is_enabled       = false;
+    opt.local_search.is_enabled        = false;
+    opt.tabu_search.iteration_max      = 0;
+    opt.cdcl.is_enabled                = true;
+    opt.output.verbose                 = option::verbose::Off;
+
+    solver::Solver<int, double> solver(&model, opt);
+    auto                        result = solver.solve();
+
+    EXPECT_TRUE(result.solution.is_feasible());
+    EXPECT_EQ(solver.cdcl_controller().result().core.termination_status,
+              CDCLCoreTerminationStatus::FEASIBLE);
+}
+
+}  // namespace

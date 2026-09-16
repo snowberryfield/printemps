@@ -12,18 +12,30 @@ namespace printemps::utility {
 /******************************************************************************/
 template <class T>
 inline bool is_integer(const T a_VALUE) {
-    return std::abs(a_VALUE - std::floor(a_VALUE)) < constant::EPSILON_10;
+    const T floor_val = std::floor(a_VALUE);
+    if (a_VALUE == floor_val) {
+        return true;
+    }
+    return std::abs(a_VALUE - floor_val) < constant::EPSILON_10;
 };
 
 /******************************************************************************/
 inline int decimal_places(const double a_VALUE,
-                           const int    a_MAX_DECIMAL_PLACES = 6) {
+                          const int    a_MAX_DECIMAL_PLACES = 6) {
     if (is_integer(a_VALUE)) {
         return 0;
     }
-    const double SCALE_BASE = 10.0;
-    for (int k = 1; k <= a_MAX_DECIMAL_PLACES; k++) {
-        const double SCALED_VALUE = a_VALUE * std::pow(SCALE_BASE, k);
+    static constexpr double POW10[] = {1.0,     10.0,     100.0,    1000.0,
+                                       10000.0, 100000.0, 1000000.0};
+    const int               limit   = std::min(a_MAX_DECIMAL_PLACES, 6);
+    for (int k = 1; k <= limit; k++) {
+        const double SCALED_VALUE = a_VALUE * POW10[k];
+        if (is_integer(SCALED_VALUE)) {
+            return k;
+        }
+    }
+    for (int k = 7; k <= a_MAX_DECIMAL_PLACES; k++) {
+        const double SCALED_VALUE = a_VALUE * std::pow(10.0, k);
         if (is_integer(SCALED_VALUE)) {
             return k;
         }

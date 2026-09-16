@@ -146,6 +146,21 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
+    inline int qhead(void) const noexcept {
+        return m_state.qhead;
+    }
+
+    /*************************************************************************/
+    inline int& mutable_qhead(void) noexcept {
+        return m_state.qhead;
+    }
+
+    /*************************************************************************/
+    inline void set_qhead(const int a_QHEAD) noexcept {
+        m_state.qhead = a_QHEAD;
+    }
+
+    /*************************************************************************/
     inline CDCLConstraintReference conflict_constraint_index(
         void) const noexcept {
         return m_state.conflict_constraint_index;
@@ -248,10 +263,9 @@ class CDCLCoreStateManager {
         if (m_option.cdcl.restart_mode ==
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count++;
-            m_state.conflict_limit +=
-                CDCLCoreStateManager::compute_luby_value(
-                    m_state.restart_luby_count) *
-                m_option.cdcl.initial_conflict_limit;
+            m_state.conflict_limit += CDCLCoreStateManager::compute_luby_value(
+                                          m_state.restart_luby_count) *
+                                      m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
                    option::cdcl_restart_mode::CDCLRestartMode::Geometric) {
             m_state.conflict_limit = static_cast<int>(
@@ -475,8 +489,8 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
-    inline const utility::FixedSizeQueue<int>&
-    literal_block_distance_queue(void) const noexcept {
+    inline const utility::FixedSizeQueue<int>& literal_block_distance_queue(
+        void) const noexcept {
         return m_state.literal_block_distance_queue;
     }
 };
