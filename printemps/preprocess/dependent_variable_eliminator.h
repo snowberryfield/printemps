@@ -187,23 +187,47 @@ class DependentVariableEliminator {
         }
 
         int number_of_eliminated_dependent_variables = 0;
+        std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *,
+            std::vector<
+                model_component::Expression<T_Variable, T_Expression> *>>
+            variable_to_expression_ptrs;
+
+        std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
+            dependent_variable_set(a_DEPENDENT_VARIABLE_PTRS.begin(),
+                                   a_DEPENDENT_VARIABLE_PTRS.end());
+
+        for (auto &&proxy : m_model_ptr->expression_proxies()) {
+            for (auto &&expression : proxy.flat_indexed_expressions()) {
+                for (auto &&sensitivity : expression.sensitivities()) {
+                    if (dependent_variable_set.find(sensitivity.first) !=
+                        dependent_variable_set.end()) {
+                        variable_to_expression_ptrs[sensitivity.first].push_back(
+                            &expression);
+                    }
+                }
+            }
+        }
 
         for (const auto &variable_ptr : a_DEPENDENT_VARIABLE_PTRS) {
-            for (auto &&proxy : m_model_ptr->expression_proxies()) {
-                for (auto &&expression : proxy.flat_indexed_expressions()) {
-                    if (expression.sensitivities().find(variable_ptr) !=
-                        expression.sensitivities().end()) {
-                        expression.substitute(
-                            variable_ptr,
-                            *(variable_ptr->dependent_expression_ptr()));
-                        number_of_eliminated_dependent_variables++;
+            auto it = variable_to_expression_ptrs.find(variable_ptr);
+            if (it == variable_to_expression_ptrs.end()) {
+                continue;
+            }
 
-                        utility::print_message(
-                            "The dependent variable " + variable_ptr->name() +
-                                " in the expression " + expression.name() +
-                                " was eliminated. ",
-                            a_IS_ENABLED_PRINT);
-                    }
+            for (auto *expression_ptr : it->second) {
+                if (expression_ptr->sensitivities().find(variable_ptr) !=
+                    expression_ptr->sensitivities().end()) {
+                    expression_ptr->substitute(
+                        variable_ptr,
+                        *(variable_ptr->dependent_expression_ptr()));
+                    number_of_eliminated_dependent_variables++;
+
+                    utility::print_message(
+                        "The dependent variable " + variable_ptr->name() +
+                            " in the expression " + expression_ptr->name() +
+                            " was eliminated. ",
+                        a_IS_ENABLED_PRINT);
                 }
             }
         }
