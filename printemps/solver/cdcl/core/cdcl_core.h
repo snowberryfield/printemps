@@ -212,8 +212,9 @@ class CDCLCore {
         }
 
         // Recursive clause minimization (MiniSat-style)
-        std::vector<int> analyze_stack;
-        std::vector<int> analyze_toclear;
+        if (m_option.cdcl.is_enabled_clause_minimization) {
+            std::vector<int> analyze_stack;
+            std::vector<int> analyze_toclear;
 
         auto is_redundant = [&](const int a_var_index) -> bool {
             analyze_stack.clear();
@@ -323,6 +324,7 @@ class CDCLCore {
 
         filter_redundant(learned_positive_variable_indices);
         filter_redundant(learned_negative_variable_indices);
+        }
 
         const int UNIQUE_IMPLICATION_POINT_CURRENT_VALUE =
             MODEL.variable(unique_implication_point_variable_index).value;

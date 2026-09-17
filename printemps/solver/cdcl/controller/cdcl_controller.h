@@ -7,6 +7,8 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
 #define PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
 
+#include <atomic>
+#include <mutex>
 #include "../../abstract_solver_controller.h"
 #include "../core/cdcl_core.h"
 #include "cdcl_controller_result.h"
@@ -139,6 +141,57 @@ class CDCLController
     }
 
     /*************************************************************************/
+    inline std::vector<option::Option> generate_portfolio_options(
+        const option::Option& a_BASE_OPTION, const int a_NUM_THREADS) const {
+        std::vector<option::Option> portfolio(a_NUM_THREADS, a_BASE_OPTION);
+        for (int t = 0; t < a_NUM_THREADS; ++t) {
+            portfolio[t].cdcl.seed = a_BASE_OPTION.cdcl.seed + t;
+            switch (t) {
+                case 0:
+                    // Thread 0: Balanced standard config (Clause minimization ON, default decay, default restart)
+                    portfolio[t].cdcl.is_enabled_clause_minimization =
+                        a_BASE_OPTION.cdcl.is_enabled_clause_minimization;
+                    portfolio[t].cdcl.variable_activity_decay_rate =
+                        a_BASE_OPTION.cdcl.variable_activity_decay_rate;
+                    portfolio[t].cdcl.initial_conflict_limit =
+                        a_BASE_OPTION.cdcl.initial_conflict_limit;
+                    break;
+                case 1:
+                    // Thread 1: High-throughput raw config (Clause minimization OFF)
+                    portfolio[t].cdcl.is_enabled_clause_minimization = false;
+                    portfolio[t].cdcl.variable_activity_decay_rate =
+                        a_BASE_OPTION.cdcl.variable_activity_decay_rate;
+                    portfolio[t].cdcl.initial_conflict_limit =
+                        a_BASE_OPTION.cdcl.initial_conflict_limit;
+                    break;
+                case 2:
+                    // Thread 2: Aggressive restarts (half interval) with clause minimization ON
+                    portfolio[t].cdcl.is_enabled_clause_minimization = true;
+                    portfolio[t].cdcl.variable_activity_decay_rate   = 0.90;
+                    portfolio[t].cdcl.initial_conflict_limit =
+                        std::max(10, a_BASE_OPTION.cdcl.initial_conflict_limit / 2);
+                    break;
+                case 3:
+                    // Thread 3: Long-window exploration (double interval) with clause minimization OFF
+                    portfolio[t].cdcl.is_enabled_clause_minimization = false;
+                    portfolio[t].cdcl.variable_activity_decay_rate   = 0.85;
+                    portfolio[t].cdcl.initial_conflict_limit =
+                        a_BASE_OPTION.cdcl.initial_conflict_limit * 2;
+                    break;
+                default:
+                    // Thread t >= 4: Alternating clause minimization, varied decay & restarts
+                    portfolio[t].cdcl.is_enabled_clause_minimization = (t % 2 == 0);
+                    portfolio[t].cdcl.variable_activity_decay_rate =
+                        0.75 + 0.05 * (t % 5);
+                    portfolio[t].cdcl.initial_conflict_limit =
+                        a_BASE_OPTION.cdcl.initial_conflict_limit * ((t % 3) + 1);
+                    break;
+            }
+        }
+        return portfolio;
+    }
+
+    /*************************************************************************/
     inline void run(void) {
         const double TOTAL_ELAPSED_TIME = this->m_time_keeper.clock();
 
@@ -203,17 +256,99 @@ class CDCLController
          */
         auto matrix_model =
             this->m_model_ptr->matrix_model_handler().export_matrix_model();
-        option::Option option   = this->m_option;
-        option.cdcl.time_offset = TOTAL_ELAPSED_TIME;
+        option::Option base_option   = this->m_option;
+        base_option.cdcl.time_offset = TOTAL_ELAPSED_TIME;
 
-        /**
-         * Run the CDCL.
-         */
-        core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
-                                 option);
+        const int NUM_THREADS = [&]() -> int {
+#ifdef _OPENMP
+            if (!this->m_option.parallel.is_enabled_cdcl_parallelization) {
+                return 1;
+            }
+            if (this->m_option.parallel.number_of_threads_cdcl > 0) {
+                return this->m_option.parallel.number_of_threads_cdcl;
+            }
+            return omp_get_max_threads();
+#else
+            return 1;
+#endif
+        }();
 
-        cdcl_core.run();
-        auto cdcl_result = cdcl_core.result();
+        core::CDCLCoreResult cdcl_result;
+
+        if (NUM_THREADS <= 1) {
+            core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
+                                     base_option);
+            cdcl_core.run();
+            cdcl_result = cdcl_core.result();
+        } else {
+#ifdef _OPENMP
+            if (this->m_option.output.verbose >= option::verbose::Outer) {
+                utility::print_message(
+                    "Running CDCL with OpenMP portfolio (" +
+                        std::to_string(NUM_THREADS) + " threads).",
+                    true);
+            }
+
+            const auto portfolio_options =
+                this->generate_portfolio_options(base_option, NUM_THREADS);
+
+            std::atomic<bool> is_interrupted_by_solution{false};
+            std::mutex        result_mutex;
+            bool              has_solution = false;
+            std::vector<core::CDCLCoreResult> thread_results(NUM_THREADS);
+
+            #pragma omp parallel num_threads(NUM_THREADS)
+            {
+                const int THREAD_ID = omp_get_thread_num();
+
+                auto thread_check_interrupt = [&]() -> bool {
+                    if (is_interrupted_by_solution.load(
+                            std::memory_order_relaxed)) {
+                        return true;
+                    }
+                    return this->check_interrupt();
+                };
+
+                core::CDCLCore cdcl_core(
+                    &matrix_model, thread_check_interrupt,
+                    portfolio_options[THREAD_ID]);
+                cdcl_core.run();
+
+                auto res = cdcl_core.result();
+                thread_results[THREAD_ID] = res;
+
+                if (res.termination_status ==
+                        core::CDCLCoreTerminationStatus::FEASIBLE ||
+                    res.termination_status ==
+                        core::CDCLCoreTerminationStatus::INFEASIBLE) {
+                    is_interrupted_by_solution.store(true,
+                                                     std::memory_order_relaxed);
+                    std::lock_guard<std::mutex> lock(result_mutex);
+                    if (!has_solution || res.termination_status ==
+                                             core::CDCLCoreTerminationStatus::
+                                                 FEASIBLE) {
+                        cdcl_result  = res;
+                        has_solution = true;
+                    }
+                }
+            }
+
+            if (!has_solution) {
+                cdcl_result = thread_results[0];
+                for (int t = 1; t < NUM_THREADS; ++t) {
+                    if (thread_results[t].number_of_conflicts >
+                        cdcl_result.number_of_conflicts) {
+                        cdcl_result = thread_results[t];
+                    }
+                }
+            }
+#else
+            core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
+                                     base_option);
+            cdcl_core.run();
+            cdcl_result = cdcl_core.result();
+#endif
+        }
 
         /**
          * Update the incumbent and solution archives if a feasible solution

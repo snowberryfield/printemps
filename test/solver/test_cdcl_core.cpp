@@ -314,4 +314,31 @@ TEST(TestCDCLCore, cdcl_controller_test) {
               CDCLCoreTerminationStatus::FEASIBLE);
 }
 
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_controller_parallel_portfolio_test) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 4, 0, 1);
+    model.create_constraint("c1", x(0) + x(1) + x(2) >= 2);
+    model.create_constraint("c2", x(1) + x(2) + x(3) <= 1);
+    model.create_constraint("c3", x(0) + x(3) == 1);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = false;
+    opt.pdlp.is_enabled                = false;
+    opt.lagrange_dual.is_enabled       = false;
+    opt.local_search.is_enabled        = false;
+    opt.tabu_search.iteration_max      = 0;
+    opt.cdcl.is_enabled                = true;
+    opt.parallel.is_enabled_cdcl_parallelization = true;
+    opt.parallel.number_of_threads_cdcl          = 4;
+    opt.output.verbose                           = option::verbose::Off;
+
+    solver::Solver<int, double> solver(&model, opt);
+    auto                        result = solver.solve();
+
+    EXPECT_TRUE(result.solution.is_feasible());
+    EXPECT_EQ(solver.cdcl_controller().result().core.termination_status,
+              CDCLCoreTerminationStatus::FEASIBLE);
+}
+
 }  // namespace

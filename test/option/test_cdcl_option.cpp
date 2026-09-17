@@ -100,6 +100,10 @@ TEST_F(TestCDCLOption, initialize) {
     EXPECT_EQ(                                                //
         CDCLOptionConstant::DEFAULT_IS_ENABLED_PHASE_SAVING,  //
         option.is_enabled_phase_saving);
+
+    EXPECT_EQ(                                                      //
+        CDCLOptionConstant::DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION,  //
+        option.is_enabled_clause_minimization);
 }
 }  // namespace
 /*****************************************************************************/

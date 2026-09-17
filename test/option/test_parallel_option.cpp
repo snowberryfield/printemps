@@ -33,6 +33,11 @@ TEST_F(TestParallelOption, initialize) {
             DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION,  //
         option.is_enabled_move_evaluation_parallelization);
 
+    EXPECT_EQ(  //
+        ParallelOptionConstant::
+            DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION,  //
+        option.is_enabled_cdcl_parallelization);
+
     EXPECT_EQ(                                                          //
         ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE,  //
         option.number_of_threads_move_update);
@@ -40,6 +45,10 @@ TEST_F(TestParallelOption, initialize) {
     EXPECT_EQ(                                                              //
         ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION,  //
         option.number_of_threads_move_evaluation);
+
+    EXPECT_EQ(                                                      //
+        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_CDCL,     //
+        option.number_of_threads_cdcl);
 
     EXPECT_EQ(  //
         ParallelOptionConstant::

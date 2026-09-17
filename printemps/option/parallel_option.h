@@ -13,11 +13,15 @@ struct ParallelOptionConstant {
         DEFAULT_IS_ENABLED_MOVE_UPDATE_PARALLELIZATION = true;
     static constexpr bool  //
         DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION = true;
+    static constexpr bool  //
+        DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION = true;
 
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION = -1;  // Adjust to max
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE = -1;      // Adjust to max
+    static constexpr int                                 //
+        DEFAULT_NUMBER_OF_THREADS_CDCL = -1;             // Adjust to max
 
     static constexpr bool  //
         DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION = true;
@@ -29,9 +33,11 @@ struct ParallelOptionConstant {
 struct ParallelOption {
     bool is_enabled_move_update_parallelization;
     bool is_enabled_move_evaluation_parallelization;
+    bool is_enabled_cdcl_parallelization;
 
     int number_of_threads_move_update;
     int number_of_threads_move_evaluation;
+    int number_of_threads_cdcl;
 
     bool   is_enabled_thread_count_optimization;
     double thread_count_optimization_decay_factor;
@@ -56,11 +62,17 @@ struct ParallelOption {
             = ParallelOptionConstant::
                 DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION;
 
+        this->is_enabled_cdcl_parallelization  //
+            = ParallelOptionConstant::DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION;
+
         this->number_of_threads_move_update  //
             = ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE;
 
         this->number_of_threads_move_evaluation  //
             = ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION;
+
+        this->number_of_threads_cdcl  //
+            = ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_CDCL;
 
         this->is_enabled_thread_count_optimization  //
             = ParallelOptionConstant::
@@ -83,6 +95,11 @@ struct ParallelOption {
             utility::to_true_or_false(                                     //
                 this->is_enabled_move_evaluation_parallelization));
 
+        utility::print(                                            //
+            " -- parallel.is_enabled_cdcl_parallelization: " +     //
+            utility::to_true_or_false(                             //
+                this->is_enabled_cdcl_parallelization));
+
         utility::print(                                       //
             " -- parallel.number_of_threads_move_update: " +  //
             utility::to_string(                               //
@@ -92,6 +109,11 @@ struct ParallelOption {
             " -- parallel.number_of_threads_move_evaluation: " +  //
             utility::to_string(                                   //
                 this->number_of_threads_move_evaluation, "%d"));
+
+        utility::print(                                //
+            " -- parallel.number_of_threads_cdcl: " +  //
+            utility::to_string(                        //
+                this->number_of_threads_cdcl, "%d"));
 
         utility::print(  //
             " -- parallel.is_enabled_thread_count_optimization:"
@@ -119,6 +141,11 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",       //
             a_OBJECT);
 
+        read_json(                                    //
+            &this->is_enabled_cdcl_parallelization,   //
+            "is_enabled_cdcl_parallelization",        //
+            a_OBJECT);
+
         read_json(                                 //
             &this->number_of_threads_move_update,  //
             "number_of_threads_move_update;",      //
@@ -127,6 +154,11 @@ struct ParallelOption {
         read_json(                                     //
             &this->number_of_threads_move_evaluation,  //
             "number_of_threads_move_evaluation",       //
+            a_OBJECT);
+
+        read_json(                           //
+            &this->number_of_threads_cdcl,   //
+            "number_of_threads_cdcl",        //
             a_OBJECT);
 
         read_json(                                        //
@@ -151,6 +183,10 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",  //
             this->is_enabled_move_evaluation_parallelization);
 
+        obj.emplace_back(                                //
+            "is_enabled_cdcl_parallelization",           //
+            this->is_enabled_cdcl_parallelization);
+
         obj.emplace_back(                     //
             "number_of_threads_move_update",  //
             this->number_of_threads_move_update);
@@ -158,6 +194,10 @@ struct ParallelOption {
         obj.emplace_back(                         //
             "number_of_threads_move_evaluation",  //
             this->number_of_threads_move_evaluation);
+
+        obj.emplace_back(                 //
+            "number_of_threads_cdcl",     //
+            this->number_of_threads_cdcl);
 
         obj.emplace_back(                            //
             "is_enabled_thread_count_optimization",  //
