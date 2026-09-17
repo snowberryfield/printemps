@@ -10,7 +10,7 @@ namespace printemps::option {
 /*****************************************************************************/
 struct CDCLOptionConstant {
     static constexpr bool   DEFAULT_IS_ENABLED    = true;
-    static constexpr int    DEFAULT_ITERATION_MAX = 10000000;
+    static constexpr int    DEFAULT_ITERATION_MAX = 100000000;
     static constexpr double DEFAULT_TIME_MAX      = 10.0;
     static constexpr double DEFAULT_TIME_OFFSET   = 0.0;
     static constexpr int    DEFAULT_LOG_INTERVAL  = 1000;
@@ -28,12 +28,12 @@ struct CDCLOptionConstant {
 
     static constexpr bool DEFAULT_IS_ENABLED_LEARNED_CONSTRAINT_REDUCTION =
         true;
-    static constexpr int    DEFAULT_LEARNED_CONSTRAINT_CAPACITY       = 2000;
+    static constexpr int    DEFAULT_LEARNED_CONSTRAINT_CAPACITY       = 8000;
     static constexpr double DEFAULT_LEARNED_CONSTRAINT_REDUCTION_RATE = 0.5;
     static constexpr int DEFAULT_LITERAL_BLOCK_DISTANCE_PROTECTION_THRESHOLD =
         2;
 
-    static constexpr double DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE   = 0.8;
+    static constexpr double DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE   = 0.85;
     static constexpr bool   DEFAULT_IS_ENABLED_PHASE_SAVING        = true;
     static constexpr bool   DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION = true;
 };

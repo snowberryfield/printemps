@@ -14,7 +14,7 @@ struct ParallelOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION = true;
+        DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION = false;
 
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION = -1;  // Adjust to max
