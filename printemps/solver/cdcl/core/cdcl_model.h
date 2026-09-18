@@ -1043,6 +1043,55 @@ class CDCLModel {
         return (m_instance_ptr->variable_index_map.reverse_at(a_INDEX)
                     ->selection_ptr() != nullptr);
     }
+
+    /*************************************************************************/
+    inline std::vector<int> extract_current_solution(void) const {
+        const int        N = static_cast<int>(m_variables.size());
+        std::vector<int> solution(N);
+        for (int i = 0; i < N; ++i) {
+            solution[i] = m_variables[i].is_assigned() ? m_variables[i].value
+                                                       : m_variables[i].phase;
+        }
+        return solution;
+    }
+
+    /*************************************************************************/
+    inline double compute_total_violation(
+        const std::vector<int>& a_SOLUTION) const {
+        if (m_instance_ptr == nullptr) {
+            return 0.0;
+        }
+        const auto& MATRIX = m_instance_ptr->constraint_coefficients;
+        const auto& LOWER_BOUNDS =
+            m_instance_ptr->constraint_lower_bounds.values;
+        const auto& UPPER_BOUNDS =
+            m_instance_ptr->constraint_upper_bounds.values;
+        const int M = m_instance_ptr->number_of_constraints;
+
+        double total_violation = 0.0;
+        for (int i = 0; i < M; ++i) {
+            const int PTR_BEGIN = MATRIX.row_ptrs[i];
+            const int PTR_END   = MATRIX.row_ptrs[i + 1];
+
+            double lhs = 0.0;
+            for (int j = PTR_BEGIN; j < PTR_END; ++j) {
+                if (a_SOLUTION[MATRIX.column_indices[j]]) {
+                    lhs += MATRIX.values[j];
+                }
+            }
+
+            const double lb = LOWER_BOUNDS[i];
+            const double ub = UPPER_BOUNDS[i];
+
+            if (std::isfinite(lb) && lhs < lb) {
+                total_violation += (lb - lhs);
+            }
+            if (std::isfinite(ub) && lhs > ub) {
+                total_violation += (lhs - ub);
+            }
+        }
+        return total_violation;
+    }
 };
 
 }  // namespace printemps::solver::cdcl::core

@@ -337,11 +337,13 @@ class CDCLController
             }
 
             if (!has_solution) {
-                cdcl_result = thread_results[0];
+                cdcl_result       = thread_results[0];
+                winning_thread_id = 0;
                 for (int t = 1; t < NUM_THREADS; ++t) {
-                    if (thread_results[t].number_of_conflicts >
-                        cdcl_result.number_of_conflicts) {
-                        cdcl_result = thread_results[t];
+                    if (thread_results[t].best_total_violation <
+                        cdcl_result.best_total_violation) {
+                        cdcl_result       = thread_results[t];
+                        winning_thread_id = t;
                     }
                 }
             }
@@ -354,13 +356,16 @@ class CDCLController
         }
 
         /**
-         * Update the incumbent and solution archives if a feasible solution
-         * was found.
+         * Update the incumbent and solution archives with the best solution
+         * found during CDCL search (smallest constraint violation).
          */
-        if (cdcl_result.termination_status ==
-            core::CDCLCoreTerminationStatus::FEASIBLE) {
+        const auto& candidate_solution = !cdcl_result.best_solution.empty()
+                                             ? cdcl_result.best_solution
+                                             : cdcl_result.solution;
+
+        if (!candidate_solution.empty()) {
             this->m_model_ptr->matrix_model_handler().import_solution(
-                cdcl_result.solution);
+                candidate_solution);
             this->m_model_ptr->updater()
                 .update_dependent_variables_and_disabled_constraints();
             this->m_model_ptr->updater().update();
@@ -372,8 +377,10 @@ class CDCLController
             const auto SPARSE_SOLUTION =
                 this->m_model_ptr->state_inspector().export_sparse_solution();
 
-            if (this->m_option.output.is_enabled_store_feasible_solutions) {
-                this->update_feasible_solution_archive({SPARSE_SOLUTION});
+            if (SCORE.is_feasible) {
+                if (this->m_option.output.is_enabled_store_feasible_solutions) {
+                    this->update_feasible_solution_archive({SPARSE_SOLUTION});
+                }
             }
             this->update_incumbent_solution_archive_and_search_tree(
                 {SPARSE_SOLUTION});
@@ -407,13 +414,28 @@ class CDCLController
             this->m_option.output.verbose >= option::verbose::Outer);
 
         if (NUM_THREADS > 1 && winning_thread_id >= 0) {
-            utility::print_info(
-                " -- Solved by thread " + std::to_string(winning_thread_id) +
-                    " (" + std::to_string(cdcl_result.number_of_conflicts) +
-                    " conflicts, " +
-                    std::to_string(cdcl_result.number_of_decisions) +
-                    " decisions).",
-                this->m_option.output.verbose >= option::verbose::Outer);
+            if (cdcl_result.termination_status ==
+                    core::CDCLCoreTerminationStatus::FEASIBLE ||
+                cdcl_result.termination_status ==
+                    core::CDCLCoreTerminationStatus::INFEASIBLE) {
+                utility::print_info(
+                    " -- Solved by thread " + std::to_string(winning_thread_id) +
+                        " (" + std::to_string(cdcl_result.number_of_conflicts) +
+                        " conflicts, " +
+                        std::to_string(cdcl_result.number_of_decisions) +
+                        " decisions).",
+                    this->m_option.output.verbose >= option::verbose::Outer);
+            } else {
+                utility::print_info(
+                    " -- Best intermediate solution from thread " +
+                        std::to_string(winning_thread_id) +
+                        " (violation: " +
+                        utility::to_string(cdcl_result.best_total_violation,
+                                           "%.5e") +
+                        ", " + std::to_string(cdcl_result.number_of_conflicts) +
+                        " conflicts).",
+                    this->m_option.output.verbose >= option::verbose::Outer);
+            }
         }
 
         this->m_time_keeper.clock();

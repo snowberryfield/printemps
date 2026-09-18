@@ -341,4 +341,50 @@ TEST(TestCDCLCore, cdcl_controller_parallel_portfolio_test) {
               CDCLCoreTerminationStatus::FEASIBLE);
 }
 
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_best_intermediate_solution_test) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 2, 0, 1);
+    // Incompatible fractional constraints:
+    // c1: 0.2*x0 + 0.3*x1 <= 0.1
+    // c2: 0.5*x0 + 0.5*x1 >= 0.8
+    model.create_constraint("c1", 0.2 * x(0) + 0.3 * x(1) <= 0.1);
+    model.create_constraint("c2", 0.5 * x(0) + 0.5 * x(1) >= 0.8);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = false;
+    opt.pdlp.is_enabled                = false;
+    opt.lagrange_dual.is_enabled       = false;
+    opt.local_search.is_enabled        = false;
+    opt.tabu_search.iteration_max      = 0;
+    opt.cdcl.is_enabled                = true;
+    opt.output.verbose                 = option::verbose::Off;
+
+    solver::Solver<int, double> solver(&model, opt);
+    auto                        result = solver.solve();
+
+    const auto& cdcl_res = solver.cdcl_controller().result().core;
+    EXPECT_EQ(cdcl_res.termination_status,
+              CDCLCoreTerminationStatus::INFEASIBLE);
+
+    // best_solution must be tracked
+    EXPECT_EQ(2u, cdcl_res.best_solution.size());
+    EXPECT_TRUE(std::isfinite(cdcl_res.best_total_violation));
+
+    // Verify evaluation conforms to original Model's floating-point scale:
+    // For x=(0,0): c1 viol = 0, c2 viol = 0.8 - 0 = 0.8 (total = 0.8).
+    // For x=(1,1): c1 viol = 0.5 - 0.1 = 0.4, c2 viol = 0 (total = 0.4).
+    // For x=(1,0): c1 viol = 0.2 - 0.1 = 0.1, c2 viol = 0.8 - 0.5 = 0.3 (total = 0.4).
+    // For x=(0,1): c1 viol = 0.3 - 0.1 = 0.2, c2 viol = 0.8 - 0.5 = 0.3 (total = 0.5).
+    // Best violation is 0.4 (NOT integerized 4).
+    EXPECT_NEAR(0.4, cdcl_res.best_total_violation, 1e-6);
+
+    // Incumbent holder must be updated with the best intermediate solution
+    const auto& global_state = solver.global_state();
+    const auto& augmented_score =
+        global_state.incumbent_holder.global_augmented_incumbent_score();
+    EXPECT_NEAR(0.4, augmented_score.total_violation, 1e-6);
+}
+
 }  // namespace
+

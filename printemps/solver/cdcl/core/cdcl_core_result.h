@@ -15,6 +15,8 @@ namespace printemps::solver::cdcl::core {
 struct CDCLCoreResult {
     CDCLCoreTerminationStatus termination_status;
     std::vector<int>          solution;
+    std::vector<int>          best_solution;
+    double                    best_total_violation;
 
     int    number_of_conflicts;
     int    number_of_restarts;
@@ -30,25 +32,35 @@ struct CDCLCoreResult {
     }
 
     /*************************************************************************/
-    CDCLCoreResult(const CDCLCoreState &a_STATE, const CDCLModel &a_MODEL) {
-        this->setup(a_STATE, a_MODEL);
+    CDCLCoreResult(const CDCLCoreState    &a_STATE,  //
+                   const CDCLModel        &a_MODEL,  //
+                   const std::vector<int> &a_BEST_SOLUTION = {},
+                   const double            a_BEST_TOTAL_VIOLATION =
+                       std::numeric_limits<double>::infinity()) {
+        this->setup(a_STATE, a_MODEL, a_BEST_SOLUTION, a_BEST_TOTAL_VIOLATION);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
         this->termination_status = CDCLCoreTerminationStatus::NOT_SOLVED;
         this->solution.clear();
+        this->best_solution.clear();
+        this->best_total_violation   = std::numeric_limits<double>::infinity();
         this->number_of_conflicts    = 0;
         this->number_of_restarts     = 0;
         this->number_of_decisions    = 0;
         this->number_of_propagations = 0;
         this->total_learned_count    = 0;
         this->average_learned_literal_block_distance = 0.0;
-        this->average_learned_length = 0.0;
+        this->average_learned_length                 = 0.0;
     }
 
     /*************************************************************************/
-    inline void setup(const CDCLCoreState &a_STATE, const CDCLModel &a_MODEL) {
+    inline void setup(const CDCLCoreState    &a_STATE,  //
+                      const CDCLModel        &a_MODEL,  //
+                      const std::vector<int> &a_BEST_SOLUTION = {},
+                      const double            a_BEST_TOTAL_VIOLATION =
+                          std::numeric_limits<double>::infinity()) {
         this->initialize();
         this->termination_status     = a_STATE.termination_status;
         this->number_of_conflicts    = a_STATE.number_of_conflicts;
@@ -75,6 +87,11 @@ struct CDCLCoreResult {
             for (int i = 0; i < VARIABLES_SIZE; i++) {
                 this->solution[i] = a_MODEL.variable(i).value;
             }
+            this->best_solution        = this->solution;
+            this->best_total_violation = 0.0;
+        } else {
+            this->best_solution        = a_BEST_SOLUTION;
+            this->best_total_violation = a_BEST_TOTAL_VIOLATION;
         }
     }
 };

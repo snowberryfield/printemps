@@ -412,6 +412,11 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
+    inline CDCLCoreTerminationStatus termination_status(void) const noexcept {
+        return m_state.termination_status;
+    }
+
+    /*************************************************************************/
     inline int last_literal_block_distance(void) const noexcept {
         return m_state.last_literal_block_distance;
     }
