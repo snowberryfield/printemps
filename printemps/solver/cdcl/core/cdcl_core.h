@@ -216,114 +216,117 @@ class CDCLCore {
             std::vector<int> analyze_stack;
             std::vector<int> analyze_toclear;
 
-        auto is_redundant = [&](const int a_var_index) -> bool {
-            analyze_stack.clear();
-            analyze_toclear.clear();
-            analyze_stack.push_back(a_var_index);
+            auto is_redundant = [&](const int a_var_index) -> bool {
+                analyze_stack.clear();
+                analyze_toclear.clear();
+                analyze_stack.push_back(a_var_index);
 
-            int           steps     = 0;
-            constexpr int MAX_STEPS = 50;
+                int           steps     = 0;
+                constexpr int MAX_STEPS = 50;
 
-            while (!analyze_stack.empty()) {
-                if (++steps > MAX_STEPS) {
-                    for (const int cleared_var : analyze_toclear) {
-                        m_state_manager.mark_seen(cleared_var, 0);
-                    }
-                    return false;
-                }
-
-                const int curr_var = analyze_stack.back();
-                analyze_stack.pop_back();
-
-                const auto reason = MODEL.variable(curr_var).reason_constraint;
-                if (reason.type == CDCLConstraintType::NONE) {
-                    for (const int cleared_var : analyze_toclear) {
-                        m_state_manager.mark_seen(cleared_var, 0);
-                    }
-                    return false;
-                }
-
-                const auto& pos_vars = MODEL.positive_variable_indices(reason);
-                for (const int ant_var : pos_vars) {
-                    if (ant_var == curr_var) {
-                        continue;
-                    }
-                    const auto& ant_v = MODEL.variable(ant_var);
-                    if (ant_v.value != 0 || ant_v.decision_level == 0) {
-                        continue;
-                    }
-                    if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
-                        m_state_manager.is_seen(ant_var, -1)) {
-                        continue;
-                    }
-                    if (ant_v.reason_constraint.type ==
-                        CDCLConstraintType::NONE) {
+                while (!analyze_stack.empty()) {
+                    if (++steps > MAX_STEPS) {
                         for (const int cleared_var : analyze_toclear) {
                             m_state_manager.mark_seen(cleared_var, 0);
                         }
                         return false;
                     }
 
-                    m_state_manager.mark_seen(ant_var, -1);
-                    analyze_toclear.push_back(ant_var);
-                    analyze_stack.push_back(ant_var);
-                }
+                    const int curr_var = analyze_stack.back();
+                    analyze_stack.pop_back();
 
-                const auto& neg_vars = MODEL.negative_variable_indices(reason);
-                for (const int ant_var : neg_vars) {
-                    if (ant_var == curr_var) {
-                        continue;
-                    }
-                    const auto& ant_v = MODEL.variable(ant_var);
-                    if (ant_v.value != 1 || ant_v.decision_level == 0) {
-                        continue;
-                    }
-                    if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
-                        m_state_manager.is_seen(ant_var, -1)) {
-                        continue;
-                    }
-                    if (ant_v.reason_constraint.type ==
-                        CDCLConstraintType::NONE) {
+                    const auto reason =
+                        MODEL.variable(curr_var).reason_constraint;
+                    if (reason.type == CDCLConstraintType::NONE) {
                         for (const int cleared_var : analyze_toclear) {
                             m_state_manager.mark_seen(cleared_var, 0);
                         }
                         return false;
                     }
 
-                    m_state_manager.mark_seen(ant_var, -1);
-                    analyze_toclear.push_back(ant_var);
-                    analyze_stack.push_back(ant_var);
-                }
-            }
+                    const auto& pos_vars =
+                        MODEL.positive_variable_indices(reason);
+                    for (const int ant_var : pos_vars) {
+                        if (ant_var == curr_var) {
+                            continue;
+                        }
+                        const auto& ant_v = MODEL.variable(ant_var);
+                        if (ant_v.value != 0 || ant_v.decision_level == 0) {
+                            continue;
+                        }
+                        if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
+                            m_state_manager.is_seen(ant_var, -1)) {
+                            continue;
+                        }
+                        if (ant_v.reason_constraint.type ==
+                            CDCLConstraintType::NONE) {
+                            for (const int cleared_var : analyze_toclear) {
+                                m_state_manager.mark_seen(cleared_var, 0);
+                            }
+                            return false;
+                        }
 
-            for (const int cleared_var : analyze_toclear) {
-                m_state_manager.mark_seen(cleared_var, 0);
-            }
-            return true;
-        };
+                        m_state_manager.mark_seen(ant_var, -1);
+                        analyze_toclear.push_back(ant_var);
+                        analyze_stack.push_back(ant_var);
+                    }
 
-        auto filter_redundant = [&](std::vector<int>& vars) {
-            size_t write_idx = 0;
-            for (size_t read_idx = 0; read_idx < vars.size(); ++read_idx) {
-                const int var = vars[read_idx];
-                if (MODEL.variable(var).reason_constraint.type ==
-                    CDCLConstraintType::NONE) {
-                    vars[write_idx++] = var;
-                    continue;
-                }
-                m_state_manager.mark_seen(var, 0);
-                if (is_redundant(var)) {
-                    // Redundant: leave marked as 0
-                } else {
-                    m_state_manager.mark_seen(var, CONFLICT_ID);
-                    vars[write_idx++] = var;
-                }
-            }
-            vars.resize(write_idx);
-        };
+                    const auto& neg_vars =
+                        MODEL.negative_variable_indices(reason);
+                    for (const int ant_var : neg_vars) {
+                        if (ant_var == curr_var) {
+                            continue;
+                        }
+                        const auto& ant_v = MODEL.variable(ant_var);
+                        if (ant_v.value != 1 || ant_v.decision_level == 0) {
+                            continue;
+                        }
+                        if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
+                            m_state_manager.is_seen(ant_var, -1)) {
+                            continue;
+                        }
+                        if (ant_v.reason_constraint.type ==
+                            CDCLConstraintType::NONE) {
+                            for (const int cleared_var : analyze_toclear) {
+                                m_state_manager.mark_seen(cleared_var, 0);
+                            }
+                            return false;
+                        }
 
-        filter_redundant(learned_positive_variable_indices);
-        filter_redundant(learned_negative_variable_indices);
+                        m_state_manager.mark_seen(ant_var, -1);
+                        analyze_toclear.push_back(ant_var);
+                        analyze_stack.push_back(ant_var);
+                    }
+                }
+
+                for (const int cleared_var : analyze_toclear) {
+                    m_state_manager.mark_seen(cleared_var, 0);
+                }
+                return true;
+            };
+
+            auto filter_redundant = [&](std::vector<int>& vars) {
+                size_t write_idx = 0;
+                for (size_t read_idx = 0; read_idx < vars.size(); ++read_idx) {
+                    const int var = vars[read_idx];
+                    if (MODEL.variable(var).reason_constraint.type ==
+                        CDCLConstraintType::NONE) {
+                        vars[write_idx++] = var;
+                        continue;
+                    }
+                    m_state_manager.mark_seen(var, 0);
+                    if (is_redundant(var)) {
+                        // Redundant: leave marked as 0
+                    } else {
+                        m_state_manager.mark_seen(var, CONFLICT_ID);
+                        vars[write_idx++] = var;
+                    }
+                }
+                vars.resize(write_idx);
+            };
+
+            filter_redundant(learned_positive_variable_indices);
+            filter_redundant(learned_negative_variable_indices);
         }
 
         const int UNIQUE_IMPLICATION_POINT_CURRENT_VALUE =

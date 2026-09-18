@@ -145,7 +145,8 @@ class CDCLController
         const option::Option& a_BASE_OPTION, const int a_NUM_THREADS) const {
         std::vector<option::Option> portfolio(a_NUM_THREADS, a_BASE_OPTION);
         for (int t = 0; t < a_NUM_THREADS; ++t) {
-            portfolio[t].cdcl.seed = a_BASE_OPTION.cdcl.seed + t;
+            portfolio[t].output.verbose = option::verbose::Off;
+            portfolio[t].cdcl.seed      = a_BASE_OPTION.cdcl.seed + t;
             switch (t) {
                 case 0:
                     // Thread 0: Balanced standard config (Clause minimization ON, default decay, default restart)
@@ -274,6 +275,7 @@ class CDCLController
         }();
 
         core::CDCLCoreResult cdcl_result;
+        int                  winning_thread_id = -1;
 
         if (NUM_THREADS <= 1) {
             core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
@@ -327,8 +329,9 @@ class CDCLController
                     if (!has_solution || res.termination_status ==
                                              core::CDCLCoreTerminationStatus::
                                                  FEASIBLE) {
-                        cdcl_result  = res;
-                        has_solution = true;
+                        cdcl_result       = res;
+                        has_solution      = true;
+                        winning_thread_id = THREAD_ID;
                     }
                 }
             }
@@ -402,6 +405,16 @@ class CDCLController
                     cdcl_result.termination_status) +
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
+
+        if (NUM_THREADS > 1 && winning_thread_id >= 0) {
+            utility::print_info(
+                " -- Solved by thread " + std::to_string(winning_thread_id) +
+                    " (" + std::to_string(cdcl_result.number_of_conflicts) +
+                    " conflicts, " +
+                    std::to_string(cdcl_result.number_of_decisions) +
+                    " decisions).",
+                this->m_option.output.verbose >= option::verbose::Outer);
+        }
 
         this->m_time_keeper.clock();
         this->print_total_elapsed_time(  //
