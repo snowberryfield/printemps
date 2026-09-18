@@ -386,5 +386,60 @@ TEST(TestCDCLCore, cdcl_best_intermediate_solution_test) {
     EXPECT_NEAR(0.4, augmented_score.total_violation, 1e-6);
 }
 
+/*****************************************************************************/
+TEST(TestCDCLCore, cdcl_selection_constraint_satisfaction_test) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 4, 0, 1);
+    auto&                     y = model.create_variables("y", 3, 0, 1);
+
+    // Two selection constraints
+    model.create_constraint("sel_x", x.selection());
+    model.create_constraint("sel_y", y.selection());
+
+    // Conflicting constraint to ensure intermediate solutions are tested
+    // 3*x(0) + 3*y(0) <= 2 and 3*x(0) + 3*y(0) >= 4 (infeasible)
+    model.create_constraint("c1", 3 * x(0) + 3 * y(0) <= 2);
+    model.create_constraint("c2", 3 * x(0) + 3 * y(0) >= 4);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = false;
+    opt.pdlp.is_enabled                = false;
+    opt.lagrange_dual.is_enabled       = false;
+    opt.local_search.is_enabled        = false;
+    opt.tabu_search.iteration_max      = 0;
+    opt.cdcl.is_enabled                = true;
+    opt.output.verbose                 = option::verbose::Off;
+
+    solver::Solver<int, double> solver(&model, opt);
+    auto                        result = solver.solve();
+
+    const auto& cdcl_res = solver.cdcl_controller().result().core;
+    EXPECT_EQ(cdcl_res.termination_status,
+              CDCLCoreTerminationStatus::INFEASIBLE);
+
+    // Best intermediate solution must be tracked
+    EXPECT_EQ(7u, cdcl_res.best_solution.size());
+
+    // Selection constraints must be strictly satisfied in best_solution:
+    // sum(x_i) == 1
+    int x_sum = cdcl_res.best_solution[0] + cdcl_res.best_solution[1] +
+                cdcl_res.best_solution[2] + cdcl_res.best_solution[3];
+    EXPECT_EQ(x_sum, 1);
+
+    // sum(y_i) == 1
+    int y_sum = cdcl_res.best_solution[4] + cdcl_res.best_solution[5] +
+                cdcl_res.best_solution[6];
+    EXPECT_EQ(y_sum, 1);
+
+    // Verification must succeed without throw (a_IS_ENABLED_CORRECTION = false)
+    EXPECT_NO_THROW(model.verifier().verify_and_correct(false, false));
+
+    // Verify selected_variable_ptr is properly set for each selection
+    for (const auto& selection : model.selections()) {
+        EXPECT_NE(selection.selected_variable_ptr, nullptr);
+        EXPECT_EQ(selection.selected_variable_ptr->value(), 1);
+    }
+}
+
 }  // namespace
 

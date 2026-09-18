@@ -366,6 +366,16 @@ class CDCLController
         if (!candidate_solution.empty()) {
             this->m_model_ptr->matrix_model_handler().import_solution(
                 candidate_solution);
+
+            for (auto&& selection : this->m_model_ptr->selections()) {
+                for (auto* var_ptr : selection.variable_ptrs) {
+                    if (var_ptr->value() == 1) {
+                        var_ptr->select();
+                        break;
+                    }
+                }
+            }
+
             this->m_model_ptr->updater()
                 .update_dependent_variables_and_disabled_constraints();
             this->m_model_ptr->updater().update();

@@ -6,6 +6,7 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CORE_CDCL_MODEL_H__
 #define PRINTEMPS_SOLVER_CDCL_CORE_CDCL_MODEL_H__
 
+#include <unordered_map>
 #include "cdcl_variable.h"
 #include "cardinality_constraint.h"
 #include "pseudo_boolean_constraint.h"
@@ -19,6 +20,7 @@ class CDCLModel {
     matrix_model::MatrixModel* m_instance_ptr;
 
     std::vector<CDCLVariable> m_variables;
+    std::vector<std::vector<int>> m_selection_variable_indices;
 
     std::vector<PseudoBooleanConstraint>  m_pseudo_boolean_constraints;
     std::vector<CardinalityConstraint>    m_cardinality_constraints;
@@ -240,6 +242,7 @@ class CDCLModel {
         m_cardinality_propagation_queue.clear();
         m_in_cardinality_propagation_queue.clear();
 
+        m_selection_variable_indices.clear();
         m_initial_activities.clear();
     }
 
@@ -249,6 +252,7 @@ class CDCLModel {
         m_instance_ptr = a_instance_ptr;
 
         this->setup_variables();
+        this->setup_selections();
         this->setup_constraints();
         this->setup_initial_propagation_queue();
         this->setup_initial_activities();
@@ -265,6 +269,31 @@ class CDCLModel {
         m_variable_to_pseudo_boolean_positive_constraints.assign(N, {});
         m_variable_to_pseudo_boolean_negative_constraints.assign(N, {});
         m_watches.assign(2 * N, {});
+    }
+
+    /*************************************************************************/
+    inline void setup_selections(void) {
+        m_selection_variable_indices.clear();
+        if (m_instance_ptr == nullptr ||
+            m_instance_ptr->variable_index_map.empty()) {
+            return;
+        }
+        std::unordered_map<void*, std::vector<int>> selection_map;
+        const int N = static_cast<int>(m_variables.size());
+        for (int i = 0; i < N; ++i) {
+            if (!m_instance_ptr->variable_index_map.contains_second(i)) {
+                continue;
+            }
+            auto* var_ptr = m_instance_ptr->variable_index_map.reverse_at(i);
+            if (var_ptr != nullptr && var_ptr->selection_ptr() != nullptr) {
+                selection_map[static_cast<void*>(var_ptr->selection_ptr())]
+                    .push_back(i);
+            }
+        }
+        m_selection_variable_indices.reserve(selection_map.size());
+        for (auto& [ptr, indices] : selection_map) {
+            m_selection_variable_indices.push_back(std::move(indices));
+        }
     }
 
     /*************************************************************************/
@@ -500,6 +529,57 @@ class CDCLModel {
                 // If packing is present (with or without must-cover), prefer
                 // phase = 0 to avoid immediate conflict on packing constraints.
                 m_variables[i].phase = 0;
+            }
+        }
+
+        // Ensure that each Selection constraint has exactly one variable with phase = 1
+        for (const auto& sel_indices : m_selection_variable_indices) {
+            if (sel_indices.empty()) {
+                continue;
+            }
+            int selected_idx = -1;
+            // 1. Try to find if one variable was already designated as selected_variable_ptr
+            for (int var_idx : sel_indices) {
+                if (m_instance_ptr != nullptr &&
+                    m_instance_ptr->variable_index_map.contains_second(
+                        var_idx)) {
+                    auto* var_ptr =
+                        m_instance_ptr->variable_index_map.reverse_at(var_idx);
+                    if (var_ptr != nullptr &&
+                        var_ptr->selection_ptr() != nullptr &&
+                        var_ptr->selection_ptr()->selected_variable_ptr ==
+                            var_ptr) {
+                        selected_idx = var_idx;
+                        break;
+                    }
+                }
+            }
+            // 2. If not found, check variable_initial_solution
+            if (selected_idx == -1 &&
+                m_instance_ptr->variable_initial_solution.size() ==
+                    static_cast<std::size_t>(NUMBER_OF_VARIABLES)) {
+                for (int var_idx : sel_indices) {
+                    if (m_instance_ptr->variable_initial_solution[var_idx] ==
+                        1) {
+                        selected_idx = var_idx;
+                        break;
+                    }
+                }
+            }
+            // 3. If still not found, pick variable with highest activity
+            if (selected_idx == -1) {
+                selected_idx = sel_indices.front();
+                for (int var_idx : sel_indices) {
+                    if (!m_initial_activities.empty() &&
+                        m_initial_activities[var_idx] >
+                            m_initial_activities[selected_idx]) {
+                        selected_idx = var_idx;
+                    }
+                }
+            }
+            // Set phase = 1 for selected_idx, phase = 0 for others
+            for (int var_idx : sel_indices) {
+                m_variables[var_idx].phase = (var_idx == selected_idx) ? 1 : 0;
             }
         }
     }
@@ -1040,8 +1120,18 @@ class CDCLModel {
 
     /*************************************************************************/
     inline bool is_selection_variable(const int a_INDEX) const noexcept {
+        if (m_instance_ptr == nullptr ||
+            !m_instance_ptr->variable_index_map.contains_second(a_INDEX)) {
+            return false;
+        }
         return (m_instance_ptr->variable_index_map.reverse_at(a_INDEX)
                     ->selection_ptr() != nullptr);
+    }
+
+    /*************************************************************************/
+    inline const std::vector<std::vector<int>>& selection_variable_indices(
+        void) const noexcept {
+        return m_selection_variable_indices;
     }
 
     /*************************************************************************/
@@ -1052,6 +1142,79 @@ class CDCLModel {
             solution[i] = m_variables[i].is_assigned() ? m_variables[i].value
                                                        : m_variables[i].phase;
         }
+
+        // Strictly enforce that each Selection constraint has exactly one variable = 1
+        const bool HAS_ACT = !m_initial_activities.empty();
+        for (const auto& sel_indices : m_selection_variable_indices) {
+            if (sel_indices.empty()) {
+                continue;
+            }
+            int count = 0;
+            for (int var_idx : sel_indices) {
+                if (solution[var_idx] == 1) {
+                    count++;
+                }
+            }
+            if (count == 1) {
+                // Exactly one variable is 1, perfect!
+                continue;
+            }
+
+            int best_var_idx = -1;
+            if (count > 1) {
+                // Multiple variables are 1: pick the best one among those currently 1
+                for (int var_idx : sel_indices) {
+                    if (solution[var_idx] != 1) {
+                        continue;
+                    }
+                    if (best_var_idx == -1) {
+                        best_var_idx = var_idx;
+                        continue;
+                    }
+                    const auto& cur  = m_variables[var_idx];
+                    const auto& best = m_variables[best_var_idx];
+                    if (cur.is_assigned() && !best.is_assigned()) {
+                        best_var_idx = var_idx;
+                    } else if (cur.is_assigned() && best.is_assigned()) {
+                        if (cur.decision_level == 0 &&
+                            best.decision_level > 0) {
+                            best_var_idx = var_idx;
+                        } else if (best.decision_level != 0 &&
+                                   cur.decision_level > best.decision_level) {
+                            best_var_idx = var_idx;
+                        } else if (cur.decision_level == best.decision_level &&
+                                   HAS_ACT &&
+                                   m_initial_activities[var_idx] >
+                                       m_initial_activities[best_var_idx]) {
+                            best_var_idx = var_idx;
+                        }
+                    } else if (!cur.is_assigned() && !best.is_assigned()) {
+                        if (HAS_ACT && m_initial_activities[var_idx] >
+                                           m_initial_activities[best_var_idx]) {
+                            best_var_idx = var_idx;
+                        }
+                    }
+                }
+            } else {
+                // count == 0: no variable is 1 in this selection!
+                // Pick the best variable in sel_indices to set to 1
+                for (int var_idx : sel_indices) {
+                    if (best_var_idx == -1) {
+                        best_var_idx = var_idx;
+                        continue;
+                    }
+                    if (HAS_ACT && m_initial_activities[var_idx] >
+                                       m_initial_activities[best_var_idx]) {
+                        best_var_idx = var_idx;
+                    }
+                }
+            }
+
+            for (int var_idx : sel_indices) {
+                solution[var_idx] = (var_idx == best_var_idx) ? 1 : 0;
+            }
+        }
+
         return solution;
     }
 
