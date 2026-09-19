@@ -87,24 +87,65 @@ TEST_F(TestProblemSizeReducerSpecial, remove_redundant_set_variables) {
 
 /*****************************************************************************/
 TEST_F(TestProblemSizeReducerSpecial, remove_redundant_set_constraints) {
-    model::Model<int, double> model;
-    auto&                     x = model.create_variables("x", 10, 0, 1);
+    {
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
 
-    model.create_constraint("g_0", x(0) + x(1) == 1);
-    model.create_constraint("g_1", x.selection());
+        model.create_constraint("g_0", x(0) + x(1) == 1);
+        model.create_constraint("g_1", x.selection());
 
-    model.builder().update_derived_components();
+        model.builder().update_derived_components();
 
-    preprocess::ProblemSizeReducerSpecial<int, double>  //
-         problem_size_reducer_special(&model);
-    auto result =
-        problem_size_reducer_special.remove_redundant_set_constraints(false);
-    EXPECT_EQ(1, result.number_of_fixed_variables);
-    EXPECT_EQ(8, result.number_of_disabled_constraints);
-    EXPECT_FALSE(x(0).is_fixed());
-    EXPECT_FALSE(x(1).is_fixed());
-    EXPECT_TRUE(x(2).is_fixed());
-    EXPECT_TRUE(x(9).is_fixed());
+        preprocess::ProblemSizeReducerSpecial<int, double>  //
+            problem_size_reducer_special(&model);
+        auto result =
+            problem_size_reducer_special.remove_redundant_set_constraints(false);
+        EXPECT_EQ(8, result.number_of_fixed_variables);
+        EXPECT_EQ(1, result.number_of_disabled_constraints);
+        EXPECT_FALSE(x(0).is_fixed());
+        EXPECT_FALSE(x(1).is_fixed());
+        EXPECT_TRUE(x(2).is_fixed());
+        EXPECT_TRUE(x(9).is_fixed());
+    }
+
+    {
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
+
+        model.create_constraint("g_0", x(0) + x(1) == 1);
+        model.create_constraint("g_1", x.selection());
+
+        x(2).fix_by(0);
+
+        model.builder().update_derived_components();
+
+        preprocess::ProblemSizeReducerSpecial<int, double>  //
+            problem_size_reducer_special(&model);
+        auto result =
+            problem_size_reducer_special.remove_redundant_set_constraints(false);
+        EXPECT_EQ(7, result.number_of_fixed_variables);
+        EXPECT_EQ(1, result.number_of_disabled_constraints);
+        EXPECT_FALSE(x(0).is_fixed());
+        EXPECT_FALSE(x(1).is_fixed());
+        EXPECT_TRUE(x(2).is_fixed());
+        EXPECT_TRUE(x(9).is_fixed());
+    }
+
+    {
+        model::Model<int, double> model;
+        auto&                     x = model.create_variables("x", 10, 0, 1);
+
+        model.create_constraint("g_0", x(0) + x(1) == 1);
+
+        model.builder().update_derived_components();
+
+        preprocess::ProblemSizeReducerSpecial<int, double>  //
+            problem_size_reducer_special(&model);
+        auto result =
+            problem_size_reducer_special.remove_redundant_set_constraints(false);
+        EXPECT_EQ(0, result.number_of_fixed_variables);
+        EXPECT_EQ(0, result.number_of_disabled_constraints);
+    }
 }
 
 /*****************************************************************************/

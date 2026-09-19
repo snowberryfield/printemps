@@ -237,6 +237,10 @@ class ProblemSizeReducerSpecial {
             }
         }
 
+        if (constraint_ptrs.size() <= 1) {
+            return ProblemSizeReducerResult(0, 0, 0);
+        }
+
         int number_of_disabled_constraints = 0;
         int number_of_fixed_variables      = 0;
 
@@ -280,14 +284,17 @@ class ProblemSizeReducerSpecial {
                     for (const auto &variable_ptr : variable_ptr_sets[i]) {
                         if (variable_ptr_sets[j].find(variable_ptr) ==
                             variable_ptr_sets[j].end()) {
-                            variable_ptr->fix_by(0);
-                            utility::print_message(  //
-                                "The value of redundant variable " +
-                                    variable_ptr->name() + " in constraint " +
-                                    constraint_ptrs[i]->name() +
-                                    " was fixed at 0.",
-                                a_IS_ENABLED_PRINT);
-                            number_of_fixed_variables++;
+                            if (!variable_ptr->is_fixed()) {
+                                variable_ptr->fix_by(0);
+                                utility::print_message(  //
+                                    "The value of redundant variable " +
+                                        variable_ptr->name() +
+                                        " in constraint " +
+                                        constraint_ptrs[i]->name() +
+                                        " was fixed at 0.",
+                                    a_IS_ENABLED_PRINT);
+                                number_of_fixed_variables++;
+                            }
                         }
                     }
 
@@ -298,8 +305,8 @@ class ProblemSizeReducerSpecial {
         }
 
         utility::print_message("Done.", a_IS_ENABLED_PRINT);
-        return ProblemSizeReducerResult(number_of_disabled_constraints,
-                                        number_of_fixed_variables, 0);
+        return ProblemSizeReducerResult(number_of_fixed_variables,
+                                        number_of_disabled_constraints, 0);
     }
 
     /*************************************************************************/
