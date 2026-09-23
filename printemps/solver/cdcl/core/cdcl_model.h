@@ -6,7 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CORE_CDCL_MODEL_H__
 #define PRINTEMPS_SOLVER_CDCL_CORE_CDCL_MODEL_H__
 
-#include <unordered_map>
 #include "cdcl_variable.h"
 #include "cardinality_constraint.h"
 #include "pseudo_boolean_constraint.h"

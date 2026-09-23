@@ -7,9 +7,6 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
 #define PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
 
-#include <atomic>
-#include <cmath>
-#include <mutex>
 #include "../../abstract_solver_controller.h"
 #include "../core/cdcl_core.h"
 #include "cdcl_controller_result.h"

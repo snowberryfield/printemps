@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_TERMINATION_STATUS_H__
 #define PRINTEMPS_SOLVER_TERMINATION_STATUS_H__
 
-#include <string>
-#include <unordered_map>
-
 namespace printemps::solver {
 /*****************************************************************************/
 enum class TerminationStatus {

@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_BIT_OPERATION_H__
 #define PRINTEMPS_UTILITY_BIT_OPERATION_H__
 
-#include <cstdint>
-
 #if defined(_MSC_VER)
 #include <intrin.h>
 #endif

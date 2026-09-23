@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_BIT_FLAGS_H__
 #define PRINTEMPS_NEIGHBORHOOD_BIT_FLAGS_H__
 
-#include <cstdint>
-#include <vector>
-
 namespace printemps::neighborhood {
 /*****************************************************************************/
 class BitFlags {

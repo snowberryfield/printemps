@@ -6,10 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CLAUSE_H__
 #define PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CLAUSE_H__
 
-#include <vector>
-#include <cstdint>
-#include <algorithm>
-
 namespace printemps::solver::cdcl::core {
 
 /*****************************************************************************/

@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MATRIX_MODEL_MATRIX_MODEL_H__
 #define PRINTEMPS_MATRIX_MODEL_MATRIX_MODEL_H__
 
-#include <vector>
-#include <utility>
 #include "utility/sparse/sparse.h"
 #include "utility/bidirectional_map.h"
 #include "model_handler/reference.h"

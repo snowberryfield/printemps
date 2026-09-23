@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CORE_STATE_MANAGER_H__
 #define PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CORE_STATE_MANAGER_H__
 
-#include <random>
-
 #include "cdcl_core_constants.h"
 #include "cdcl_core_termination_status.h"
 #include "cdcl_core_state.h"

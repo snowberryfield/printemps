@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_TOPOLOGICAL_SORTER_H__
 #define PRINTEMPS_UTILITY_TOPOLOGICAL_SORTER_H__
 
-#include <vector>
-#include <unordered_map>
-
 namespace printemps::utility {
 /*****************************************************************************/
 template <class T>

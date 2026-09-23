@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_MULTINOMIAL_H__
 #define PRINTEMPS_MODEL_COMPONENT_CONSTRAINT_MULTINOMIAL_H__
 
-#include <array>
-
 namespace printemps::model_component {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>

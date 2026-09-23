@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_OPTION_CDCL_RESTART_MODE_H__
 #define PRINTEMPS_OPTION_CDCL_RESTART_MODE_H__
 
-#include <string>
-#include <unordered_map>
-
 namespace printemps::option::cdcl_restart_mode {
 /*****************************************************************************/
 enum CDCLRestartMode : int {  //

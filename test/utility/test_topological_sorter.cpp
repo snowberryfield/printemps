@@ -4,10 +4,6 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <algorithm>
-#include <string>
-#include <vector>
-
 #include <printemps.h>
 
 namespace {

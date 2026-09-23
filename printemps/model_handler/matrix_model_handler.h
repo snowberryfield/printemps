@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_MODEL_HANDLER_MATRIX_MODEL_HANDLER_H__
 #define PRINTEMPS_MODEL_HANDLER_MATRIX_MODEL_HANDLER_H__
 
-#include <map>
-#include <cmath>
-#include <stdexcept>
 #include "matrix_model/matrix_model.h"
 #include "utility/string_utility.h"
 

@@ -4,8 +4,6 @@
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
 #include <gtest/gtest.h>
-#include <string>
-
 #include <printemps.h>
 
 namespace {

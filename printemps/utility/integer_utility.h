@@ -6,8 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_INTEGER_UTILITY_H__
 #define PRINTEMPS_UTILITY_INTEGER_UTILITY_H__
 
-#include <cmath>
-
 namespace printemps::utility {
 /******************************************************************************/
 template <class T>
