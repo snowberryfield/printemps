@@ -36,6 +36,12 @@ struct CDCLOptionConstant {
     static constexpr double DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE   = 0.85;
     static constexpr bool   DEFAULT_IS_ENABLED_PHASE_SAVING        = true;
     static constexpr bool   DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION = true;
+
+    static constexpr double DEFAULT_RANDOM_VARIABLE_SELECTION_RATE = 0.0;
+    static constexpr double DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO   = 0.0;
+    static constexpr double DEFAULT_INITIAL_PHASE_PERTURBATION_RATE = 0.0;
+
+    static constexpr bool DEFAULT_IS_ENABLED_EVALUATE_FULL_SOLUTIONS = false;
 };
 
 /*****************************************************************************/
@@ -63,6 +69,12 @@ struct CDCLOption {
     double variable_activity_decay_rate;
     bool   is_enabled_phase_saving;
     bool   is_enabled_clause_minimization;
+
+    double random_variable_selection_rate;
+    double initial_activity_noise_ratio;
+    double initial_phase_perturbation_rate;
+
+    bool is_enabled_evaluate_full_solutions;
 
     /*************************************************************************/
     CDCLOption(void) {
@@ -112,6 +124,16 @@ struct CDCLOption {
             CDCLOptionConstant::DEFAULT_IS_ENABLED_PHASE_SAVING;
         this->is_enabled_clause_minimization =
             CDCLOptionConstant::DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION;
+
+        this->random_variable_selection_rate =
+            CDCLOptionConstant::DEFAULT_RANDOM_VARIABLE_SELECTION_RATE;
+        this->initial_activity_noise_ratio =
+            CDCLOptionConstant::DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO;
+        this->initial_phase_perturbation_rate =
+            CDCLOptionConstant::DEFAULT_INITIAL_PHASE_PERTURBATION_RATE;
+
+        this->is_enabled_evaluate_full_solutions =
+            CDCLOptionConstant::DEFAULT_IS_ENABLED_EVALUATE_FULL_SOLUTIONS;
     }
 
     /*************************************************************************/
@@ -217,6 +239,26 @@ struct CDCLOption {
             " -- cdcl.is_enabled_clause_minimization: " +  //
             utility::to_true_or_false(                      //
                 this->is_enabled_clause_minimization));
+
+        utility::print(                                         //
+            " -- cdcl.random_variable_selection_rate: " +       //
+            utility::to_string(                                 //
+                this->random_variable_selection_rate, "%f"));
+
+        utility::print(                                      //
+            " -- cdcl.initial_activity_noise_ratio: " +      //
+            utility::to_string(                              //
+                this->initial_activity_noise_ratio, "%f"));
+
+        utility::print(                                          //
+            " -- cdcl.initial_phase_perturbation_rate: " +       //
+            utility::to_string(                                  //
+                this->initial_phase_perturbation_rate, "%f"));
+
+        utility::print(                                          //
+            " -- cdcl.is_enabled_evaluate_full_solutions: " +    //
+            utility::to_true_or_false(                           //
+                this->is_enabled_evaluate_full_solutions));
     }
 
     /**************************************************************************/
@@ -259,6 +301,16 @@ struct CDCLOption {
                   a_OBJECT);
         read_json(&this->is_enabled_clause_minimization,
                   "is_enabled_clause_minimization", a_OBJECT);
+
+        read_json(&this->random_variable_selection_rate,
+                  "random_variable_selection_rate", a_OBJECT);
+        read_json(&this->initial_activity_noise_ratio,
+                  "initial_activity_noise_ratio", a_OBJECT);
+        read_json(&this->initial_phase_perturbation_rate,
+                  "initial_phase_perturbation_rate", a_OBJECT);
+
+        read_json(&this->is_enabled_evaluate_full_solutions,
+                  "is_enabled_evaluate_full_solutions", a_OBJECT);
     }
 
     /**************************************************************************/
@@ -301,6 +353,16 @@ struct CDCLOption {
                          this->is_enabled_phase_saving);
         obj.emplace_back("is_enabled_clause_minimization",
                          this->is_enabled_clause_minimization);
+
+        obj.emplace_back("random_variable_selection_rate",
+                         this->random_variable_selection_rate);
+        obj.emplace_back("initial_activity_noise_ratio",
+                         this->initial_activity_noise_ratio);
+        obj.emplace_back("initial_phase_perturbation_rate",
+                         this->initial_phase_perturbation_rate);
+
+        obj.emplace_back("is_enabled_evaluate_full_solutions",
+                         this->is_enabled_evaluate_full_solutions);
 
         return obj;
     }

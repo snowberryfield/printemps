@@ -42,6 +42,7 @@ class CDCLCore {
     matrix_model::MatrixModel*           m_instance_ptr;
     std::optional<std::function<bool()>> m_check_interrupt;
     option::Option                       m_option;
+    std::mt19937                         m_random_engine;
 
     CDCLCoreStateManager m_state_manager;
     CDCLCoreResult       m_result;
@@ -52,7 +53,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline void check_and_update_best_solution(void) {
-        auto         sol       = m_state_manager.model().extract_current_solution();
+        auto         sol = m_state_manager.model().extract_current_solution();
         const double violation =
             m_state_manager.model().compute_total_violation(sol);
         if (violation < m_best_total_violation) {
@@ -462,6 +463,18 @@ class CDCLCore {
 
     /*************************************************************************/
     inline int find_branching_variable_index(void) {
+        if (m_option.cdcl.random_variable_selection_rate > 0.0) {
+            std::uniform_real_distribution<double> dist_real(0.0, 1.0);
+            if (dist_real(m_random_engine) <
+                m_option.cdcl.random_variable_selection_rate) {
+                const int RANDOM_VARIABLE_INDEX =
+                    m_state_manager.pop_random_unassigned_variable(
+                        m_random_engine);
+                if (RANDOM_VARIABLE_INDEX != CDCLCoreConstant::NO_VARIABLE) {
+                    return RANDOM_VARIABLE_INDEX;
+                }
+            }
+        }
         return m_state_manager.pop_max_unassigned_variable();
     }
 
@@ -537,7 +550,9 @@ class CDCLCore {
 
     /*************************************************************************/
     inline void restart(void) {
-        this->check_and_update_best_solution();
+        if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
+            this->check_and_update_best_solution();
+        }
         m_state_manager.on_restart();
         this->backjump(0);
     }
@@ -827,6 +842,7 @@ class CDCLCore {
         m_instance_ptr    = a_instance_ptr;
         m_check_interrupt = a_CHECK_INTERRUPT;
         m_option          = a_OPTION;
+        m_random_engine.seed(static_cast<unsigned int>(m_option.cdcl.seed));
         m_state_manager.setup(m_instance_ptr, m_option);
     }
 
@@ -842,7 +858,9 @@ class CDCLCore {
 
         this->print_table_header(IS_ENABLED_PRINT_TABLE);
         this->print_table_initial(IS_ENABLED_PRINT_TABLE);
-        this->check_and_update_best_solution();
+        if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
+            this->check_and_update_best_solution();
+        }
 
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
@@ -878,11 +896,13 @@ class CDCLCore {
             CDCLIterationEventType event_type = CDCLIterationEventType::None;
 
             if (!this->propagate()) {
-                const int current_trail_size =
-                    static_cast<int>(m_state_manager.trail().size());
-                if (current_trail_size > m_max_trail_size) {
-                    m_max_trail_size = current_trail_size;
-                    this->check_and_update_best_solution();
+                if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
+                    const int CURRENT_TRAIL_SIZE =
+                        static_cast<int>(m_state_manager.trail().size());
+                    if (CURRENT_TRAIL_SIZE > m_max_trail_size) {
+                        m_max_trail_size = CURRENT_TRAIL_SIZE;
+                        this->check_and_update_best_solution();
+                    }
                 }
 
                 const auto [IS_CONTINUABLE, CONFLICT_EVENT_TYPE] =
@@ -913,8 +933,9 @@ class CDCLCore {
                                IS_ENABLED_PRINT_TABLE);
         this->print_table_footer(IS_ENABLED_PRINT_TABLE);
 
-        if (m_state_manager.termination_status() !=
-            CDCLCoreTerminationStatus::FEASIBLE) {
+        if (m_option.cdcl.is_enabled_evaluate_full_solutions &&
+            m_state_manager.termination_status() !=
+                CDCLCoreTerminationStatus::FEASIBLE) {
             this->check_and_update_best_solution();
         }
 

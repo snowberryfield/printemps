@@ -356,9 +356,10 @@ TEST(TestCDCLCore, cdcl_best_intermediate_solution_test) {
     opt.pdlp.is_enabled                = false;
     opt.lagrange_dual.is_enabled       = false;
     opt.local_search.is_enabled        = false;
-    opt.tabu_search.iteration_max      = 0;
-    opt.cdcl.is_enabled                = true;
-    opt.output.verbose                 = option::verbose::Off;
+    opt.tabu_search.iteration_max                 = 0;
+    opt.cdcl.is_enabled                           = true;
+    opt.cdcl.is_enabled_evaluate_full_solutions   = true;
+    opt.output.verbose                            = option::verbose::Off;
 
     solver::Solver<int, double> solver(&model, opt);
     auto                        result = solver.solve();
@@ -387,6 +388,41 @@ TEST(TestCDCLCore, cdcl_best_intermediate_solution_test) {
 }
 
 /*****************************************************************************/
+TEST(TestCDCLCore, cdcl_full_solution_evaluation_disabled_by_default_test) {
+    model::Model<int, double> model;
+    auto&                     x = model.create_variables("x", 2, 0, 1);
+    model.create_constraint("c1", 0.2 * x(0) + 0.3 * x(1) <= 0.1);
+    model.create_constraint("c2", 0.5 * x(0) + 0.5 * x(1) >= 0.8);
+
+    option::Option opt;
+    opt.preprocess.is_enabled_presolve = false;
+    opt.pdlp.is_enabled                = false;
+    opt.lagrange_dual.is_enabled       = false;
+    opt.local_search.is_enabled        = false;
+    opt.tabu_search.iteration_max      = 0;
+    opt.cdcl.is_enabled                = true;
+    // cdcl.is_enabled_evaluate_full_solutions is false by default
+    opt.output.verbose                 = option::verbose::Off;
+
+    solver::Solver<int, double> solver(&model, opt);
+    auto                        result = solver.solve();
+
+    const auto& cdcl_res = solver.cdcl_controller().result().core;
+    EXPECT_EQ(cdcl_res.termination_status,
+              CDCLCoreTerminationStatus::INFEASIBLE);
+
+    // best_solution must NOT be tracked when disabled
+    EXPECT_TRUE(cdcl_res.best_solution.empty());
+    EXPECT_TRUE(std::isinf(cdcl_res.best_total_violation));
+
+    // Incumbent holder violation should remain at the initial solution's violation (x=(0,0) -> viol=0.8)
+    const auto& global_state = solver.global_state();
+    const auto& augmented_score =
+        global_state.incumbent_holder.global_augmented_incumbent_score();
+    EXPECT_NEAR(0.8, augmented_score.total_violation, 1e-6);
+}
+
+/*****************************************************************************/
 TEST(TestCDCLCore, cdcl_selection_constraint_satisfaction_test) {
     model::Model<int, double> model;
     auto&                     x = model.create_variables("x", 4, 0, 1);
@@ -406,9 +442,10 @@ TEST(TestCDCLCore, cdcl_selection_constraint_satisfaction_test) {
     opt.pdlp.is_enabled                = false;
     opt.lagrange_dual.is_enabled       = false;
     opt.local_search.is_enabled        = false;
-    opt.tabu_search.iteration_max      = 0;
-    opt.cdcl.is_enabled                = true;
-    opt.output.verbose                 = option::verbose::Off;
+    opt.tabu_search.iteration_max                 = 0;
+    opt.cdcl.is_enabled                           = true;
+    opt.cdcl.is_enabled_evaluate_full_solutions   = true;
+    opt.output.verbose                            = option::verbose::Off;
 
     solver::Solver<int, double> solver(&model, opt);
     auto                        result = solver.solve();

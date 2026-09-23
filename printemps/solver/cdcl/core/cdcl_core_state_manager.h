@@ -6,6 +6,8 @@
 #ifndef PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CORE_STATE_MANAGER_H__
 #define PRINTEMPS_SOLVER_CDCL_CORE_CDCL_CORE_STATE_MANAGER_H__
 
+#include <random>
+
 #include "cdcl_core_constants.h"
 #include "cdcl_core_termination_status.h"
 #include "cdcl_core_state.h"
@@ -54,6 +56,40 @@ class CDCLCoreStateManager {
 
         m_model.setup(a_instance_ptr);
         m_state.activity = m_model.initial_activities();
+
+        const int NUMBER_OF_VARIABLES = m_model.number_of_variables();
+
+        if (m_option.cdcl.initial_activity_noise_ratio > 0.0 ||
+            m_option.cdcl.initial_phase_perturbation_rate > 0.0) {
+            std::mt19937 random_engine(
+                static_cast<unsigned int>(m_option.cdcl.seed));
+            std::uniform_real_distribution<double> dist_real(0.0, 1.0);
+
+            if (m_option.cdcl.initial_activity_noise_ratio > 0.0) {
+                for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
+                    m_state.activity[i] +=
+                        m_state.activity[i] *
+                            m_option.cdcl.initial_activity_noise_ratio *
+                            dist_real(random_engine) +
+                        1e-6 * dist_real(random_engine);
+                }
+            }
+
+            if (m_option.cdcl.initial_phase_perturbation_rate > 0.0) {
+                for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
+                    if (dist_real(random_engine) <
+                        m_option.cdcl.initial_phase_perturbation_rate) {
+                        auto& var = m_model.mutable_variable(i);
+                        if (var.phase != CDCLCoreConstant::NO_PHASE) {
+                            var.phase = 1 - var.phase;
+                        } else {
+                            var.phase = dist_real(random_engine) < 0.5 ? 1 : 0;
+                        }
+                    }
+                }
+            }
+        }
+
         if (m_option.cdcl.restart_mode ==
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count = 1;
@@ -65,8 +101,6 @@ class CDCLCoreStateManager {
         }
         m_state.literal_block_distance_queue.setup(
             m_option.cdcl.restart_adaptive_window);
-
-        const int NUMBER_OF_VARIABLES = m_model.number_of_variables();
 
         m_state.seen_marker.assign(NUMBER_OF_VARIABLES, 0);
         m_state.seen_conflict_id = 0;
@@ -212,6 +246,27 @@ class CDCLCoreStateManager {
             if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
                 return VARIABLE_INDEX;
             }
+        }
+        return CDCLCoreConstant::NO_VARIABLE;
+    }
+
+    /*************************************************************************/
+    template <class T_Engine>
+    inline int pop_random_unassigned_variable(T_Engine& a_engine) {
+        constexpr int MAX_ATTEMPTS = 10;
+        int           attempts     = 0;
+        while (!m_heap.empty() && attempts < MAX_ATTEMPTS) {
+            std::uniform_int_distribution<int> dist(0, m_heap.size() - 1);
+            const int POS            = dist(a_engine);
+            const int VARIABLE_INDEX = m_heap.heap_array()[POS];
+            if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
+                m_heap.remove(VARIABLE_INDEX, m_state.activity);
+                return VARIABLE_INDEX;
+            } else {
+                // Lazily purge already-assigned variable
+                m_heap.remove(VARIABLE_INDEX, m_state.activity);
+            }
+            attempts++;
         }
         return CDCLCoreConstant::NO_VARIABLE;
     }

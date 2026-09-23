@@ -8,6 +8,7 @@
 #define PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
 
 #include <atomic>
+#include <cmath>
 #include <mutex>
 #include "../../abstract_solver_controller.h"
 #include "../core/cdcl_core.h"
@@ -142,52 +143,34 @@ class CDCLController
 
     /*************************************************************************/
     inline std::vector<option::Option> generate_portfolio_options(
-        const option::Option& a_BASE_OPTION, const int a_NUM_THREADS) const {
-        std::vector<option::Option> portfolio(a_NUM_THREADS, a_BASE_OPTION);
-        for (int t = 0; t < a_NUM_THREADS; ++t) {
+        const option::Option& a_BASE_OPTION,
+        const int             a_NUMBER_OF_THREADS) const {
+        std::vector<option::Option> portfolio(a_NUMBER_OF_THREADS,
+                                              a_BASE_OPTION);
+        for (int t = 0; t < a_NUMBER_OF_THREADS; ++t) {
             portfolio[t].output.verbose = option::verbose::Off;
             portfolio[t].cdcl.seed      = a_BASE_OPTION.cdcl.seed + t;
-            switch (t) {
-                case 0:
-                    // Thread 0: Balanced standard config (Clause minimization ON, default decay, default restart)
-                    portfolio[t].cdcl.is_enabled_clause_minimization =
-                        a_BASE_OPTION.cdcl.is_enabled_clause_minimization;
-                    portfolio[t].cdcl.variable_activity_decay_rate =
-                        a_BASE_OPTION.cdcl.variable_activity_decay_rate;
-                    portfolio[t].cdcl.initial_conflict_limit =
-                        a_BASE_OPTION.cdcl.initial_conflict_limit;
-                    break;
-                case 1:
-                    // Thread 1: High-throughput raw config (Clause minimization OFF)
-                    portfolio[t].cdcl.is_enabled_clause_minimization = false;
-                    portfolio[t].cdcl.variable_activity_decay_rate =
-                        a_BASE_OPTION.cdcl.variable_activity_decay_rate;
-                    portfolio[t].cdcl.initial_conflict_limit =
-                        a_BASE_OPTION.cdcl.initial_conflict_limit;
-                    break;
-                case 2:
-                    // Thread 2: Aggressive restarts (half interval) with clause minimization ON
-                    portfolio[t].cdcl.is_enabled_clause_minimization = true;
-                    portfolio[t].cdcl.variable_activity_decay_rate   = 0.90;
-                    portfolio[t].cdcl.initial_conflict_limit =
-                        std::max(10, a_BASE_OPTION.cdcl.initial_conflict_limit / 2);
-                    break;
-                case 3:
-                    // Thread 3: Long-window exploration (double interval) with clause minimization OFF
-                    portfolio[t].cdcl.is_enabled_clause_minimization = false;
-                    portfolio[t].cdcl.variable_activity_decay_rate   = 0.85;
-                    portfolio[t].cdcl.initial_conflict_limit =
-                        a_BASE_OPTION.cdcl.initial_conflict_limit * 2;
-                    break;
-                default:
-                    // Thread t >= 4: Alternating clause minimization, varied decay & restarts
-                    portfolio[t].cdcl.is_enabled_clause_minimization = (t % 2 == 0);
-                    portfolio[t].cdcl.variable_activity_decay_rate =
-                        0.75 + 0.05 * (t % 5);
-                    portfolio[t].cdcl.initial_conflict_limit =
-                        a_BASE_OPTION.cdcl.initial_conflict_limit * ((t % 3) + 1);
-                    break;
+
+            if (t == 0) {
+                // Thread 0: Baseline thread using base options directly
+                continue;
             }
+
+            // Worker threads t >= 1: Diversify randomness parameters
+            portfolio[t].cdcl.random_variable_selection_rate =
+                (a_BASE_OPTION.cdcl.random_variable_selection_rate > 0.0)
+                    ? a_BASE_OPTION.cdcl.random_variable_selection_rate
+                    : (0.01 + 0.005 * (t % 4));
+
+            portfolio[t].cdcl.initial_activity_noise_ratio =
+                (a_BASE_OPTION.cdcl.initial_activity_noise_ratio > 0.0)
+                    ? a_BASE_OPTION.cdcl.initial_activity_noise_ratio
+                    : (0.01 * ((t % 5) + 1));
+
+            portfolio[t].cdcl.initial_phase_perturbation_rate =
+                (a_BASE_OPTION.cdcl.initial_phase_perturbation_rate > 0.0)
+                    ? a_BASE_OPTION.cdcl.initial_phase_perturbation_rate
+                    : (0.05 * (t % 5));
         }
         return portfolio;
     }
@@ -260,7 +243,7 @@ class CDCLController
         option::Option base_option   = this->m_option;
         base_option.cdcl.time_offset = TOTAL_ELAPSED_TIME;
 
-        const int NUM_THREADS = [&]() -> int {
+        const int NUMBER_OF_THREADS = [&]() -> int {
 #ifdef _OPENMP
             if (!this->m_option.parallel.is_enabled_cdcl_parallelization) {
                 return 1;
@@ -274,32 +257,35 @@ class CDCLController
 #endif
         }();
 
-        core::CDCLCoreResult cdcl_result;
-        int                  winning_thread_id = -1;
+        core::CDCLCoreResult              cdcl_result;
+        int                               winning_thread_id = -1;
+        std::vector<core::CDCLCoreResult> thread_results;
 
-        if (NUM_THREADS <= 1) {
+        if (NUMBER_OF_THREADS <= 1) {
             core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
                                      base_option);
             cdcl_core.run();
-            cdcl_result = cdcl_core.result();
+            cdcl_result       = cdcl_core.result();
+            thread_results    = {cdcl_result};
+            winning_thread_id = 0;
         } else {
 #ifdef _OPENMP
             if (this->m_option.output.verbose >= option::verbose::Outer) {
-                utility::print_message(
-                    "Running CDCL with OpenMP portfolio (" +
-                        std::to_string(NUM_THREADS) + " threads).",
-                    true);
+                utility::print_message("Running CDCL with OpenMP portfolio (" +
+                                           std::to_string(NUMBER_OF_THREADS) +
+                                           " threads).",
+                                       true);
             }
 
-            const auto portfolio_options =
-                this->generate_portfolio_options(base_option, NUM_THREADS);
+            const auto portfolio_options = this->generate_portfolio_options(
+                base_option, NUMBER_OF_THREADS);
 
             std::atomic<bool> is_interrupted_by_solution{false};
             std::mutex        result_mutex;
             bool              has_solution = false;
-            std::vector<core::CDCLCoreResult> thread_results(NUM_THREADS);
+            thread_results.resize(NUMBER_OF_THREADS);
 
-            #pragma omp parallel num_threads(NUM_THREADS)
+#pragma omp parallel num_threads(NUMBER_OF_THREADS)
             {
                 const int THREAD_ID = omp_get_thread_num();
 
@@ -311,25 +297,24 @@ class CDCLController
                     return this->check_interrupt();
                 };
 
-                core::CDCLCore cdcl_core(
-                    &matrix_model, thread_check_interrupt,
-                    portfolio_options[THREAD_ID]);
+                core::CDCLCore cdcl_core(&matrix_model, thread_check_interrupt,
+                                         portfolio_options[THREAD_ID]);
                 cdcl_core.run();
 
-                auto res = cdcl_core.result();
-                thread_results[THREAD_ID] = res;
+                auto result               = cdcl_core.result();
+                thread_results[THREAD_ID] = result;
 
-                if (res.termination_status ==
+                if (result.termination_status ==
                         core::CDCLCoreTerminationStatus::FEASIBLE ||
-                    res.termination_status ==
+                    result.termination_status ==
                         core::CDCLCoreTerminationStatus::INFEASIBLE) {
                     is_interrupted_by_solution.store(true,
                                                      std::memory_order_relaxed);
                     std::lock_guard<std::mutex> lock(result_mutex);
-                    if (!has_solution || res.termination_status ==
-                                             core::CDCLCoreTerminationStatus::
-                                                 FEASIBLE) {
-                        cdcl_result       = res;
+                    if (!has_solution ||
+                        result.termination_status ==
+                            core::CDCLCoreTerminationStatus::FEASIBLE) {
+                        cdcl_result       = result;
                         has_solution      = true;
                         winning_thread_id = THREAD_ID;
                     }
@@ -339,11 +324,21 @@ class CDCLController
             if (!has_solution) {
                 cdcl_result       = thread_results[0];
                 winning_thread_id = 0;
-                for (int t = 1; t < NUM_THREADS; ++t) {
-                    if (thread_results[t].best_total_violation <
-                        cdcl_result.best_total_violation) {
-                        cdcl_result       = thread_results[t];
-                        winning_thread_id = t;
+                if (this->m_option.cdcl.is_enabled_evaluate_full_solutions) {
+                    for (int i = 1; i < NUMBER_OF_THREADS; ++i) {
+                        if (thread_results[i].best_total_violation <
+                            cdcl_result.best_total_violation) {
+                            cdcl_result       = thread_results[i];
+                            winning_thread_id = i;
+                        }
+                    }
+                } else {
+                    for (int i = 1; i < NUMBER_OF_THREADS; ++i) {
+                        if (thread_results[i].number_of_conflicts >
+                            cdcl_result.number_of_conflicts) {
+                            cdcl_result       = thread_results[i];
+                            winning_thread_id = i;
+                        }
                     }
                 }
             }
@@ -351,17 +346,28 @@ class CDCLController
             core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
                                      base_option);
             cdcl_core.run();
-            cdcl_result = cdcl_core.result();
+            cdcl_result       = cdcl_core.result();
+            thread_results    = {cdcl_result};
+            winning_thread_id = 0;
 #endif
         }
 
         /**
-         * Update the incumbent and solution archives with the best solution
-         * found during CDCL search (smallest constraint violation).
+         * Update the incumbent and solution archives:
+         * - If a feasible solution was found, import and evaluate it.
+         * - If evaluate_full_solutions is enabled, import the best full
+         *   solution (smallest constraint violation).
          */
-        const auto& candidate_solution = !cdcl_result.best_solution.empty()
-                                             ? cdcl_result.best_solution
-                                             : cdcl_result.solution;
+        const bool HAS_FEASIBLE_SOLUTION =
+            (cdcl_result.termination_status ==
+             core::CDCLCoreTerminationStatus::FEASIBLE);
+
+        const auto& candidate_solution =
+            HAS_FEASIBLE_SOLUTION
+                ? cdcl_result.solution
+                : (this->m_option.cdcl.is_enabled_evaluate_full_solutions
+                       ? cdcl_result.best_solution
+                       : std::vector<int>{});
 
         if (!candidate_solution.empty()) {
             this->m_model_ptr->matrix_model_handler().import_solution(
@@ -423,23 +429,78 @@ class CDCLController
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
-        if (NUM_THREADS > 1 && winning_thread_id >= 0) {
+        if (NUMBER_OF_THREADS > 1) {
+            const bool IS_ENABLED_PRINT =
+                this->m_option.output.verbose >= option::verbose::Outer;
+
+            utility::print(
+                "---------+-------+-------------------+---------+---------+----"
+                "----+-------------",
+                IS_ENABLED_PRINT);
+            utility::print(
+                "  Thread |  Seed | Status            |  Confl. |  Decis. |  "
+                "Rest. |  Best Viol. ",
+                IS_ENABLED_PRINT);
+            utility::print(
+                "---------+-------+-------------------+---------+---------+----"
+                "----+-------------",
+                IS_ENABLED_PRINT);
+
+            for (int t = 0; t < NUMBER_OF_THREADS; ++t) {
+                const auto& res = thread_results[t];
+                std::string status_str =
+                    core::CDCLCoreTerminationStatusInverseMap.at(
+                        res.termination_status);
+
+                std::string viol_str = "-";
+                if (res.termination_status ==
+                    core::CDCLCoreTerminationStatus::FEASIBLE) {
+                    viol_str = "0.00000e+00";
+                } else if (this->m_option.cdcl
+                               .is_enabled_evaluate_full_solutions &&
+                           !std::isinf(res.best_total_violation)) {
+                    viol_str =
+                        utility::to_string(res.best_total_violation, "%.5e");
+                }
+
+                char row[128];
+                std::snprintf(row, sizeof(row),
+                              "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
+                              (t == winning_thread_id ? " *" : "  "),  //
+                              t,                                       //
+                              base_option.cdcl.seed + t,               //
+                              status_str.c_str(),                      //
+                              res.number_of_conflicts,                 //
+                              res.number_of_decisions,                 //
+                              res.number_of_restarts,                  //
+                              viol_str.c_str());
+                utility::print(std::string(row), IS_ENABLED_PRINT);
+            }
+
+            utility::print(
+                "---------+-------+-------------------+---------+---------+----"
+                "----+-------------",
+                IS_ENABLED_PRINT);
+        }
+
+        if (NUMBER_OF_THREADS > 1 && winning_thread_id >= 0) {
             if (cdcl_result.termination_status ==
                     core::CDCLCoreTerminationStatus::FEASIBLE ||
                 cdcl_result.termination_status ==
                     core::CDCLCoreTerminationStatus::INFEASIBLE) {
                 utility::print_info(
-                    " -- Solved by thread " + std::to_string(winning_thread_id) +
-                        " (" + std::to_string(cdcl_result.number_of_conflicts) +
+                    " -- Solved by thread " +
+                        std::to_string(winning_thread_id) + " (" +
+                        std::to_string(cdcl_result.number_of_conflicts) +
                         " conflicts, " +
                         std::to_string(cdcl_result.number_of_decisions) +
                         " decisions).",
                     this->m_option.output.verbose >= option::verbose::Outer);
-            } else {
+            } else if (this->m_option.cdcl.is_enabled_evaluate_full_solutions &&
+                       !std::isinf(cdcl_result.best_total_violation)) {
                 utility::print_info(
-                    " -- Best intermediate solution from thread " +
-                        std::to_string(winning_thread_id) +
-                        " (violation: " +
+                    " -- Best full solution from thread " +
+                        std::to_string(winning_thread_id) + " (violation: " +
                         utility::to_string(cdcl_result.best_total_violation,
                                            "%.5e") +
                         ", " + std::to_string(cdcl_result.number_of_conflicts) +

@@ -192,6 +192,26 @@ class CDCLVariableHeap {
         }
         return VARIABLE_INDEX;
     }
+
+    /*************************************************************************/
+    inline void remove(const int                  a_VARIABLE_INDEX,
+                       const std::vector<double>& a_ACTIVITY) noexcept {
+        const int POSITION = this->position_of(a_VARIABLE_INDEX);
+        if (POSITION == NOT_IN_HEAP) {
+            return;
+        }
+        const int LAST_POSITION = static_cast<int>(m_heap_array.size()) - 1;
+        if (POSITION == LAST_POSITION) {
+            m_positions[a_VARIABLE_INDEX] = NOT_IN_HEAP;
+            m_heap_array.pop_back();
+            return;
+        }
+        this->swap_nodes(POSITION, LAST_POSITION);
+        m_positions[a_VARIABLE_INDEX] = NOT_IN_HEAP;
+        m_heap_array.pop_back();
+        this->sift_down(POSITION, a_ACTIVITY);
+        this->sift_up(POSITION, a_ACTIVITY);
+    }
 };
 
 }  // namespace printemps::solver::cdcl::core

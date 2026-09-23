@@ -95,9 +95,9 @@ struct ParallelOption {
             utility::to_true_or_false(                                     //
                 this->is_enabled_move_evaluation_parallelization));
 
-        utility::print(                                            //
-            " -- parallel.is_enabled_cdcl_parallelization: " +     //
-            utility::to_true_or_false(                             //
+        utility::print(                                         //
+            " -- parallel.is_enabled_cdcl_parallelization: " +  //
+            utility::to_true_or_false(                          //
                 this->is_enabled_cdcl_parallelization));
 
         utility::print(                                       //
@@ -141,9 +141,9 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",       //
             a_OBJECT);
 
-        read_json(                                    //
-            &this->is_enabled_cdcl_parallelization,   //
-            "is_enabled_cdcl_parallelization",        //
+        read_json(                                   //
+            &this->is_enabled_cdcl_parallelization,  //
+            "is_enabled_cdcl_parallelization",       //
             a_OBJECT);
 
         read_json(                                 //
@@ -156,9 +156,9 @@ struct ParallelOption {
             "number_of_threads_move_evaluation",       //
             a_OBJECT);
 
-        read_json(                           //
-            &this->number_of_threads_cdcl,   //
-            "number_of_threads_cdcl",        //
+        read_json(                          //
+            &this->number_of_threads_cdcl,  //
+            "number_of_threads_cdcl",       //
             a_OBJECT);
 
         read_json(                                        //
@@ -183,8 +183,8 @@ struct ParallelOption {
             "is_enabled_move_evaluation_parallelization",  //
             this->is_enabled_move_evaluation_parallelization);
 
-        obj.emplace_back(                                //
-            "is_enabled_cdcl_parallelization",           //
+        obj.emplace_back(                       //
+            "is_enabled_cdcl_parallelization",  //
             this->is_enabled_cdcl_parallelization);
 
         obj.emplace_back(                     //
@@ -195,8 +195,8 @@ struct ParallelOption {
             "number_of_threads_move_evaluation",  //
             this->number_of_threads_move_evaluation);
 
-        obj.emplace_back(                 //
-            "number_of_threads_cdcl",     //
+        obj.emplace_back(              //
+            "number_of_threads_cdcl",  //
             this->number_of_threads_cdcl);
 
         obj.emplace_back(                            //

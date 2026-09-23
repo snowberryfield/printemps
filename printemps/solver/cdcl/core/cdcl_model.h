@@ -1087,6 +1087,11 @@ class CDCLModel {
     }
 
     /*************************************************************************/
+    inline CDCLVariable& mutable_variable(const int a_INDEX) noexcept {
+        return m_variables[a_INDEX];
+    }
+
+    /*************************************************************************/
     inline const std::vector<double>& initial_activities(void) const noexcept {
         return m_initial_activities;
     }
