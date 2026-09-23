@@ -318,16 +318,19 @@ class CDCLModel {
             const double UPPER_BOUND =
                 m_instance_ptr->constraint_upper_bounds.values[i];
 
-            if (std::isfinite(LOWER_BOUND)) {
+            const bool HAS_LOWER_BOUND =
+                std::isfinite(LOWER_BOUND) &&
+                (LOWER_BOUND > -constant::LARGE_VALUE_50);
+            const bool HAS_UPPER_BOUND =
+                std::isfinite(UPPER_BOUND) &&
+                (UPPER_BOUND < constant::LARGE_VALUE_50);
+
+            if (HAS_LOWER_BOUND) {
                 this->build_constraint(variable_indices, raw_coefficients,
                                        LOWER_BOUND);
             }
 
-            const bool IS_EQUAL =
-                (i >= m_instance_ptr->equal_constraint_index_range.first &&
-                 i < m_instance_ptr->equal_constraint_index_range.second);
-
-            if (IS_EQUAL && std::isfinite(UPPER_BOUND)) {
+            if (HAS_UPPER_BOUND) {
                 std::vector<double> negative_coefficients(
                     NUMBER_OF_NON_ZERO_ELEMENTS);
                 for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
