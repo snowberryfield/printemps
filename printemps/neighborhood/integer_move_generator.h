@@ -118,14 +118,15 @@ class IntegerMoveGenerator
                                 (*a_moves_ptr)[4 * i]
                                     .alterations.front()
                                     .second = value + 1;
-                                word |= (1ULL << BIT_OFFSET);
+                                BitArray::set_bit_to_word(&word, BIT_OFFSET);
                             }
 
                             if (value != lower_bound) {
                                 (*a_moves_ptr)[4 * i + 1]
                                     .alterations.front()
                                     .second = value - 1;
-                                word |= (1ULL << (BIT_OFFSET + 1));
+                                BitArray::set_bit_to_word(&word,
+                                                          BIT_OFFSET + 1);
                             }
 
                             if (value < upper_bound - 4 &&
@@ -135,7 +136,8 @@ class IntegerMoveGenerator
                                 (*a_moves_ptr)[4 * i + 2]
                                     .alterations.front()
                                     .second = value + DELTA;
-                                word |= (1ULL << (BIT_OFFSET + 2));
+                                BitArray::set_bit_to_word(&word,
+                                                          BIT_OFFSET + 2);
                             }
 
                             if (value > lower_bound + 4 &&
@@ -145,7 +147,8 @@ class IntegerMoveGenerator
                                 (*a_moves_ptr)[4 * i + 3]
                                     .alterations.front()
                                     .second = value + DELTA;
-                                word |= (1ULL << (BIT_OFFSET + 3));
+                                BitArray::set_bit_to_word(&word,
+                                                          BIT_OFFSET + 3);
                             }
                         }
                     }

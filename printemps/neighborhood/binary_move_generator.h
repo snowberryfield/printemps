@@ -95,7 +95,7 @@ class BinaryMoveGenerator
                         for (int i = START; i < END; i++) {
                             (*a_moves_ptr)[i].alterations.front().second =
                                 1 - mutable_variable_ptrs[i]->value();
-                            word |= (1ULL << (i - START));
+                            BitArray::set_bit_to_word(&word, i - START);
                         }
                         a_flags->set_word(w, word);
                     }
@@ -117,7 +117,7 @@ class BinaryMoveGenerator
                                     ->is_objective_improvable()) {
                                 (*a_moves_ptr)[i].alterations.front().second =
                                     1 - mutable_variable_ptrs[i]->value();
-                                word |= (1ULL << (i - START));
+                                BitArray::set_bit_to_word(&word, i - START);
                             }
                         }
                         a_flags->set_word(w, word);
@@ -140,7 +140,7 @@ class BinaryMoveGenerator
                                     ->is_feasibility_improvable()) {
                                 (*a_moves_ptr)[i].alterations.front().second =
                                     1 - mutable_variable_ptrs[i]->value();
-                                word |= (1ULL << (i - START));
+                                BitArray::set_bit_to_word(&word, i - START);
                             }
                         }
                         a_flags->set_word(w, word);
@@ -160,7 +160,7 @@ class BinaryMoveGenerator
                         if (mutable_variable_ptrs[i]->is_improvable()) {
                             (*a_moves_ptr)[i].alterations.front().second =
                                 1 - mutable_variable_ptrs[i]->value();
-                            word |= (1ULL << (i - START));
+                            BitArray::set_bit_to_word(&word, i - START);
                         }
                     }
                     a_flags->set_word(w, word);

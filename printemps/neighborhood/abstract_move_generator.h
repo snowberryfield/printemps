@@ -6,20 +6,23 @@
 #ifndef PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 #define PRINTEMPS_NEIGHBORHOOD_ABSTRACT_MOVE_GENERATOR_H__
 
-#include "bit_flags.h"
+#include "../utility/bit_array.h"
 
 namespace printemps::neighborhood {
+using utility::BitArray;
+using utility::BitFlags;
+
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
 class AbstractMoveGenerator {
    protected:
     std::function<void(std::vector<Move<T_Variable, T_Expression>> *,
-                       BitFlags *, const bool, const bool, const bool,
+                       utility::BitArray *, const bool, const bool, const bool,
                        const bool, const int)>
         m_move_updater;
 
     std::vector<Move<T_Variable, T_Expression>> m_moves;
-    BitFlags                                    m_flags;
+    utility::BitArray                           m_flags;
     bool                                        m_is_enabled;
 
    public:
@@ -31,7 +34,7 @@ class AbstractMoveGenerator {
     /*************************************************************************/
     virtual void initialize(void) {
         m_move_updater = [](std::vector<Move<T_Variable, T_Expression>> *,  //
-                            BitFlags *,                                     //
+                            utility::BitArray *,                            //
                             const bool,                                     //
                             const bool,                                     //
                             const bool,                                     //
@@ -78,17 +81,17 @@ class AbstractMoveGenerator {
     }
 
     /*************************************************************************/
-    inline BitFlags &flags(void) {
+    inline utility::BitArray &flags(void) {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline const BitFlags &flags(void) const {
+    inline const utility::BitArray &flags(void) const {
         return m_flags;
     }
 
     /*************************************************************************/
-    inline void set_flags(const BitFlags &a_FLAGS) {
+    inline void set_flags(const utility::BitArray &a_FLAGS) {
         /**
          * NOTE: This method is for test.
          */

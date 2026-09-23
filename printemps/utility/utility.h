@@ -14,6 +14,7 @@
 #include "date_time_utility.h"
 #include "integer_utility.h"
 #include "bit_operation.h"
+#include "bit_array.h"
 #include "random.h"
 #include "time_keeper.h"
 #include "fixed_size_hash_map.h"

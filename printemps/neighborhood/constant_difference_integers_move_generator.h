@@ -142,19 +142,19 @@ class ConstantDifferenceIntegersMoveGenerator
                         }
 
                         if (a_ACCEPT_ALL) {
-                            word |= (1ULL << (i - START));
+                            BitArray::set_bit_to_word(&word, i - START);
                         } else {
                             if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                                 (*a_moves_ptr)[i]
                                     .has_objective_improvable_variable()) {
-                                word |= (1ULL << (i - START));
+                                BitArray::set_bit_to_word(&word, i - START);
                                 continue;
                             }
 
                             if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                                 (*a_moves_ptr)[i]
                                     .has_feasibility_improvable_variable()) {
-                                word |= (1ULL << (i - START));
+                                BitArray::set_bit_to_word(&word, i - START);
                                 continue;
                             }
                         }
