@@ -4,8 +4,8 @@
 // https://opensource.org/licenses/mit-license.php
 // CDCLController class definition
 /*****************************************************************************/
-#ifndef PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
-#define PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H_
+#ifndef PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H__
+#define PRINTEMPS_SOLVER_CDCL_CONTROLLER_CDCL_CONTROLLER_H__
 
 #include "../../abstract_solver_controller.h"
 #include "../core/cdcl_core.h"

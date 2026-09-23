@@ -49,6 +49,11 @@ struct CDCLCoreState {
     int                          restart_luby_count;
     utility::FixedSizeQueue<int> literal_block_distance_queue;
 
+    std::vector<int> solution;
+    std::vector<int> best_solution;
+    double           best_total_violation;
+    int              max_trail_size;
+
     /*********************************************************************/
     CDCLCoreState(void) {
         this->initialize();
@@ -91,6 +96,11 @@ struct CDCLCoreState {
 
         this->restart_luby_count = 0;
         this->literal_block_distance_queue.initialize();
+
+        this->solution.clear();
+        this->best_solution.clear();
+        this->best_total_violation = std::numeric_limits<double>::infinity();
+        this->max_trail_size       = 0;
     }
 };
 }  // namespace printemps::solver::cdcl::core

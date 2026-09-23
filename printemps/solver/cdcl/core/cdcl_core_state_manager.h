@@ -558,6 +558,52 @@ class CDCLCoreStateManager {
         void) const noexcept {
         return m_state.literal_block_distance_queue;
     }
+
+    /*************************************************************************/
+    inline void check_and_update_best_solution(void) {
+        auto         solution  = m_model.extract_current_solution();
+        const double VIOLATION = m_model.compute_total_violation(solution);
+        if (VIOLATION < m_state.best_total_violation) {
+            m_state.best_total_violation = VIOLATION;
+            m_state.best_solution        = std::move(solution);
+        }
+    }
+
+    /*************************************************************************/
+    inline void update_feasible_solution(void) {
+        const int NUMBER_OF_VARIABLES = m_model.number_of_variables();
+        m_state.solution.resize(NUMBER_OF_VARIABLES);
+        for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
+            m_state.solution[i] = m_model.variable(i).value;
+        }
+        m_state.best_solution        = m_state.solution;
+        m_state.best_total_violation = 0.0;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<int>& solution(void) const noexcept {
+        return m_state.solution;
+    }
+
+    /*************************************************************************/
+    inline const std::vector<int>& best_solution(void) const noexcept {
+        return m_state.best_solution;
+    }
+
+    /*************************************************************************/
+    inline double best_total_violation(void) const noexcept {
+        return m_state.best_total_violation;
+    }
+
+    /*************************************************************************/
+    inline int max_trail_size(void) const noexcept {
+        return m_state.max_trail_size;
+    }
+
+    /*************************************************************************/
+    inline void set_max_trail_size(const int a_MAX_TRAIL_SIZE) noexcept {
+        m_state.max_trail_size = a_MAX_TRAIL_SIZE;
+    }
 };
 }  // namespace printemps::solver::cdcl::core
 

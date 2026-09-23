@@ -47,18 +47,11 @@ class CDCLCore {
     CDCLCoreStateManager m_state_manager;
     CDCLCoreResult       m_result;
 
-    std::vector<int> m_best_solution;
-    double           m_best_total_violation;
-    int              m_max_trail_size;
-
     /*************************************************************************/
-    inline void check_and_update_best_solution(void) {
-        auto         sol = m_state_manager.model().extract_current_solution();
-        const double violation =
-            m_state_manager.model().compute_total_violation(sol);
-        if (violation < m_best_total_violation) {
-            m_best_total_violation = violation;
-            m_best_solution        = std::move(sol);
+    inline void preprocess(void) {
+        m_state_manager.reset_iteration();
+        if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
+            m_state_manager.check_and_update_best_solution();
         }
     }
 
@@ -555,7 +548,7 @@ class CDCLCore {
     /*************************************************************************/
     inline void restart(void) {
         if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
-            check_and_update_best_solution();
+            m_state_manager.check_and_update_best_solution();
         }
         m_state_manager.on_restart();
         backjump(0);
@@ -630,8 +623,7 @@ class CDCLCore {
 
         m_state_manager.set_termination_status(
             CDCLCoreTerminationStatus::FEASIBLE);
-        m_best_total_violation = 0.0;
-        m_best_solution = m_state_manager.model().extract_current_solution();
+        m_state_manager.update_feasible_solution();
 
         return false;
     }
@@ -807,9 +799,12 @@ class CDCLCore {
 
     /*************************************************************************/
     inline void postprocess(void) {
-        m_result =
-            CDCLCoreResult(m_state_manager.state(), m_state_manager.model(),
-                           m_best_solution, m_best_total_violation);
+        if (m_option.cdcl.is_enabled_evaluate_full_solutions &&
+            m_state_manager.termination_status() !=
+                CDCLCoreTerminationStatus::FEASIBLE) {
+            m_state_manager.check_and_update_best_solution();
+        }
+        m_result = CDCLCoreResult(m_state_manager.state(), m_option);
     }
 
    public:
@@ -832,9 +827,6 @@ class CDCLCore {
         m_option.initialize();
         m_state_manager.initialize();
         m_result.initialize();
-        m_best_solution.clear();
-        m_best_total_violation = std::numeric_limits<double>::infinity();
-        m_max_trail_size       = 0;
     }
 
     /*************************************************************************/
@@ -855,16 +847,14 @@ class CDCLCore {
     void run(void) {
         utility::TimeKeeper time_keeper;
         time_keeper.set_start_time();
-        m_state_manager.reset_iteration();
+
+        preprocess();
 
         const bool IS_ENABLED_PRINT_TABLE =
             m_option.output.verbose >= option::verbose::Inner;
 
         print_table_header(IS_ENABLED_PRINT_TABLE);
         print_table_initial(IS_ENABLED_PRINT_TABLE);
-        if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
-            check_and_update_best_solution();
-        }
 
         while (true) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
@@ -903,9 +893,9 @@ class CDCLCore {
                 if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
                     const int CURRENT_TRAIL_SIZE =
                         static_cast<int>(m_state_manager.trail().size());
-                    if (CURRENT_TRAIL_SIZE > m_max_trail_size) {
-                        m_max_trail_size = CURRENT_TRAIL_SIZE;
-                        check_and_update_best_solution();
+                    if (CURRENT_TRAIL_SIZE > m_state_manager.max_trail_size()) {
+                        m_state_manager.set_max_trail_size(CURRENT_TRAIL_SIZE);
+                        m_state_manager.check_and_update_best_solution();
                     }
                 }
 
@@ -936,12 +926,6 @@ class CDCLCore {
         print_table_body(CDCLIterationEventType::None,
                          IS_ENABLED_PRINT_TABLE);
         print_table_footer(IS_ENABLED_PRINT_TABLE);
-
-        if (m_option.cdcl.is_enabled_evaluate_full_solutions &&
-            m_state_manager.termination_status() !=
-                CDCLCoreTerminationStatus::FEASIBLE) {
-            check_and_update_best_solution();
-        }
 
         m_state_manager.set_elapsed_time(time_keeper.clock());
         postprocess();

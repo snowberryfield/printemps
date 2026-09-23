@@ -8,7 +8,6 @@
 
 #include "cdcl_core_termination_status.h"
 #include "cdcl_core_state.h"
-#include "cdcl_model.h"
 
 namespace printemps::solver::cdcl::core {
 /*****************************************************************************/
@@ -32,35 +31,29 @@ struct CDCLCoreResult {
     }
 
     /*************************************************************************/
-    CDCLCoreResult(const CDCLCoreState    &a_STATE,  //
-                   const CDCLModel        &a_MODEL,  //
-                   const std::vector<int> &a_BEST_SOLUTION = {},
-                   const double            a_BEST_TOTAL_VIOLATION =
-                       std::numeric_limits<double>::infinity()) {
-        this->setup(a_STATE, a_MODEL, a_BEST_SOLUTION, a_BEST_TOTAL_VIOLATION);
+    CDCLCoreResult(const CDCLCoreState   &a_STATE,  //
+                   const option::Option  &a_OPTION = {}) {
+        this->setup(a_STATE, a_OPTION);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->termination_status = CDCLCoreTerminationStatus::NOT_SOLVED;
+        this->termination_status                     = CDCLCoreTerminationStatus::NOT_SOLVED;
         this->solution.clear();
         this->best_solution.clear();
-        this->best_total_violation   = std::numeric_limits<double>::infinity();
-        this->number_of_conflicts    = 0;
-        this->number_of_restarts     = 0;
-        this->number_of_decisions    = 0;
-        this->number_of_propagations = 0;
-        this->total_learned_count    = 0;
+        this->best_total_violation                   = std::numeric_limits<double>::infinity();
+        this->number_of_conflicts                    = 0;
+        this->number_of_restarts                     = 0;
+        this->number_of_decisions                    = 0;
+        this->number_of_propagations                 = 0;
+        this->total_learned_count                    = 0;
         this->average_learned_literal_block_distance = 0.0;
         this->average_learned_length                 = 0.0;
     }
 
     /*************************************************************************/
-    inline void setup(const CDCLCoreState    &a_STATE,  //
-                      const CDCLModel        &a_MODEL,  //
-                      const std::vector<int> &a_BEST_SOLUTION = {},
-                      const double            a_BEST_TOTAL_VIOLATION =
-                          std::numeric_limits<double>::infinity()) {
+    inline void setup(const CDCLCoreState   &a_STATE,  //
+                      [[maybe_unused]] const option::Option &a_OPTION = {}) {
         this->initialize();
         this->termination_status     = a_STATE.termination_status;
         this->number_of_conflicts    = a_STATE.number_of_conflicts;
@@ -81,18 +74,9 @@ struct CDCLCoreResult {
                    a_STATE.total_learned_count)
                 : 0.0;
 
-        if (this->termination_status == CDCLCoreTerminationStatus::FEASIBLE) {
-            const int VARIABLES_SIZE = a_MODEL.number_of_variables();
-            this->solution.resize(VARIABLES_SIZE);
-            for (int i = 0; i < VARIABLES_SIZE; i++) {
-                this->solution[i] = a_MODEL.variable(i).value;
-            }
-            this->best_solution        = this->solution;
-            this->best_total_violation = 0.0;
-        } else {
-            this->best_solution        = a_BEST_SOLUTION;
-            this->best_total_violation = a_BEST_TOTAL_VIOLATION;
-        }
+        this->solution             = a_STATE.solution;
+        this->best_solution        = a_STATE.best_solution;
+        this->best_total_violation = a_STATE.best_total_violation;
     }
 };
 }  // namespace printemps::solver::cdcl::core
