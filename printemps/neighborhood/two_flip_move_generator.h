@@ -76,19 +76,19 @@ class TwoFlipMoveGenerator
                [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
 #endif
             ) {
-                const int MOVES_SIZE = a_moves_ptr->size();
-                const int NUM_WORDS  = (MOVES_SIZE + 63) / 64;
+                const int MOVES_SIZE      = a_moves_ptr->size();
+                const int NUMBER_OF_WORDS = (MOVES_SIZE + 63) / 64;
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (int w = 0; w < NUM_WORDS; w++) {
-                    const int     start_i = w * 64;
-                    const int     end_i   = std::min(start_i + 64, MOVES_SIZE);
-                    std::uint64_t word    = 0;
+                for (int w = 0; w < NUMBER_OF_WORDS; w++) {
+                    const int     START = w * 64;
+                    const int     END   = std::min(START + 64, MOVES_SIZE);
+                    std::uint64_t word  = 0;
 
-                    for (int i = start_i; i < end_i; i++) {
+                    for (int i = START; i < END; i++) {
                         if (!(*a_moves_ptr)[i].is_available) {
                             continue;
                         }
@@ -104,7 +104,8 @@ class TwoFlipMoveGenerator
                         bool has_same_value = false;
                         for (const auto &alteration :
                              (*a_moves_ptr)[i].alterations) {
-                            if (alteration.first->value() == alteration.second) {
+                            if (alteration.first->value() ==
+                                alteration.second) {
                                 has_same_value = true;
                                 break;
                             }
@@ -114,19 +115,19 @@ class TwoFlipMoveGenerator
                         }
 
                         if (a_ACCEPT_ALL) {
-                            word |= (1ULL << (i - start_i));
+                            word |= (1ULL << (i - START));
                         } else {
                             if (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
                                 (*a_moves_ptr)[i]
                                     .has_objective_improvable_variable()) {
-                                word |= (1ULL << (i - start_i));
+                                word |= (1ULL << (i - START));
                                 continue;
                             }
 
                             if (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                                 (*a_moves_ptr)[i]
                                     .has_feasibility_improvable_variable()) {
-                                word |= (1ULL << (i - start_i));
+                                word |= (1ULL << (i - START));
                                 continue;
                             }
                         }

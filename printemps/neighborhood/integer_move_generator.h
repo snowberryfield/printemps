@@ -86,22 +86,22 @@ class IntegerMoveGenerator
                 [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
 #endif
             ) {
-                const int DELTA_MAX = 10000;
-                const int MOVES_SIZE = 4 * VARIABLES_SIZE;
-                const int NUM_WORDS  = (MOVES_SIZE + 63) / 64;
+                const int DELTA_MAX       = 10000;
+                const int MOVES_SIZE      = 4 * VARIABLES_SIZE;
+                const int NUMBER_OF_WORDS = (MOVES_SIZE + 63) / 64;
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
     num_threads(a_NUMBER_OF_THREADS)
 #endif
-                for (int w = 0; w < NUM_WORDS; w++) {
-                    const int     start_var = w * 16;
-                    const int     end_var   = std::min(start_var + 16, VARIABLES_SIZE);
-                    std::uint64_t word      = 0;
+                for (int w = 0; w < NUMBER_OF_WORDS; w++) {
+                    const int     START = w * 16;
+                    const int     END   = std::min(START + 16, VARIABLES_SIZE);
+                    std::uint64_t word  = 0;
 
-                    for (int i = start_var; i < end_var; i++) {
-                        const int  bit_offset  = (i - start_var) * 4;
-                        const auto value       = mutable_variable_ptrs[i]->value();
+                    for (int i = START; i < END; i++) {
+                        const int  BIT_OFFSET = (i - START) * 4;
+                        const auto value = mutable_variable_ptrs[i]->value();
                         const auto lower_bound =
                             mutable_variable_ptrs[i]->lower_bound();
                         const auto upper_bound =
@@ -109,41 +109,43 @@ class IntegerMoveGenerator
 
                         if (a_ACCEPT_ALL ||
                             (a_ACCEPT_OBJECTIVE_IMPROVABLE &&
-                             mutable_variable_ptrs[i]->is_objective_improvable()) ||
+                             mutable_variable_ptrs[i]
+                                 ->is_objective_improvable()) ||
                             (a_ACCEPT_FEASIBILITY_IMPROVABLE &&
                              mutable_variable_ptrs[i]
                                  ->is_feasibility_improvable())) {
                             if (value != upper_bound) {
-                                (*a_moves_ptr)[4 * i].alterations.front().second =
-                                    value + 1;
-                                word |= (1ULL << bit_offset);
+                                (*a_moves_ptr)[4 * i]
+                                    .alterations.front()
+                                    .second = value + 1;
+                                word |= (1ULL << BIT_OFFSET);
                             }
 
                             if (value != lower_bound) {
                                 (*a_moves_ptr)[4 * i + 1]
                                     .alterations.front()
                                     .second = value - 1;
-                                word |= (1ULL << (bit_offset + 1));
+                                word |= (1ULL << (BIT_OFFSET + 1));
                             }
 
                             if (value < upper_bound - 4 &&
                                 upper_bound != constant::INT_HALF_MAX) {
-                                const auto DELTA =
-                                    std::min(DELTA_MAX, (upper_bound - value) / 2);
+                                const auto DELTA = std::min(
+                                    DELTA_MAX, (upper_bound - value) / 2);
                                 (*a_moves_ptr)[4 * i + 2]
                                     .alterations.front()
                                     .second = value + DELTA;
-                                word |= (1ULL << (bit_offset + 2));
+                                word |= (1ULL << (BIT_OFFSET + 2));
                             }
 
                             if (value > lower_bound + 4 &&
                                 lower_bound != constant::INT_HALF_MIN) {
-                                const auto DELTA =
-                                    std::max(-DELTA_MAX, (lower_bound - value) / 2);
+                                const auto DELTA = std::max(
+                                    -DELTA_MAX, (lower_bound - value) / 2);
                                 (*a_moves_ptr)[4 * i + 3]
                                     .alterations.front()
                                     .second = value + DELTA;
-                                word |= (1ULL << (bit_offset + 3));
+                                word |= (1ULL << (BIT_OFFSET + 3));
                             }
                         }
                     }

@@ -249,19 +249,20 @@ class Neighborhood {
                     a_IS_ENABLED_PARALLEL,            //
                     a_NUMBER_OF_THREADS);
 
-                auto       &moves      = move_generator_ptr->moves();
-                const auto &flag_words = move_generator_ptr->flags().words();
-                const int   NUM_WORDS  = flag_words.size();
+                auto     &moves           = move_generator_ptr->moves();
+                auto     &flag_words      = move_generator_ptr->flags().words();
+                const int NUMBER_OF_WORDS = flag_words.size();
 
-                for (int w = 0; w < NUM_WORDS; ++w) {
+                for (int w = 0; w < NUMBER_OF_WORDS; w++) {
                     auto word = flag_words[w];
                     if (word == 0) {
                         continue;
                     }
-                    const int base_index = w * 64;
+                    const int BASE_INDEX = w * 64;
                     while (word != 0) {
-                        const int bit_pos = utility::countr_zero(word);
-                        m_move_ptrs.push_back(&moves[base_index + bit_pos]);
+                        const int BIT_POSITION = utility::countr_zero(word);
+                        m_move_ptrs.push_back(
+                            &moves[BASE_INDEX + BIT_POSITION]);
                         word &= (word - 1);
                     }
                 }
