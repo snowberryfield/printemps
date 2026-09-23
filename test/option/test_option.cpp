@@ -498,6 +498,26 @@ TEST_F(TestOption, setup) {
             false,  //
             option.cdcl.is_enabled_phase_saving);
 
+        EXPECT_EQ(  //
+            false,  //
+            option.cdcl.is_enabled_clause_minimization);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.random_variable_selection_rate);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.initial_activity_noise_ratio);
+
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.initial_phase_perturbation_rate);
+
+        EXPECT_EQ(  //
+            true,   //
+            option.cdcl.is_enabled_evaluate_full_solutions);
+
         /// lagrange_dual
         EXPECT_EQ(  //
             true,   //
@@ -1089,6 +1109,26 @@ TEST_F(TestOption, to_json) {
     EXPECT_EQ(  //
         false,  //
         to_bool(cdcl.at("is_enabled_phase_saving")));
+
+    EXPECT_EQ(  //
+        false,  //
+        to_bool(cdcl.at("is_enabled_clause_minimization")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("random_variable_selection_rate")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("initial_activity_noise_ratio")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("initial_phase_perturbation_rate")));
+
+    EXPECT_EQ(  //
+        true,   //
+        to_bool(cdcl.at("is_enabled_evaluate_full_solutions")));
 
     /// lagrange_dual
     auto lagrange_dual =

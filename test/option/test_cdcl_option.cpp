@@ -121,24 +121,6 @@ TEST_F(TestCDCLOption, initialize) {
         CDCLOptionConstant::DEFAULT_IS_ENABLED_EVALUATE_FULL_SOLUTIONS,
         option.is_enabled_evaluate_full_solutions);
 }
-
-/*****************************************************************************/
-TEST_F(TestCDCLOption, json_roundtrip) {
-    using namespace printemps::option;
-    CDCLOption option;
-    option.random_variable_selection_rate        = 0.05;
-    option.initial_activity_noise_ratio          = 0.02;
-    option.initial_phase_perturbation_rate       = 0.10;
-    option.is_enabled_evaluate_full_solutions    = true;
-
-    auto json_obj = option.to_json();
-    CDCLOption restored_option(json_obj);
-
-    EXPECT_FLOAT_EQ(0.05, restored_option.random_variable_selection_rate);
-    EXPECT_FLOAT_EQ(0.02, restored_option.initial_activity_noise_ratio);
-    EXPECT_FLOAT_EQ(0.10, restored_option.initial_phase_perturbation_rate);
-    EXPECT_TRUE(restored_option.is_enabled_evaluate_full_solutions);
-}
 }  // namespace
 /*****************************************************************************/
 // END

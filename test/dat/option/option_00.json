@@ -129,7 +129,12 @@
         "learned_constraint_reduction_rate": 0.1, 
         "literal_block_distance_protection_threshold": 1, 
         "variable_activity_decay_rate": 0.1, 
-        "is_enabled_phase_saving": false
+        "is_enabled_phase_saving": false,
+        "is_enabled_clause_minimization": false,
+        "random_variable_selection_rate": 0.1,
+        "initial_activity_noise_ratio": 0.1,
+        "initial_phase_perturbation_rate": 0.1,
+        "is_enabled_evaluate_full_solutions": true
     }, 
     "lagrange_dual": {
         "is_enabled": true,
