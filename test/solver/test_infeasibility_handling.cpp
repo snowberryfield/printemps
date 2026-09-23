@@ -10,7 +10,18 @@ namespace {
 using namespace printemps;
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, preprocess_infeasible) {
+class TestInfeasibilityHandling : public ::testing::Test {
+   protected:
+    virtual void SetUp(void) {
+        /// nothing to do
+    }
+    virtual void TearDown(void) {
+        /// nothing to do
+    }
+};
+
+/*****************************************************************************/
+TEST_F(TestInfeasibilityHandling, preprocess_infeasible) {
     /**
      * Contradictory cycle on binary variables:
      * x0 == x1 == x2 == x3 == x4 == 1 - x0
@@ -30,16 +41,16 @@ TEST(TestInfeasibilityHandling, preprocess_infeasible) {
     option.output.verbose = option::verbose::Off;
 
     solver::IPSolver solver(&model, option);
-    const auto       result = solver.solve();
+    const auto       RESULT = solver.solve();
 
-    EXPECT_EQ(result.status.termination_status,
+    EXPECT_EQ(RESULT.status.termination_status,
               solver::TerminationStatus::INFEASIBLE);
-    EXPECT_TRUE(result.status.is_proven_infeasible());
-    EXPECT_FALSE(result.status.is_found_feasible_solution);
+    EXPECT_TRUE(RESULT.status.is_proven_infeasible());
+    EXPECT_FALSE(RESULT.status.is_found_feasible_solution);
 }
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, pdlp_infeasible) {
+TEST_F(TestInfeasibilityHandling, pdlp_infeasible) {
     /**
      * LP relaxation is infeasible:
      * x >= 0, y >= 0
@@ -60,16 +71,16 @@ TEST(TestInfeasibilityHandling, pdlp_infeasible) {
     option.cdcl.is_enabled               = false;
 
     solver::IPSolver solver(&model, option);
-    const auto       result = solver.solve();
+    const auto       RESULT = solver.solve();
 
-    EXPECT_EQ(result.status.termination_status,
+    EXPECT_EQ(RESULT.status.termination_status,
               solver::TerminationStatus::INFEASIBLE);
-    EXPECT_TRUE(result.status.is_proven_infeasible());
-    EXPECT_FALSE(result.status.is_found_feasible_solution);
+    EXPECT_TRUE(RESULT.status.is_proven_infeasible());
+    EXPECT_FALSE(RESULT.status.is_found_feasible_solution);
 }
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, cdcl_infeasible) {
+TEST_F(TestInfeasibilityHandling, cdcl_infeasible) {
     /**
      * Binary infeasible problem:
      * x0 + x1 == 1 and x0 - x1 == 0 (both in {0, 1})
@@ -88,16 +99,16 @@ TEST(TestInfeasibilityHandling, cdcl_infeasible) {
     option.cdcl.is_enabled               = true;
 
     solver::IPSolver solver(&model, option);
-    const auto       result = solver.solve();
+    const auto       RESULT = solver.solve();
 
-    EXPECT_EQ(result.status.termination_status,
+    EXPECT_EQ(RESULT.status.termination_status,
               solver::TerminationStatus::INFEASIBLE);
-    EXPECT_TRUE(result.status.is_proven_infeasible());
-    EXPECT_FALSE(result.status.is_found_feasible_solution);
+    EXPECT_TRUE(RESULT.status.is_proven_infeasible());
+    EXPECT_FALSE(RESULT.status.is_found_feasible_solution);
 }
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, feasible_solution_status) {
+TEST_F(TestInfeasibilityHandling, feasible_solution_status) {
     /**
      * Trivial feasible problem:
      * x0 + x1 <= 1
@@ -111,16 +122,16 @@ TEST(TestInfeasibilityHandling, feasible_solution_status) {
     option.output.verbose = option::verbose::Off;
 
     solver::IPSolver solver(&model, option);
-    const auto       result = solver.solve();
+    const auto       RESULT = solver.solve();
 
-    EXPECT_EQ(result.status.termination_status,
+    EXPECT_EQ(RESULT.status.termination_status,
               solver::TerminationStatus::FEASIBLE);
-    EXPECT_FALSE(result.status.is_proven_infeasible());
-    EXPECT_TRUE(result.status.is_found_feasible_solution);
+    EXPECT_FALSE(RESULT.status.is_proven_infeasible());
+    EXPECT_TRUE(RESULT.status.is_found_feasible_solution);
 }
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, json_serialization) {
+TEST_F(TestInfeasibilityHandling, json_serialization) {
     model::IPModel model;
     auto&          x = model.create_variables("x", 5, 0, 1);
     auto&          f = model.create_constraints("f", 5);
@@ -135,17 +146,17 @@ TEST(TestInfeasibilityHandling, json_serialization) {
     option.output.verbose = option::verbose::Off;
 
     solver::IPSolver solver(&model, option);
-    const auto       result = solver.solve();
+    const auto       RESULT = solver.solve();
 
-    utility::json::JsonObject json_obj;
-    result.status.add_summary_json(&json_obj);
+    utility::json::JsonObject json_object;
+    RESULT.status.add_summary_json(&json_object);
 
-    EXPECT_EQ(std::any_cast<std::string>(json_obj.at("termination_status")),
+    EXPECT_EQ(std::any_cast<std::string>(json_object.at("termination_status")),
               "INFEASIBLE");
 }
 
 /*****************************************************************************/
-TEST(TestInfeasibilityHandling, cdcl_seeded_clauses) {
+TEST_F(TestInfeasibilityHandling, cdcl_seeded_clauses) {
     /**
      * Problem with a small constraint group:
      * x0, x1, x2, x3 in {0, 1}
@@ -179,14 +190,18 @@ TEST(TestInfeasibilityHandling, cdcl_seeded_clauses) {
     EXPECT_EQ(solver::cdcl::core::CDCLCoreTerminationStatus::FEASIBLE,
               cdcl_core.result().termination_status);
 
-    const auto& solution = cdcl_core.result().solution;
-    int x0_val = solution[matrix_model.variable_index_map.forward_at(&x(0))];
-    int x1_val = solution[matrix_model.variable_index_map.forward_at(&x(1))];
-    int x2_val = solution[matrix_model.variable_index_map.forward_at(&x(2))];
-    int x3_val = solution[matrix_model.variable_index_map.forward_at(&x(3))];
+    const auto& SOLUTION = cdcl_core.result().solution;
+    const int   X0_VALUE =
+        SOLUTION[matrix_model.variable_index_map.forward_at(&x(0))];
+    const int X1_VALUE =
+        SOLUTION[matrix_model.variable_index_map.forward_at(&x(1))];
+    const int X2_VALUE =
+        SOLUTION[matrix_model.variable_index_map.forward_at(&x(2))];
+    const int X3_VALUE =
+        SOLUTION[matrix_model.variable_index_map.forward_at(&x(3))];
 
-    EXPECT_EQ(1, x0_val + x1_val);
-    EXPECT_EQ(1, x2_val + x3_val);
+    EXPECT_EQ(1, X0_VALUE + X1_VALUE);
+    EXPECT_EQ(1, X2_VALUE + X3_VALUE);
 }
 
 }  // namespace

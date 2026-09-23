@@ -66,13 +66,13 @@ TEST_F(TestTopologicalSorter, simple_chain) {
     sorter.add_edge(0, 1);
     sorter.add_edge(1, 2);
 
-    auto order = sorter.sort();
+    const auto TOPOLOGICAL_ORDER = sorter.sort();
     EXPECT_FALSE(sorter.has_cycle());
-    EXPECT_EQ(3, static_cast<int>(order.size()));
+    EXPECT_EQ(3, static_cast<int>(TOPOLOGICAL_ORDER.size()));
 
-    EXPECT_EQ(0, order[0]);
-    EXPECT_EQ(1, order[1]);
-    EXPECT_EQ(2, order[2]);
+    EXPECT_EQ(0, TOPOLOGICAL_ORDER[0]);
+    EXPECT_EQ(1, TOPOLOGICAL_ORDER[1]);
+    EXPECT_EQ(2, TOPOLOGICAL_ORDER[2]);
 }
 
 /*****************************************************************************/
@@ -84,22 +84,26 @@ TEST_F(TestTopologicalSorter, diamond_dag) {
     sorter.add_edge(1, 3);
     sorter.add_edge(2, 3);
 
-    auto order = sorter.sort();
+    const auto TOPOLOGICAL_ORDER = sorter.sort();
     EXPECT_FALSE(sorter.has_cycle());
-    EXPECT_EQ(4, static_cast<int>(order.size()));
+    EXPECT_EQ(4, static_cast<int>(TOPOLOGICAL_ORDER.size()));
 
     // Verify topological ordering constraints:
     // index(0) < index(1), index(0) < index(2)
     // index(1) < index(3), index(2) < index(3)
-    auto pos_0 = std::find(order.begin(), order.end(), 0);
-    auto pos_1 = std::find(order.begin(), order.end(), 1);
-    auto pos_2 = std::find(order.begin(), order.end(), 2);
-    auto pos_3 = std::find(order.begin(), order.end(), 3);
+    const auto POSITION_0 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 0);
+    const auto POSITION_1 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 1);
+    const auto POSITION_2 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 2);
+    const auto POSITION_3 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 3);
 
-    EXPECT_TRUE(pos_0 < pos_1);
-    EXPECT_TRUE(pos_0 < pos_2);
-    EXPECT_TRUE(pos_1 < pos_3);
-    EXPECT_TRUE(pos_2 < pos_3);
+    EXPECT_TRUE(POSITION_0 < POSITION_1);
+    EXPECT_TRUE(POSITION_0 < POSITION_2);
+    EXPECT_TRUE(POSITION_1 < POSITION_3);
+    EXPECT_TRUE(POSITION_2 < POSITION_3);
 }
 
 /*****************************************************************************/
@@ -110,17 +114,21 @@ TEST_F(TestTopologicalSorter, disconnected_dag) {
     sorter.add_edge(2, 3);
     sorter.add_node(4);
 
-    auto order = sorter.sort();
+    const auto TOPOLOGICAL_ORDER = sorter.sort();
     EXPECT_FALSE(sorter.has_cycle());
-    EXPECT_EQ(5, static_cast<int>(order.size()));
+    EXPECT_EQ(5, static_cast<int>(TOPOLOGICAL_ORDER.size()));
 
-    auto pos_0 = std::find(order.begin(), order.end(), 0);
-    auto pos_1 = std::find(order.begin(), order.end(), 1);
-    auto pos_2 = std::find(order.begin(), order.end(), 2);
-    auto pos_3 = std::find(order.begin(), order.end(), 3);
+    const auto POSITION_0 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 0);
+    const auto POSITION_1 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 1);
+    const auto POSITION_2 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 2);
+    const auto POSITION_3 =
+        std::find(TOPOLOGICAL_ORDER.begin(), TOPOLOGICAL_ORDER.end(), 3);
 
-    EXPECT_TRUE(pos_0 < pos_1);
-    EXPECT_TRUE(pos_2 < pos_3);
+    EXPECT_TRUE(POSITION_0 < POSITION_1);
+    EXPECT_TRUE(POSITION_2 < POSITION_3);
 }
 
 /*****************************************************************************/
@@ -132,18 +140,18 @@ TEST_F(TestTopologicalSorter, cycle_detection) {
         sorter.add_edge(1, 2);
         sorter.add_edge(2, 0);
 
-        auto order = sorter.sort();
+        const auto TOPOLOGICAL_ORDER = sorter.sort();
         EXPECT_TRUE(sorter.has_cycle());
-        EXPECT_NE(3, static_cast<int>(order.size()));
+        EXPECT_NE(3, static_cast<int>(TOPOLOGICAL_ORDER.size()));
     }
     {
         utility::TopologicalSorter<int> sorter;
         // Self-loop: 0 -> 0
         sorter.add_edge(0, 0);
 
-        auto order = sorter.sort();
+        const auto TOPOLOGICAL_ORDER = sorter.sort();
         EXPECT_TRUE(sorter.has_cycle());
-        EXPECT_NE(1, static_cast<int>(order.size()));
+        EXPECT_NE(1, static_cast<int>(TOPOLOGICAL_ORDER.size()));
     }
 }
 
@@ -154,21 +162,23 @@ TEST_F(TestTopologicalSorter, successors) {
     sorter.add_edge(0, 2);
     sorter.add_edge(1, 3);
 
-    auto succ_0 = sorter.successors(0);
-    EXPECT_EQ(2, static_cast<int>(succ_0.size()));
-    EXPECT_TRUE(std::find(succ_0.begin(), succ_0.end(), 1) != succ_0.end());
-    EXPECT_TRUE(std::find(succ_0.begin(), succ_0.end(), 2) != succ_0.end());
+    const auto SUCCESSORS_0 = sorter.successors(0);
+    EXPECT_EQ(2, static_cast<int>(SUCCESSORS_0.size()));
+    EXPECT_TRUE(std::find(SUCCESSORS_0.begin(), SUCCESSORS_0.end(), 1) !=
+                SUCCESSORS_0.end());
+    EXPECT_TRUE(std::find(SUCCESSORS_0.begin(), SUCCESSORS_0.end(), 2) !=
+                SUCCESSORS_0.end());
 
-    auto succ_1 = sorter.successors(1);
-    EXPECT_EQ(1, static_cast<int>(succ_1.size()));
-    EXPECT_EQ(3, succ_1[0]);
+    const auto SUCCESSORS_1 = sorter.successors(1);
+    EXPECT_EQ(1, static_cast<int>(SUCCESSORS_1.size()));
+    EXPECT_EQ(3, SUCCESSORS_1[0]);
 
-    auto succ_3 = sorter.successors(3);
-    EXPECT_TRUE(succ_3.empty());
+    const auto SUCCESSORS_3 = sorter.successors(3);
+    EXPECT_TRUE(SUCCESSORS_3.empty());
 
     // Non-existent node returns empty
-    auto succ_unknown = sorter.successors(999);
-    EXPECT_TRUE(succ_unknown.empty());
+    const auto SUCCESSORS_UNKNOWN = sorter.successors(999);
+    EXPECT_TRUE(SUCCESSORS_UNKNOWN.empty());
 }
 
 /*****************************************************************************/
@@ -178,16 +188,16 @@ TEST_F(TestTopologicalSorter, pointer_type) {
     sorter.add_edge(&a, &b);
     sorter.add_edge(&b, &c);
 
-    auto order = sorter.sort();
+    const auto TOPOLOGICAL_ORDER = sorter.sort();
     EXPECT_FALSE(sorter.has_cycle());
-    EXPECT_EQ(3, static_cast<int>(order.size()));
-    EXPECT_EQ(&a, order[0]);
-    EXPECT_EQ(&b, order[1]);
-    EXPECT_EQ(&c, order[2]);
+    EXPECT_EQ(3, static_cast<int>(TOPOLOGICAL_ORDER.size()));
+    EXPECT_EQ(&a, TOPOLOGICAL_ORDER[0]);
+    EXPECT_EQ(&b, TOPOLOGICAL_ORDER[1]);
+    EXPECT_EQ(&c, TOPOLOGICAL_ORDER[2]);
 
-    auto succ_a = sorter.successors(&a);
-    EXPECT_EQ(1, static_cast<int>(succ_a.size()));
-    EXPECT_EQ(&b, succ_a[0]);
+    const auto SUCCESSORS_A = sorter.successors(&a);
+    EXPECT_EQ(1, static_cast<int>(SUCCESSORS_A.size()));
+    EXPECT_EQ(&b, SUCCESSORS_A[0]);
 }
 
 }  // namespace
