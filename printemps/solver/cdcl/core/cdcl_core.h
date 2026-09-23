@@ -90,7 +90,7 @@ class CDCLCore {
         m_state_manager.resize_trail(BACKTRACK_INDEX);
         m_state_manager.resize_trail_level_offsets(a_BACKJUMP_LEVEL);
         m_state_manager.set_current_decision_level(a_BACKJUMP_LEVEL);
-        m_state_manager.set_qhead(BACKTRACK_INDEX);
+        m_state_manager.set_propagation_queue_head(BACKTRACK_INDEX);
 
         m_state_manager.mutable_model().clear_propagation_queue();
     }
@@ -100,17 +100,19 @@ class CDCLCore {
         auto assign_callback = [this](const int a_VARIABLE_INDEX,
                                       const int a_VALUE,
                                       const CDCLConstraintReference& a_REASON) {
-            this->assign(a_VARIABLE_INDEX, a_VALUE, a_REASON);
-            this->m_state_manager.on_propagation();
+            assign(a_VARIABLE_INDEX, a_VALUE, a_REASON);
+            m_state_manager.on_propagation();
         };
 
         const CDCLConstraintReference CONFLICT_REFERENCE =
             m_state_manager.mutable_model().propagate(
-                m_state_manager.trail(), m_state_manager.mutable_qhead(),
+                m_state_manager.trail(),
+                m_state_manager.mutable_propagation_queue_head(),
                 assign_callback);
 
         if (CONFLICT_REFERENCE.type != CDCLConstraintType::NONE) {
-            m_state_manager.set_conflict_constraint_index(CONFLICT_REFERENCE);
+            m_state_manager.set_conflict_constraint_index(
+                CONFLICT_REFERENCE);
             return false;
         }
         return true;
@@ -315,30 +317,32 @@ class CDCLCore {
                     }
                 }
 
-                for (const int cleared_var : analyze_toclear) {
-                    m_state_manager.mark_seen(cleared_var, 0);
+                for (const int CLEARED_VARIABLE : analyze_toclear) {
+                    m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                 }
                 return true;
             };
 
-            auto filter_redundant = [&](std::vector<int>& vars) {
-                size_t write_idx = 0;
-                for (size_t read_idx = 0; read_idx < vars.size(); ++read_idx) {
-                    const int var = vars[read_idx];
-                    if (MODEL.variable(var).reason_constraint.type ==
+            auto filter_redundant = [&](std::vector<int>& a_variables) {
+                size_t write_index = 0;
+                for (size_t read_index = 0; read_index < a_variables.size();
+                     ++read_index) {
+                    const int VARIABLE_INDEX = a_variables[read_index];
+                    if (MODEL.variable(VARIABLE_INDEX).reason_constraint.type ==
                         CDCLConstraintType::NONE) {
-                        vars[write_idx++] = var;
+                        a_variables[write_index++] = VARIABLE_INDEX;
                         continue;
                     }
-                    m_state_manager.mark_seen(var, 0);
-                    if (is_redundant(var)) {
+                    m_state_manager.mark_seen(VARIABLE_INDEX, 0);
+                    if (is_redundant(VARIABLE_INDEX)) {
                         // Redundant: leave marked as 0
                     } else {
-                        m_state_manager.mark_seen(var, CONFLICT_ID);
-                        vars[write_idx++] = var;
+                        m_state_manager.mark_seen(VARIABLE_INDEX,
+                                                  CONFLICT_ID);
+                        a_variables[write_index++] = VARIABLE_INDEX;
                     }
                 }
-                vars.resize(write_idx);
+                a_variables.resize(write_index);
             };
 
             filter_redundant(learned_positive_variable_indices);
@@ -419,7 +423,7 @@ class CDCLCore {
         const auto [UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
                     LEARNED_POSITIVE_VARIABLE_INDICES,
                     LEARNED_NEGATIVE_VARIABLE_INDICES] =
-            this->find_first_unique_implication_point();
+            find_first_unique_implication_point();
 
         /**
          * If the trail was empty when find_first_UIP ran, it returns
@@ -434,12 +438,12 @@ class CDCLCore {
                     CardinalityConstraint{}};
         }
 
-        const int BACKJUMP_LEVEL = this->compute_backjump_level(
+        const int BACKJUMP_LEVEL = compute_backjump_level(
             LEARNED_POSITIVE_VARIABLE_INDICES,
             LEARNED_NEGATIVE_VARIABLE_INDICES,
             UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX);
 
-        const int LITERAL_BLOCK_DISTANCE = this->compute_literal_block_distance(
+        const int LITERAL_BLOCK_DISTANCE = compute_literal_block_distance(
             LEARNED_POSITIVE_VARIABLE_INDICES,
             LEARNED_NEGATIVE_VARIABLE_INDICES);
 
@@ -480,7 +484,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool branch(void) {
-        const int BEST_VARIABLE_INDEX = this->find_branching_variable_index();
+        const int BEST_VARIABLE_INDEX = find_branching_variable_index();
         if (BEST_VARIABLE_INDEX == CDCLCoreConstant::NO_VARIABLE) {
             return false;
         }
@@ -501,9 +505,9 @@ class CDCLCore {
                                        ? MODEL.variable(BEST_VARIABLE_INDEX).phase
                                        : 0;
 
-        this->assign(BEST_VARIABLE_INDEX, BRANCH_VALUE,
-                     CDCLConstraintReference{CDCLConstraintType::NONE,
-                                             CDCLCoreConstant::DECISION});
+        assign(BEST_VARIABLE_INDEX, BRANCH_VALUE,
+               CDCLConstraintReference{CDCLConstraintType::NONE,
+                                       CDCLCoreConstant::DECISION});
 
         return true;
     }
@@ -551,10 +555,10 @@ class CDCLCore {
     /*************************************************************************/
     inline void restart(void) {
         if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
-            this->check_and_update_best_solution();
+            check_and_update_best_solution();
         }
         m_state_manager.on_restart();
-        this->backjump(0);
+        backjump(0);
     }
 
     /*************************************************************************/
@@ -567,7 +571,7 @@ class CDCLCore {
 
         auto [BACKJUMP_LEVEL, UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
               UNIQUE_IMPLICATION_POINT_FORCED_VALUE, LEARNED_CONSTRAINT] =
-            this->analyze_conflict();
+            analyze_conflict();
 
         /**
          * analyze_conflict returns BACKJUMP_LEVEL = NO_VARIABLE (= -1) when
@@ -585,7 +589,7 @@ class CDCLCore {
         m_state_manager.decay_activity_increment();
         m_state_manager.increment_number_of_conflicts();
 
-        this->backjump(BACKJUMP_LEVEL);
+        backjump(BACKJUMP_LEVEL);
 
         CDCLConstraintReference new_constraint_reference =
             m_state_manager.mutable_model().add_learned_constraint(
@@ -596,14 +600,14 @@ class CDCLCore {
             !m_state_manager.model()
                  .variable(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX)
                  .is_assigned()) {
-            this->assign(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
-                         UNIQUE_IMPLICATION_POINT_FORCED_VALUE,
-                         new_constraint_reference);
+            assign(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
+                   UNIQUE_IMPLICATION_POINT_FORCED_VALUE,
+                   new_constraint_reference);
         }
 
-        if (this->should_restart()) {
-            this->restart();
-            if (this->should_reduce_learned_constraints()) {
+        if (should_restart()) {
+            restart();
+            if (should_reduce_learned_constraints()) {
                 [[maybe_unused]] const int PURGED_COUNT =
                     m_state_manager.mutable_model().reduce_learned_constraints(
                         m_option.cdcl.learned_constraint_reduction_rate,
@@ -618,7 +622,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool handle_decision(void) {
-        const bool HAS_UNASSIGNED = this->branch();
+        const bool HAS_UNASSIGNED = branch();
 
         if (HAS_UNASSIGNED) {
             return true;
@@ -639,7 +643,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool satisfy_interrupted_terminate_condition(void) {
-        if (this->check_interrupt()) {
+        if (check_interrupt()) {
             m_state_manager.set_termination_status(
                 CDCLCoreTerminationStatus::INTERRUPTION);
             return true;
@@ -712,8 +716,8 @@ class CDCLCore {
             return;
         }
 
-        this->print_table_body(CDCLIterationEventType::None,
-                               a_IS_ENABLED_PRINT);
+        print_table_body(CDCLIterationEventType::None,
+                         a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -811,14 +815,14 @@ class CDCLCore {
    public:
     /*************************************************************************/
     CDCLCore(void) {
-        this->initialize();
+        initialize();
     }
 
     /*************************************************************************/
     CDCLCore(matrix_model::MatrixModel*                  a_instance_ptr,
              const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
              const option::Option&                       a_OPTION) {
-        this->setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
+        setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
     }
 
     /*************************************************************************/
@@ -838,7 +842,7 @@ class CDCLCore {
         matrix_model::MatrixModel*                  a_instance_ptr,
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
         const option::Option&                       a_OPTION) {
-        this->initialize();
+        initialize();
         m_instance_ptr    = a_instance_ptr;
         m_check_interrupt = a_CHECK_INTERRUPT;
         m_option          = a_OPTION;
@@ -856,10 +860,10 @@ class CDCLCore {
         const bool IS_ENABLED_PRINT_TABLE =
             m_option.output.verbose >= option::verbose::Inner;
 
-        this->print_table_header(IS_ENABLED_PRINT_TABLE);
-        this->print_table_initial(IS_ENABLED_PRINT_TABLE);
+        print_table_header(IS_ENABLED_PRINT_TABLE);
+        print_table_initial(IS_ENABLED_PRINT_TABLE);
         if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
-            this->check_and_update_best_solution();
+            check_and_update_best_solution();
         }
 
         while (true) {
@@ -868,51 +872,51 @@ class CDCLCore {
             /**
              * Terminate the loop if interrupted
              */
-            if (this->satisfy_interrupted_terminate_condition()) {
+            if (satisfy_interrupted_terminate_condition()) {
                 break;
             }
 
             /**
              * Terminate the loop if the time is over.
              */
-            if (this->satisfy_time_over_terminate_condition()) {
+            if (satisfy_time_over_terminate_condition()) {
                 break;
             }
 
             /**
              * Terminate the loop if the iteration is over.
              */
-            if (this->satisfy_iteration_over_terminate_condition()) {
+            if (satisfy_iteration_over_terminate_condition()) {
                 break;
             }
 
             /**
              * Terminate the loop if the conflict limit is reached.
              */
-            if (this->satisfy_conflict_over_terminate_condition()) {
+            if (satisfy_conflict_over_terminate_condition()) {
                 break;
             }
 
             CDCLIterationEventType event_type = CDCLIterationEventType::None;
 
-            if (!this->propagate()) {
+            if (!propagate()) {
                 if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
                     const int CURRENT_TRAIL_SIZE =
                         static_cast<int>(m_state_manager.trail().size());
                     if (CURRENT_TRAIL_SIZE > m_max_trail_size) {
                         m_max_trail_size = CURRENT_TRAIL_SIZE;
-                        this->check_and_update_best_solution();
+                        check_and_update_best_solution();
                     }
                 }
 
                 const auto [IS_CONTINUABLE, CONFLICT_EVENT_TYPE] =
-                    this->handle_conflict();
+                    handle_conflict();
                 if (!IS_CONTINUABLE) {
                     break;
                 }
                 event_type = CONFLICT_EVENT_TYPE;
             } else {
-                if (!this->handle_decision()) {
+                if (!handle_decision()) {
                     break;
                 }
             }
@@ -925,22 +929,22 @@ class CDCLCore {
 
             if (event_type == CDCLIterationEventType::Restart ||
                 IS_LOG_ITERATION) {
-                this->print_table_body(event_type, IS_ENABLED_PRINT_TABLE);
+                print_table_body(event_type, IS_ENABLED_PRINT_TABLE);
             }
         }
 
-        this->print_table_body(CDCLIterationEventType::None,
-                               IS_ENABLED_PRINT_TABLE);
-        this->print_table_footer(IS_ENABLED_PRINT_TABLE);
+        print_table_body(CDCLIterationEventType::None,
+                         IS_ENABLED_PRINT_TABLE);
+        print_table_footer(IS_ENABLED_PRINT_TABLE);
 
         if (m_option.cdcl.is_enabled_evaluate_full_solutions &&
             m_state_manager.termination_status() !=
                 CDCLCoreTerminationStatus::FEASIBLE) {
-            this->check_and_update_best_solution();
+            check_and_update_best_solution();
         }
 
         m_state_manager.set_elapsed_time(time_keeper.clock());
-        this->postprocess();
+        postprocess();
     }
 
     /*************************************************************************/

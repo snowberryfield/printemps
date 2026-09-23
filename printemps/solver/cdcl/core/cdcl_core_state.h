@@ -22,10 +22,10 @@ struct CDCLCoreState {
 
     std::vector<int>        trail;
     std::vector<int>        trail_level_offsets;
-    int                     qhead;
+    int                     propagation_queue_head;
     CDCLConstraintReference conflict_constraint_index;
 
-    std::vector<double> activity;
+    std::vector<double> activities;
     double              variable_activity_increment;
     int                 conflict_limit;
 
@@ -64,11 +64,11 @@ struct CDCLCoreState {
 
         this->trail.clear();
         this->trail_level_offsets.clear();
-        this->qhead                     = 0;
+        this->propagation_queue_head    = 0;
         this->conflict_constraint_index = {CDCLConstraintType::NONE,
                                            CDCLCoreConstant::NO_CONFLICT};
 
-        this->activity.clear();
+        this->activities.clear();
         this->variable_activity_increment = 1.0;
         this->conflict_limit              = 100;
 

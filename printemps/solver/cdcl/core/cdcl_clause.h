@@ -17,32 +17,33 @@ namespace printemps::solver::cdcl::core {
  * - L = 2 * v + 1: negative literal (~x_v), satisfied when x_v == 0, falsified
  * when x_v == 1
  */
-inline constexpr int lit_var(const int a_LIT) noexcept {
-    return a_LIT >> 1;
+inline constexpr int literal_variable(const int a_LITERAL) noexcept {
+    return a_LITERAL >> 1;
 }
 
-inline constexpr int lit_sign(const int a_LIT) noexcept {
-    return a_LIT & 1;
+inline constexpr int literal_sign(const int a_LITERAL) noexcept {
+    return a_LITERAL & 1;
 }
 
-inline constexpr int lit_neg(const int a_LIT) noexcept {
-    return a_LIT ^ 1;
+inline constexpr int literal_negate(const int a_LITERAL) noexcept {
+    return a_LITERAL ^ 1;
 }
 
-inline constexpr int make_lit(const int a_VAR, const int a_SIGN) noexcept {
-    return (a_VAR << 1) | a_SIGN;
+inline constexpr int make_literal(const int a_VARIABLE,
+                                  const int a_SIGN) noexcept {
+    return (a_VARIABLE << 1) | a_SIGN;
 }
 
 /*****************************************************************************/
 /**
  * Watcher: represents a clause watching a literal.
- * blocker_lit is another literal in the clause that is frequently already
- * satisfied. If blocker_lit is satisfied, we can skip fetching the full clause
+ * blocker_literal is another literal in the clause that is frequently already
+ * satisfied. If blocker_literal is satisfied, we can skip fetching the full clause
  * from memory.
  */
 struct CDCLWatcher {
     int constraint_index;
-    int blocker_lit;
+    int blocker_literal;
 };
 
 /*****************************************************************************/
@@ -58,6 +59,7 @@ struct CDCLLearnedClause {
     std::vector<int> positive_variable_indices;
     std::vector<int> negative_variable_indices;
 
+    /*************************************************************************/
     CDCLLearnedClause(void)
         : index(-1),
           literal_block_distance(0),
@@ -67,23 +69,27 @@ struct CDCLLearnedClause {
           negative_variable_indices() {
     }
 
-    CDCLLearnedClause(const int a_INDEX, const int a_LBD,
-                      std::vector<int>&& a_LITERALS, std::vector<int>&& a_POS,
-                      std::vector<int>&& a_NEG)
+    /*************************************************************************/
+    CDCLLearnedClause(const int a_INDEX, const int a_LITERAL_BLOCK_DISTANCE,
+                      std::vector<int>&& a_LITERALS,
+                      std::vector<int>&& a_POSITIVE_VARIABLE_INDICES,
+                      std::vector<int>&& a_NEGATIVE_VARIABLE_INDICES)
         : index(a_INDEX),
-          literal_block_distance(a_LBD),
+          literal_block_distance(a_LITERAL_BLOCK_DISTANCE),
           is_deleted(false),
           literals(std::move(a_LITERALS)),
-          positive_variable_indices(std::move(a_POS)),
-          negative_variable_indices(std::move(a_NEG)) {
+          positive_variable_indices(std::move(a_POSITIVE_VARIABLE_INDICES)),
+          negative_variable_indices(std::move(a_NEGATIVE_VARIABLE_INDICES)) {
     }
 
+    /*************************************************************************/
     inline int size(void) const noexcept {
-        return static_cast<int>(literals.size());
+        return static_cast<int>(this->literals.size());
     }
 
+    /*************************************************************************/
     inline bool empty(void) const noexcept {
-        return literals.empty();
+        return this->literals.empty();
     }
 };
 

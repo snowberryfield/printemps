@@ -42,13 +42,13 @@ struct PseudoBooleanConstraint {
         this->negative_terms              = a_NEGATIVE_TERMS;
 
         this->positive_variable_indices.reserve(this->positive_terms.size());
-        for (const auto& [idx, coeff] : this->positive_terms) {
-            this->positive_variable_indices.push_back(idx);
+        for (const auto& [variable_index, coefficient] : this->positive_terms) {
+            this->positive_variable_indices.push_back(variable_index);
         }
 
         this->negative_variable_indices.reserve(this->negative_terms.size());
-        for (const auto& [idx, coeff] : this->negative_terms) {
-            this->negative_variable_indices.push_back(idx);
+        for (const auto& [variable_index, coefficient] : this->negative_terms) {
+            this->negative_variable_indices.push_back(variable_index);
         }
     }
 

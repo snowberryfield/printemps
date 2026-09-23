@@ -22,7 +22,7 @@ class CDCLController
    public:
     /*************************************************************************/
     CDCLController(void) {
-        this->initialize();
+        initialize();
     }
 
     /*************************************************************************/
@@ -36,19 +36,19 @@ class CDCLController
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
         const option::Option&                                 a_OPTION) {
-        this->setup(a_model_ptr,         //
-                    a_global_state_ptr,  //
-                    a_INITIAL_SOLUTION,  //
-                    a_TIME_KEEPER,       //
-                    a_CHECK_INTERRUPT,   //
-                    a_CALLBACK,          //
-                    a_OPTION);
+        setup(a_model_ptr,         //
+              a_global_state_ptr,  //
+              a_INITIAL_SOLUTION,  //
+              a_TIME_KEEPER,       //
+              a_CHECK_INTERRUPT,   //
+              a_CALLBACK,          //
+              a_OPTION);
     }
 
     /*************************************************************************/
     inline void initialize(void) override {
         AbstractSolverController<T_Variable, T_Expression>::initialize();
-        this->m_result.initialize();
+        m_result.initialize();
     }
 
     /*************************************************************************/
@@ -181,7 +181,7 @@ class CDCLController
          */
         if (this->satisfy_solved_skip_condition(this->m_option.output.verbose >=
                                                 option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -190,7 +190,7 @@ class CDCLController
          */
         if (this->satisfy_not_applicable_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -199,7 +199,7 @@ class CDCLController
          */
         if (this->satisfy_feasible_solution_found_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -208,7 +208,7 @@ class CDCLController
          */
         if (this->satisfy_interrupted_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -218,7 +218,7 @@ class CDCLController
         if (this->satisfy_time_over_skip_condition(
                 TOTAL_ELAPSED_TIME,
                 this->m_option.output.verbose >= option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -228,7 +228,7 @@ class CDCLController
          */
         if (this->satisfy_reach_target_skip_condition(
                 this->m_option.output.verbose >= option::verbose::Outer)) {
-            this->m_result.initialize();
+            m_result.initialize();
             return;
         }
 
@@ -274,7 +274,7 @@ class CDCLController
                                        true);
             }
 
-            const auto portfolio_options = this->generate_portfolio_options(
+            const auto portfolio_options = generate_portfolio_options(
                 base_option, NUMBER_OF_THREADS);
 
             std::atomic<bool> is_interrupted_by_solution{false};
@@ -413,7 +413,7 @@ class CDCLController
         /**
          * Store the result.
          */
-        this->m_result =
+        m_result =
             CDCLControllerResult<T_Variable, T_Expression>(cdcl_result);
 
         /**
@@ -444,33 +444,34 @@ class CDCLController
                 IS_ENABLED_PRINT);
 
             for (int t = 0; t < NUMBER_OF_THREADS; ++t) {
-                const auto& res = thread_results[t];
-                std::string status_str =
+                const auto& thread_result = thread_results[t];
+                std::string status_string =
                     core::CDCLCoreTerminationStatusInverseMap.at(
-                        res.termination_status);
+                        thread_result.termination_status);
 
-                std::string viol_str = "-";
-                if (res.termination_status ==
+                std::string violation_string = "-";
+                if (thread_result.termination_status ==
                     core::CDCLCoreTerminationStatus::FEASIBLE) {
-                    viol_str = "0.00000e+00";
+                    violation_string = "0.00000e+00";
                 } else if (this->m_option.cdcl
                                .is_enabled_evaluate_full_solutions &&
-                           !std::isinf(res.best_total_violation)) {
-                    viol_str =
-                        utility::to_string(res.best_total_violation, "%.5e");
+                           !std::isinf(thread_result.best_total_violation)) {
+                    violation_string = utility::to_string(
+                        thread_result.best_total_violation, "%.5e");
                 }
 
                 char row[128];
-                std::snprintf(row, sizeof(row),
-                              "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
-                              (t == winning_thread_id ? " *" : "  "),  //
-                              t,                                       //
-                              base_option.cdcl.seed + t,               //
-                              status_str.c_str(),                      //
-                              res.number_of_conflicts,                 //
-                              res.number_of_decisions,                 //
-                              res.number_of_restarts,                  //
-                              viol_str.c_str());
+                std::snprintf(
+                    row, sizeof(row),
+                    "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
+                    (t == winning_thread_id ? " *" : "  "),          //
+                    t,                                               //
+                    base_option.cdcl.seed + t,                       //
+                    status_string.c_str(),                           //
+                    thread_result.number_of_conflicts,               //
+                    thread_result.number_of_decisions,               //
+                    thread_result.number_of_restarts,                //
+                    violation_string.c_str());
                 utility::print(std::string(row), IS_ENABLED_PRINT);
             }
 
@@ -525,7 +526,7 @@ class CDCLController
     /*************************************************************************/
     inline const CDCLControllerResult<T_Variable, T_Expression>& result(
         void) const {
-        return this->m_result;
+        return m_result;
     }
 };
 }  // namespace printemps::solver::cdcl::controller

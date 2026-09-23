@@ -24,13 +24,13 @@ class CDCLCoreStateManager {
    public:
     /*************************************************************************/
     CDCLCoreStateManager(void) {
-        this->initialize();
+        initialize();
     }
 
     /*************************************************************************/
     CDCLCoreStateManager(matrix_model::MatrixModel* a_instance_ptr,
                          const option::Option&      a_OPTION) {
-        this->setup(a_instance_ptr, a_OPTION);
+        setup(a_instance_ptr, a_OPTION);
     }
 
     /*************************************************************************/
@@ -49,11 +49,11 @@ class CDCLCoreStateManager {
     /*************************************************************************/
     inline void setup(matrix_model::MatrixModel* a_instance_ptr,
                       const option::Option&      a_OPTION) {
-        this->initialize();
+        initialize();
         m_option = a_OPTION;
 
         m_model.setup(a_instance_ptr);
-        m_state.activity = m_model.initial_activities();
+        m_state.activities = m_model.initial_activities();
 
         const int NUMBER_OF_VARIABLES = m_model.number_of_variables();
 
@@ -65,8 +65,8 @@ class CDCLCoreStateManager {
 
             if (m_option.cdcl.initial_activity_noise_ratio > 0.0) {
                 for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
-                    m_state.activity[i] +=
-                        m_state.activity[i] *
+                    m_state.activities[i] +=
+                        m_state.activities[i] *
                             m_option.cdcl.initial_activity_noise_ratio *
                             dist_real(random_engine) +
                         1e-6 * dist_real(random_engine);
@@ -77,11 +77,12 @@ class CDCLCoreStateManager {
                 for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
                     if (dist_real(random_engine) <
                         m_option.cdcl.initial_phase_perturbation_rate) {
-                        auto& var = m_model.mutable_variable(i);
-                        if (var.phase != CDCLCoreConstant::NO_PHASE) {
-                            var.phase = 1 - var.phase;
+                        auto& variable = m_model.mutable_variable(i);
+                        if (variable.phase != CDCLCoreConstant::NO_PHASE) {
+                            variable.phase = 1 - variable.phase;
                         } else {
-                            var.phase = dist_real(random_engine) < 0.5 ? 1 : 0;
+                            variable.phase =
+                                dist_real(random_engine) < 0.5 ? 1 : 0;
                         }
                     }
                 }
@@ -92,10 +93,12 @@ class CDCLCoreStateManager {
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count = 1;
             m_state.conflict_limit =
-                compute_luby_value(1) * m_option.cdcl.initial_conflict_limit;
+                compute_luby_value(1) *
+                m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
                    option::cdcl_restart_mode::CDCLRestartMode::Geometric) {
-            m_state.conflict_limit = m_option.cdcl.initial_conflict_limit;
+            m_state.conflict_limit =
+                m_option.cdcl.initial_conflict_limit;
         }
         m_state.literal_block_distance_queue.setup(
             m_option.cdcl.restart_adaptive_window);
@@ -108,7 +111,7 @@ class CDCLCoreStateManager {
         /**
          * Build the indexed max-heap: all variables start unassigned.
          */
-        m_heap.setup(NUMBER_OF_VARIABLES, m_state.activity);
+        m_heap.setup(NUMBER_OF_VARIABLES, m_state.activities);
     }
 
     /*************************************************************************/
@@ -178,18 +181,19 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
-    inline int qhead(void) const noexcept {
-        return m_state.qhead;
+    inline int propagation_queue_head(void) const noexcept {
+        return m_state.propagation_queue_head;
     }
 
     /*************************************************************************/
-    inline int& mutable_qhead(void) noexcept {
-        return m_state.qhead;
+    inline int& mutable_propagation_queue_head(void) noexcept {
+        return m_state.propagation_queue_head;
     }
 
     /*************************************************************************/
-    inline void set_qhead(const int a_QHEAD) noexcept {
-        m_state.qhead = a_QHEAD;
+    inline void set_propagation_queue_head(
+        const int a_PROPAGATION_QUEUE_HEAD) noexcept {
+        m_state.propagation_queue_head = a_PROPAGATION_QUEUE_HEAD;
     }
 
     /*************************************************************************/
@@ -206,7 +210,7 @@ class CDCLCoreStateManager {
 
     /*************************************************************************/
     inline double activity_of(const int a_VARIABLE_INDEX) const {
-        return m_state.activity[a_VARIABLE_INDEX];
+        return m_state.activities[a_VARIABLE_INDEX];
     }
 
     /*************************************************************************/
@@ -221,26 +225,28 @@ class CDCLCoreStateManager {
 
     /*************************************************************************/
     inline void rescale_activities(void) {
-        for (auto& act : m_state.activity) {
-            act *= 1e-20;
+        for (auto& activity : m_state.activities) {
+            activity *= 1e-20;
         }
         m_state.variable_activity_increment *= 1e-20;
     }
 
     /*************************************************************************/
     inline void bump_activity(const int a_VARIABLE_INDEX) {
-        m_state.activity[a_VARIABLE_INDEX] +=
+        m_state.activities[a_VARIABLE_INDEX] +=
             m_state.variable_activity_increment;
-        if (m_state.activity[a_VARIABLE_INDEX] > 1e20) {
-            this->rescale_activities();
+        if (m_state.activities[a_VARIABLE_INDEX] > 1e20) {
+            rescale_activities();
         }
-        m_heap.update_after_bump(a_VARIABLE_INDEX, m_state.activity);
+        m_heap.update_after_bump(a_VARIABLE_INDEX,
+                                 m_state.activities);
     }
 
     /*************************************************************************/
     inline int pop_max_unassigned_variable(void) {
         while (!m_heap.empty()) {
-            const int VARIABLE_INDEX = m_heap.pop(m_state.activity);
+            const int VARIABLE_INDEX =
+                m_heap.pop(m_state.activities);
             if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
                 return VARIABLE_INDEX;
             }
@@ -254,15 +260,16 @@ class CDCLCoreStateManager {
         constexpr int MAX_ATTEMPTS = 10;
         int           attempts     = 0;
         while (!m_heap.empty() && attempts < MAX_ATTEMPTS) {
-            std::uniform_int_distribution<int> dist(0, m_heap.size() - 1);
-            const int POS            = dist(a_engine);
-            const int VARIABLE_INDEX = m_heap.heap_array()[POS];
+            std::uniform_int_distribution<int> dist(0,
+                                                    m_heap.size() - 1);
+            const int POSITION       = dist(a_engine);
+            const int VARIABLE_INDEX = m_heap.heap_array()[POSITION];
             if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
-                m_heap.remove(VARIABLE_INDEX, m_state.activity);
+                m_heap.remove(VARIABLE_INDEX, m_state.activities);
                 return VARIABLE_INDEX;
             } else {
                 // Lazily purge already-assigned variable
-                m_heap.remove(VARIABLE_INDEX, m_state.activity);
+                m_heap.remove(VARIABLE_INDEX, m_state.activities);
             }
             attempts++;
         }
@@ -287,7 +294,7 @@ class CDCLCoreStateManager {
             m_state.number_of_assigned_zeros--;
         }
         // Re-insert into heap so this variable can be branched on again.
-        m_heap.push(a_VARIABLE_INDEX, m_state.activity);
+        m_heap.push(a_VARIABLE_INDEX, m_state.activities);
     }
 
     /*************************************************************************/
@@ -404,7 +411,7 @@ class CDCLCoreStateManager {
         }
         m_state.variable_activity_increment *= (1.0 / DECAY_RATE);
         if (m_state.variable_activity_increment > 1e20) {
-            this->rescale_activities();
+            rescale_activities();
         }
     }
 

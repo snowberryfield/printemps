@@ -24,10 +24,10 @@ inline int countr_zero(const std::uint64_t a_VALUE) noexcept {
     return static_cast<int>(index);
 #else
     // Fallback
-    std::uint64_t val = a_VALUE;
-    int count = 0;
-    while ((val & 1ULL) == 0) {
-        val >>= 1;
+    std::uint64_t value = a_VALUE;
+    int           count = 0;
+    while ((value & 1ULL) == 0) {
+        value >>= 1;
         count++;
     }
     return count;
@@ -41,10 +41,10 @@ inline int popcount(const std::uint64_t a_VALUE) noexcept {
 #elif defined(_MSC_VER)
     return static_cast<int>(__popcnt64(a_VALUE));
 #else
-    std::uint64_t val = a_VALUE;
-    int count = 0;
-    while (val != 0) {
-        val &= (val - 1);
+    std::uint64_t value = a_VALUE;
+    int           count = 0;
+    while (value != 0) {
+        value &= (value - 1);
         count++;
     }
     return count;

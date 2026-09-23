@@ -44,7 +44,7 @@ class CDCLVariableHeap {
 
     /*************************************************************************/
     CDCLVariableHeap(void) {
-        this->initialize();
+        initialize();
     }
 
     /*************************************************************************/
@@ -56,7 +56,7 @@ class CDCLVariableHeap {
     /*************************************************************************/
     inline void setup(const int                  a_NUMBER_OF_VARIABLES,
                       const std::vector<double>& a_ACTIVITY) {
-        this->initialize();
+        initialize();
         m_heap_array.resize(a_NUMBER_OF_VARIABLES);
         m_positions.assign(a_NUMBER_OF_VARIABLES, NOT_IN_HEAP);
 
@@ -67,7 +67,7 @@ class CDCLVariableHeap {
 
         // Heapify (build heap in O(N) via sift-down from last parent).
         for (int i = a_NUMBER_OF_VARIABLES / 2 - 1; i >= 0; i--) {
-            this->sift_down(i, a_ACTIVITY);
+            sift_down(i, a_ACTIVITY);
         }
     }
 
@@ -115,9 +115,9 @@ class CDCLVariableHeap {
         int position = a_POSITION;
         while (position > 0) {
             const int PARENT = (position - 1) / 2;
-            if (this->greater_than(m_heap_array[position], m_heap_array[PARENT],
-                                   a_ACTIVITY)) {
-                this->swap_nodes(position, PARENT);
+            if (greater_than(m_heap_array[position], m_heap_array[PARENT],
+                             a_ACTIVITY)) {
+                swap_nodes(position, PARENT);
                 position = PARENT;
             } else {
                 break;
@@ -135,19 +135,19 @@ class CDCLVariableHeap {
             const int LEFT    = 2 * position + 1;
             const int RIGHT   = 2 * position + 2;
             if (LEFT < NUMBER_OF_VARIABLES &&
-                this->greater_than(m_heap_array[LEFT], m_heap_array[largest],
-                                   a_ACTIVITY)) {
+                greater_than(m_heap_array[LEFT], m_heap_array[largest],
+                             a_ACTIVITY)) {
                 largest = LEFT;
             }
             if (RIGHT < NUMBER_OF_VARIABLES &&
-                this->greater_than(m_heap_array[RIGHT], m_heap_array[largest],
-                                   a_ACTIVITY)) {
+                greater_than(m_heap_array[RIGHT], m_heap_array[largest],
+                             a_ACTIVITY)) {
                 largest = RIGHT;
             }
             if (largest == position) {
                 break;
             }
-            this->swap_nodes(position, largest);
+            swap_nodes(position, largest);
             position = largest;
         }
     }
@@ -157,22 +157,22 @@ class CDCLVariableHeap {
                      const std::vector<double>& a_ACTIVITY) noexcept {
         if (a_VARIABLE_INDEX < 0 ||
             a_VARIABLE_INDEX >= static_cast<int>(m_positions.size()) ||
-            this->contains(a_VARIABLE_INDEX)) {
+            contains(a_VARIABLE_INDEX)) {
             return;
         }
         const int POSITION = static_cast<int>(m_heap_array.size());
         m_heap_array.push_back(a_VARIABLE_INDEX);
         m_positions[a_VARIABLE_INDEX] = POSITION;
-        this->sift_up(POSITION, a_ACTIVITY);
+        sift_up(POSITION, a_ACTIVITY);
     }
 
     /*************************************************************************/
     inline void update_after_bump(
         const int                  a_VARIABLE_INDEX,
         const std::vector<double>& a_ACTIVITY) noexcept {
-        const int POSITION = this->position_of(a_VARIABLE_INDEX);
+        const int POSITION = position_of(a_VARIABLE_INDEX);
         if (POSITION != NOT_IN_HEAP) {
-            this->sift_up(POSITION, a_ACTIVITY);
+            sift_up(POSITION, a_ACTIVITY);
         }
     }
 
@@ -183,12 +183,12 @@ class CDCLVariableHeap {
         }
         const int VARIABLE_INDEX = m_heap_array[0];
         const int LAST_POSITION  = static_cast<int>(m_heap_array.size()) - 1;
-        this->swap_nodes(0, LAST_POSITION);
+        swap_nodes(0, LAST_POSITION);
         m_positions[VARIABLE_INDEX] = NOT_IN_HEAP;
         m_heap_array.pop_back();
 
         if (!m_heap_array.empty()) {
-            this->sift_down(0, a_ACTIVITY);
+            sift_down(0, a_ACTIVITY);
         }
         return VARIABLE_INDEX;
     }
@@ -196,7 +196,7 @@ class CDCLVariableHeap {
     /*************************************************************************/
     inline void remove(const int                  a_VARIABLE_INDEX,
                        const std::vector<double>& a_ACTIVITY) noexcept {
-        const int POSITION = this->position_of(a_VARIABLE_INDEX);
+        const int POSITION = position_of(a_VARIABLE_INDEX);
         if (POSITION == NOT_IN_HEAP) {
             return;
         }
@@ -206,11 +206,11 @@ class CDCLVariableHeap {
             m_heap_array.pop_back();
             return;
         }
-        this->swap_nodes(POSITION, LAST_POSITION);
+        swap_nodes(POSITION, LAST_POSITION);
         m_positions[a_VARIABLE_INDEX] = NOT_IN_HEAP;
         m_heap_array.pop_back();
-        this->sift_down(POSITION, a_ACTIVITY);
-        this->sift_up(POSITION, a_ACTIVITY);
+        sift_down(POSITION, a_ACTIVITY);
+        sift_up(POSITION, a_ACTIVITY);
     }
 };
 

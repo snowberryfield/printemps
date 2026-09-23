@@ -29,6 +29,7 @@ class TopologicalSorter {
     }
 
     /*************************************************************************/
+    /*************************************************************************/
     inline void initialize(void) {
         m_nodes.clear();
         m_node_to_index.clear();
@@ -39,8 +40,8 @@ class TopologicalSorter {
 
     /*************************************************************************/
     inline void setup(const std::vector<T> &a_NODES) {
-        this->initialize();
-        this->add_nodes(a_NODES);
+        initialize();
+        add_nodes(a_NODES);
     }
 
     /*************************************************************************/
@@ -60,8 +61,8 @@ class TopologicalSorter {
 
     /*************************************************************************/
     inline void add_nodes(const std::vector<T> &a_NODES) {
-        for (const auto &node : a_NODES) {
-            this->add_node(node);
+        for (const auto &NODE : a_NODES) {
+            add_node(NODE);
         }
     }
 
@@ -72,8 +73,8 @@ class TopologicalSorter {
 
     /*************************************************************************/
     inline void add_edge(const T &a_SOURCE, const T &a_TARGET) {
-        const int SOURCE_INDEX = this->add_node(a_SOURCE);
-        const int TARGET_INDEX = this->add_node(a_TARGET);
+        const int SOURCE_INDEX = add_node(a_SOURCE);
+        const int TARGET_INDEX = add_node(a_TARGET);
         m_successors[SOURCE_INDEX].push_back(TARGET_INDEX);
         m_in_degrees[TARGET_INDEX]++;
     }
@@ -91,12 +92,12 @@ class TopologicalSorter {
             }
         }
 
-        std::vector<T> topo_order;
-        topo_order.reserve(SIZE);
+        std::vector<T> topological_order;
+        topological_order.reserve(SIZE);
         int head = 0;
         while (head < static_cast<int>(queue.size())) {
             const int SOURCE_INDEX = queue[head++];
-            topo_order.push_back(m_nodes[SOURCE_INDEX]);
+            topological_order.push_back(m_nodes[SOURCE_INDEX]);
             for (const int TARGET_INDEX : m_successors[SOURCE_INDEX]) {
                 in_degrees[TARGET_INDEX]--;
                 if (in_degrees[TARGET_INDEX] == 0) {
@@ -105,8 +106,8 @@ class TopologicalSorter {
             }
         }
 
-        m_has_cycle = (static_cast<int>(topo_order.size()) != SIZE);
-        return topo_order;
+        m_has_cycle = (static_cast<int>(topological_order.size()) != SIZE);
+        return topological_order;
     }
 
     /*************************************************************************/
@@ -123,8 +124,8 @@ class TopologicalSorter {
         const auto    &successor_indices = m_successors[it->second];
         std::vector<T> result;
         result.reserve(successor_indices.size());
-        for (const int index : successor_indices) {
-            result.push_back(m_nodes[index]);
+        for (const int INDEX : successor_indices) {
+            result.push_back(m_nodes[INDEX]);
         }
         return result;
     }
