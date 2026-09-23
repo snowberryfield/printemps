@@ -94,8 +94,8 @@ class Model {
         m_matrix_model_handler;
     model_handler::InitialSolutionHandler<T_Variable, T_Expression>
         m_initial_solution_handler;
-    model_handler::StateInspector<T_Variable, T_Expression> m_state_inspector;
-    model_handler::Inspector<T_Variable, T_Expression>      m_inspector;
+    model_handler::StateExporter<T_Variable, T_Expression> m_state_exporter;
+    model_handler::Inspector<T_Variable, T_Expression>     m_inspector;
 
     /*************************************************************************/
     Model(const Model &) = default;
@@ -173,7 +173,7 @@ class Model {
         m_json_handler.setup(this);
         m_matrix_model_handler.setup(this);
         m_initial_solution_handler.setup(this);
-        m_state_inspector.setup(this);
+        m_state_exporter.setup(this);
         m_inspector.setup(this);
     }
 
@@ -678,9 +678,15 @@ class Model {
     }
 
     /*************************************************************************/
-    inline model_handler::StateInspector<T_Variable, T_Expression> &
-    state_inspector(void) noexcept {
-        return m_state_inspector;
+    inline model_handler::StateExporter<T_Variable, T_Expression> &
+    state_exporter(void) noexcept {
+        return m_state_exporter;
+    }
+
+    /*************************************************************************/
+    inline const model_handler::StateExporter<T_Variable, T_Expression> &
+    state_exporter(void) const noexcept {
+        return m_state_exporter;
     }
 
     /*************************************************************************/

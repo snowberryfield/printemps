@@ -391,7 +391,7 @@ class CDCLController
                 this->m_model_ptr, SCORE);
 
             const auto SPARSE_SOLUTION =
-                this->m_model_ptr->state_inspector().export_sparse_solution();
+                this->m_model_ptr->state_exporter().export_sparse_solution();
 
             if (SCORE.is_feasible) {
                 if (this->m_option.output.is_enabled_store_feasible_solutions) {

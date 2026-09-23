@@ -165,12 +165,12 @@ struct Status {
         this->averaged_number_of_threads_move_evaluation =
             TABU_SEARCH_RESULT.state.averaged_number_of_threads_move_evaluation;
 
-        this->penalty_coefficients = this->model_ptr->state_inspector()
+        this->penalty_coefficients = this->model_ptr->state_exporter()
                                          .export_named_penalty_coefficients();
         this->update_counts =
-            this->model_ptr->state_inspector().export_named_update_counts();
+            this->model_ptr->state_exporter().export_named_update_counts();
         this->violation_counts =
-            this->model_ptr->state_inspector().export_named_violation_counts();
+            this->model_ptr->state_exporter().export_named_violation_counts();
     }
 
     /*************************************************************************/

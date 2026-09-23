@@ -724,7 +724,7 @@ class LocalSearchCore {
                 m_model_ptr->updater()
                     .update_dependent_variables_and_disabled_constraints();
                 m_feasible_solutions.push_back(
-                    m_model_ptr->state_inspector().export_sparse_solution());
+                    m_model_ptr->state_exporter().export_sparse_solution());
             }
 
             /**

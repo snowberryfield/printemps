@@ -346,7 +346,7 @@ TEST_F(TestModel, initial_solution_handler) {
 }
 
 /*****************************************************************************/
-TEST_F(TestModel, state_inspector) {
+TEST_F(TestModel, state_exporter) {
     /// This test is skipped because it is just a getter.
 }
 

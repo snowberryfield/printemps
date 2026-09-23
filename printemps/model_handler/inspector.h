@@ -112,13 +112,16 @@ class Inspector {
             }
 
             model_component::Constraint<T_Variable, T_Expression>
-                *first_constraint_ptr = nullptr;
+                                            *first_constraint_ptr = nullptr;
             model_component::ConstraintSense first_constraint_sense =
                 model_component::ConstraintSense::Less;
             T_Expression first_constraint_coeff = 0;
             std::size_t  start_idx              = 0;
 
-            for (std::size_t i = 0; i < CONSTRAINT_SENSITIVITIES.size(); i++) {
+            const int CONSTRAINT_SENSITIVITIES_SIZE =
+                static_cast<int>(CONSTRAINT_SENSITIVITIES.size());
+
+            for (int i = 0; i < CONSTRAINT_SENSITIVITIES_SIZE; i++) {
                 if (CONSTRAINT_SENSITIVITIES[i].first->is_enabled() &&
                     std::abs(CONSTRAINT_SENSITIVITIES[i].second) >
                         constant::EPSILON_10) {
@@ -136,7 +139,7 @@ class Inspector {
 
             const bool IS_FIRST_COEFF_POSITIVE = (first_constraint_coeff > 0);
 
-            for (int i = start_idx; i < CONSTRAINT_SENSITIVITIES.size(); i++) {
+            for (int i = start_idx; i < CONSTRAINT_SENSITIVITIES_SIZE; i++) {
                 const auto CONSTRAINT_PTR = CONSTRAINT_SENSITIVITIES[i].first;
                 if (!CONSTRAINT_PTR->is_enabled()) {
                     continue;

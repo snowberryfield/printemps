@@ -3,24 +3,24 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_MODEL_HANDLER_STATE_INSPECTOR_H__
-#define PRINTEMPS_MODEL_HANDLER_STATE_INSPECTOR_H__
+#ifndef PRINTEMPS_MODEL_HANDLER_STATE_EXPORTER_H__
+#define PRINTEMPS_MODEL_HANDLER_STATE_EXPORTER_H__
 
 namespace printemps::model_handler {
 /*****************************************************************************/
 template <class T_Variable, class T_Expression>
-class StateInspector {
+class StateExporter {
    private:
     const model::Model<T_Variable, T_Expression> *m_model_ptr;
 
    public:
     /*************************************************************************/
-    StateInspector(void) {
+    StateExporter(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    StateInspector(
+    StateExporter(
         const model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }

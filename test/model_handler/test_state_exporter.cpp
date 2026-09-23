@@ -9,7 +9,7 @@
 namespace {
 using namespace printemps;
 /*****************************************************************************/
-class TestStateInspector : public ::testing::Test {
+class TestStateExporter : public ::testing::Test {
    protected:
     utility::UniformRandom<std::uniform_int_distribution<>, int>
         m_random_integer;
@@ -33,7 +33,7 @@ class TestStateInspector : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, generate_variable_parameter_proxies) {
+TEST_F(TestStateExporter, generate_variable_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -44,7 +44,7 @@ TEST_F(TestStateInspector, generate_variable_parameter_proxies) {
     model.builder().setup_unique_names();
 
     auto parameter_proxies =
-        model.state_inspector().generate_variable_parameter_proxies(fill_value);
+        model.state_exporter().generate_variable_parameter_proxies(fill_value);
     EXPECT_EQ(x.index(), parameter_proxies[0].index());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
     EXPECT_EQ(1, parameter_proxies[0].number_of_elements());
@@ -74,7 +74,7 @@ TEST_F(TestStateInspector, generate_variable_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, generate_expression_parameter_proxies) {
+TEST_F(TestStateExporter, generate_expression_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& p = model.create_expression("p");
@@ -85,7 +85,7 @@ TEST_F(TestStateInspector, generate_expression_parameter_proxies) {
     model.builder().setup_unique_names();
 
     auto parameter_proxies =
-        model.state_inspector().generate_expression_parameter_proxies(
+        model.state_exporter().generate_expression_parameter_proxies(
             fill_value);
     EXPECT_EQ(p.index(), parameter_proxies[0].index());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
@@ -116,7 +116,7 @@ TEST_F(TestStateInspector, generate_expression_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, generate_constraint_parameter_proxies) {
+TEST_F(TestStateExporter, generate_constraint_parameter_proxies) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -127,7 +127,7 @@ TEST_F(TestStateInspector, generate_constraint_parameter_proxies) {
     model.builder().setup_unique_names();
 
     auto parameter_proxies =
-        model.state_inspector().generate_constraint_parameter_proxies(
+        model.state_exporter().generate_constraint_parameter_proxies(
             fill_value);
     EXPECT_EQ(g.index(), parameter_proxies[0].index());
     EXPECT_EQ(1, parameter_proxies[0].number_of_dimensions());
@@ -158,7 +158,7 @@ TEST_F(TestStateInspector, generate_constraint_parameter_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_local_penalty_coefficient_proxies) {
+TEST_F(TestStateExporter, export_local_penalty_coefficient_proxies) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -183,7 +183,7 @@ TEST_F(TestStateInspector, export_local_penalty_coefficient_proxies) {
     }
 
     auto local_penalty_coefficient_proxies =
-        model.state_inspector().export_local_penalty_coefficient_proxies();
+        model.state_exporter().export_local_penalty_coefficient_proxies();
 
     EXPECT_EQ(g.index(), local_penalty_coefficient_proxies[0].index());
     EXPECT_EQ(1, local_penalty_coefficient_proxies[0].number_of_dimensions());
@@ -221,7 +221,7 @@ TEST_F(TestStateInspector, export_local_penalty_coefficient_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_update_count_proxies) {
+TEST_F(TestStateExporter, export_update_count_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -245,7 +245,7 @@ TEST_F(TestStateInspector, export_update_count_proxies) {
     }
 
     auto update_count_proxies =
-        model.state_inspector().export_update_count_proxies();
+        model.state_exporter().export_update_count_proxies();
 
     EXPECT_EQ(x.index(), update_count_proxies[0].index());
     EXPECT_EQ(1, update_count_proxies[0].number_of_dimensions());
@@ -276,7 +276,7 @@ TEST_F(TestStateInspector, export_update_count_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_violation_count_proxies) {
+TEST_F(TestStateExporter, export_violation_count_proxies) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -318,7 +318,7 @@ TEST_F(TestStateInspector, export_violation_count_proxies) {
     }
 
     auto violation_count_proxies =
-        model.state_inspector().export_violation_count_proxies();
+        model.state_exporter().export_violation_count_proxies();
 
     EXPECT_EQ(g.index(), violation_count_proxies[0].index());
     EXPECT_EQ(1, violation_count_proxies[0].number_of_dimensions());
@@ -350,7 +350,7 @@ TEST_F(TestStateInspector, export_violation_count_proxies) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_dense_solution) {
+TEST_F(TestStateExporter, export_dense_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -392,7 +392,7 @@ TEST_F(TestStateInspector, export_dense_solution) {
 
     model.updater().update();
 
-    auto solution = model.state_inspector().export_dense_solution();
+    auto solution = model.state_exporter().export_dense_solution();
     EXPECT_EQ(3, static_cast<int>(solution.variable_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.expression_value_proxies.size()));
     EXPECT_EQ(3, static_cast<int>(solution.constraint_value_proxies.size()));
@@ -470,7 +470,7 @@ TEST_F(TestStateInspector, export_dense_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_sparse_solution) {
+TEST_F(TestStateExporter, export_sparse_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -494,7 +494,7 @@ TEST_F(TestStateInspector, export_sparse_solution) {
 
     model.updater().update();
 
-    auto sparse_solution = model.state_inspector().export_sparse_solution();
+    auto sparse_solution = model.state_exporter().export_sparse_solution();
     EXPECT_EQ(model.objective().value(), sparse_solution.objective);
     EXPECT_EQ(model.is_feasible(), sparse_solution.is_feasible);
 
@@ -502,7 +502,7 @@ TEST_F(TestStateInspector, export_sparse_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_named_solution) {
+TEST_F(TestStateExporter, export_named_solution) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -545,7 +545,7 @@ TEST_F(TestStateInspector, export_named_solution) {
     model.builder().update_derived_components();
     model.updater().update();
 
-    auto named_solution = model.state_inspector().export_named_solution();
+    auto named_solution = model.state_exporter().export_named_solution();
 
     EXPECT_EQ(3, static_cast<int>(named_solution.variables().size()));
     EXPECT_EQ(3, static_cast<int>(named_solution.expressions().size()));
@@ -650,7 +650,7 @@ TEST_F(TestStateInspector, export_named_solution) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_named_penalty_coefficients) {
+TEST_F(TestStateExporter, export_named_penalty_coefficients) {
     model::Model<int, double> model;
 
     auto& g = model.create_constraint("g");
@@ -675,7 +675,7 @@ TEST_F(TestStateInspector, export_named_penalty_coefficients) {
     }
 
     auto named_penalty_coefficients =
-        model.state_inspector().export_named_penalty_coefficients();
+        model.state_exporter().export_named_penalty_coefficients();
 
     EXPECT_FLOAT_EQ(10.0, named_penalty_coefficients["g"](0));
     EXPECT_FLOAT_EQ(20.0, named_penalty_coefficients["h"](0));
@@ -685,7 +685,7 @@ TEST_F(TestStateInspector, export_named_penalty_coefficients) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_named_update_counts) {
+TEST_F(TestStateExporter, export_named_update_counts) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -709,7 +709,7 @@ TEST_F(TestStateInspector, export_named_update_counts) {
     }
 
     auto named_update_counts =
-        model.state_inspector().export_named_update_counts();
+        model.state_exporter().export_named_update_counts();
 
     EXPECT_EQ(1, named_update_counts["x"](0));
     EXPECT_EQ(2, named_update_counts["y"](0));
@@ -719,7 +719,7 @@ TEST_F(TestStateInspector, export_named_update_counts) {
 }
 
 /*****************************************************************************/
-TEST_F(TestStateInspector, export_named_violation_counts) {
+TEST_F(TestStateExporter, export_named_violation_counts) {
     model::Model<int, double> model;
 
     auto& x = model.create_variable("x");
@@ -760,7 +760,7 @@ TEST_F(TestStateInspector, export_named_violation_counts) {
     }
 
     auto violation_counts =
-        model.state_inspector().export_named_violation_counts();
+        model.state_exporter().export_named_violation_counts();
 
     EXPECT_EQ(1, violation_counts["g"](0));
     EXPECT_EQ(2, violation_counts["h"](0));

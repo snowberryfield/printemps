@@ -133,7 +133,7 @@ class IncumbentHolder {
                 a_model_ptr->updater()
                     .update_dependent_variables_and_disabled_constraints();
                 solution =
-                    a_model_ptr->state_inspector().export_dense_solution();
+                    a_model_ptr->state_exporter().export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -152,7 +152,7 @@ class IncumbentHolder {
                 a_model_ptr->updater()
                     .update_dependent_variables_and_disabled_constraints();
                 solution =
-                    a_model_ptr->state_inspector().export_dense_solution();
+                    a_model_ptr->state_exporter().export_dense_solution();
                 is_solution_updated = true;
             }
 
@@ -174,7 +174,7 @@ class IncumbentHolder {
                     a_model_ptr->updater()
                         .update_dependent_variables_and_disabled_constraints();
                     solution =
-                        a_model_ptr->state_inspector().export_dense_solution();
+                        a_model_ptr->state_exporter().export_dense_solution();
                     is_solution_updated = true;
                 }
 

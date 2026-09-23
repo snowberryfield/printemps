@@ -48,7 +48,7 @@ TEST_F(TestNamedSolution, initialize) {
     x(1) = 1;
 
     model.updater().update();
-    auto solution = model.state_inspector().export_named_solution();
+    auto solution = model.state_exporter().export_named_solution();
 
     EXPECT_EQ("name", solution.name());
     EXPECT_EQ(2, solution.number_of_variables());

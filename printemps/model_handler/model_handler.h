@@ -24,7 +24,7 @@ class Model;
 #include "opb_handler.h"
 #include "wcnf_handler.h"
 #include "printer.h"
-#include "state_inspector.h"
+#include "state_exporter.h"
 #include "inspector.h"
 
 #endif

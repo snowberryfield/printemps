@@ -118,7 +118,7 @@ class Solver {
         }
 
         auto named_solution =
-            m_model_ptr->state_inspector().export_named_solution();
+            m_model_ptr->state_exporter().export_named_solution();
 
         /**
          * Prepare the result object to return.
@@ -452,13 +452,13 @@ class Solver {
          * Update the state.
          */
         auto initial_solution =
-            m_model_ptr->state_inspector().export_dense_solution();
+            m_model_ptr->state_exporter().export_dense_solution();
         m_global_state.incumbent_holder.try_update_incumbent(
             m_model_ptr, m_model_ptr->evaluator().evaluate({}));
         m_current_solution = initial_solution.to_sparse();
 
         m_global_state.incumbent_solution_archive.push(
-            m_model_ptr->state_inspector().export_sparse_solution());
+            m_model_ptr->state_exporter().export_sparse_solution());
     }
 
     /*************************************************************************/

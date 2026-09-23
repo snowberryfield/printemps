@@ -78,13 +78,13 @@ class LagrangeDualCoreStateManager {
         /**
          * Initialize the primal solution.
          */
-        m_state.primal = m_model_ptr->state_inspector().export_dense_solution();
+        m_state.primal = m_model_ptr->state_exporter().export_dense_solution();
         m_state.primal_incumbent = m_state.primal;
 
         /**
          * Initialize the dual solution as lagrange multipliers.
          */
-        m_state.dual = m_model_ptr->state_inspector()
+        m_state.dual = m_model_ptr->state_exporter()
                            .generate_constraint_parameter_proxies(0.0);
         this->bound_dual();
         m_state.dual_incumbent = m_state.dual;
@@ -164,7 +164,7 @@ class LagrangeDualCoreStateManager {
         if (m_state.lagrangian > m_state.lagrangian_incumbent) {
             m_state.lagrangian_incumbent = m_state.lagrangian;
             m_state.primal_incumbent =
-                m_model_ptr->state_inspector().export_dense_solution();
+                m_model_ptr->state_exporter().export_dense_solution();
             m_state.dual_incumbent = m_state.dual;
         }
 
