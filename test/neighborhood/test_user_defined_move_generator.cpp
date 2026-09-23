@@ -23,8 +23,8 @@ class TestUserDefinedMoveGenerator : public ::testing::Test {
 TEST_F(TestUserDefinedMoveGenerator, setup) {
     model::Model<int, double> model;
 
-    const int N = 100;
-    auto&     x = model.create_variables("x", N, 0, 1);
+    constexpr int N = 100;
+    auto&         x = model.create_variables("x", N, 0, 1);
 
     x(0).fix_by(0);
     x(1).fix_by(1);

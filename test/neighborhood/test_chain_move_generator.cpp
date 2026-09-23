@@ -96,8 +96,8 @@ TEST_F(TestChainMoveGenerator, reduce_moves) {
     model::Model<int, double>       model;
     neighborhood::Move<int, double> move;
 
-    const int N                   = 5000;
-    const int CHAIN_MOVE_CAPACITY = 10000;
+    constexpr int N                   = 5000;
+    constexpr int CHAIN_MOVE_CAPACITY = 10000;
 
     for (int i = 0; i < N; i++) {
         model.neighborhood().chain().register_move(move);

@@ -23,7 +23,7 @@ class TestSelectionMoveGenerator : public ::testing::Test {
 TEST_F(TestSelectionMoveGenerator, setup) {
     model::Model<int, double> model;
 
-    const int              N = 10;
+    constexpr int          N = 10;
     auto&                  x = model.create_variables("x", N, 0, 1);
     [[maybe_unused]] auto& f = model.create_constraint("f", x.selection());
     auto&                  g = model.create_constraint("g", x.sum() <= 5);

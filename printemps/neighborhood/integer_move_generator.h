@@ -86,9 +86,9 @@ class IntegerMoveGenerator
                 [[maybe_unused]] const int  a_NUMBER_OF_THREADS     //
 #endif
             ) {
-                const int DELTA_MAX       = 10000;
-                const int MOVES_SIZE      = 4 * VARIABLES_SIZE;
-                const int NUMBER_OF_WORDS = (MOVES_SIZE + 63) / 64;
+                constexpr int DELTA_MAX       = 10000;
+                const int     MOVES_SIZE      = 4 * VARIABLES_SIZE;
+                const int     NUMBER_OF_WORDS = (MOVES_SIZE + 63) / 64;
 
 #ifdef _OPENMP
 #pragma omp parallel for if (a_IS_ENABLED_PARALLEL) schedule(static) \
