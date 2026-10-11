@@ -8,7 +8,7 @@
 
 #include "adjacent_node.h"
 #include "edge.h"
-#include "graph_base.h"
+#include "abstract_graph.h"
 #include "union_find.h"
 #include "undirected_graph.h"
 #include "directed_graph.h"

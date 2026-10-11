@@ -6,29 +6,26 @@
 #ifndef PRINTEMPS_UTILITY_GRAPH_UNDIRECTED_GRAPH_H__
 #define PRINTEMPS_UTILITY_GRAPH_UNDIRECTED_GRAPH_H__
 
-#include <vector>
-#include <unordered_map>
-#include <algorithm>
-
 #include "adjacent_node.h"
-#include "graph_base.h"
+#include "abstract_graph.h"
 #include "union_find.h"
 
 namespace printemps::utility::graph {
 /*****************************************************************************/
 template <class T>
-class UndirectedGraph : public GraphBase<T> {
+class UndirectedGraph : public AbstractBase<T> {
    private:
     std::vector<std::vector<AdjacentNode>> m_adjacency_list;
 
    public:
     /*************************************************************************/
-    UndirectedGraph(void) : GraphBase<T>() {
+    UndirectedGraph(void) : AbstractBase<T>() {
         this->initialize();
     }
 
     /*************************************************************************/
-    explicit UndirectedGraph(const std::vector<T> &a_NODES) : GraphBase<T>() {
+    explicit UndirectedGraph(const std::vector<T> &a_NODES)
+        : AbstractBase<T>() {
         this->initialize();
         this->add_nodes(a_NODES);
     }
@@ -38,13 +35,12 @@ class UndirectedGraph : public GraphBase<T> {
 
     /*************************************************************************/
     inline void initialize(void) override {
-        GraphBase<T>::initialize();
+        AbstractBase<T>::initialize();
         m_adjacency_list.clear();
     }
 
     /*************************************************************************/
-    inline int add_node(const T     &a_NODE,
-                        const double a_WEIGHT = 0.0) override {
+    inline int add_node(const T &a_NODE, const double a_WEIGHT = 0.0) override {
         const auto [INDEX, IS_NEW] = this->register_node(a_NODE, a_WEIGHT);
         if (IS_NEW) {
             m_adjacency_list.emplace_back();
@@ -127,11 +123,10 @@ class UndirectedGraph : public GraphBase<T> {
             edge_ptrs.push_back(&edge);
         }
 
-        std::stable_sort(
-            edge_ptrs.begin(), edge_ptrs.end(),
-            [](const auto *a_FIRST, const auto *a_SECOND) {
-                return a_FIRST->weight < a_SECOND->weight;
-            });
+        std::stable_sort(edge_ptrs.begin(), edge_ptrs.end(),
+                         [](const auto *a_FIRST, const auto *a_SECOND) {
+                             return a_FIRST->weight < a_SECOND->weight;
+                         });
 
         UnionFind<T>       union_find(this->m_nodes);
         UndirectedGraph<T> mst;

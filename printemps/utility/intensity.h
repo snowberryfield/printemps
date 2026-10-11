@@ -6,9 +6,6 @@
 #ifndef PRINTEMPS_UTILITY_INTENSITY_H__
 #define PRINTEMPS_UTILITY_INTENSITY_H__
 
-#include <cstdint>
-#include <unordered_map>
-
 namespace printemps::utility {
 
 /*****************************************************************************/

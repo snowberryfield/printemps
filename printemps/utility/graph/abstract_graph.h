@@ -3,17 +3,15 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_GRAPH_GRAPH_BASE_H__
-#define PRINTEMPS_UTILITY_GRAPH_GRAPH_BASE_H__
+#ifndef PRINTEMPS_UTILITY_GRAPH_ABSTRACT_GRAPH_H__
+#define PRINTEMPS_UTILITY_GRAPH_ABSTRACT_GRAPH_H__
 
-#include <vector>
-#include <unordered_map>
 #include "edge.h"
 
 namespace printemps::utility::graph {
 /*****************************************************************************/
 template <class T>
-class GraphBase {
+class AbstractBase {
    protected:
     std::vector<T>             m_nodes;
     std::unordered_map<T, int> m_node_to_index;
@@ -27,7 +25,7 @@ class GraphBase {
         if (it != m_node_to_index.end()) {
             return {it->second, false};
         }
-        const int INDEX = static_cast<int>(m_nodes.size());
+        const int INDEX         = static_cast<int>(m_nodes.size());
         m_node_to_index[a_NODE] = INDEX;
         m_nodes.push_back(a_NODE);
         m_node_weights.push_back(a_WEIGHT);
@@ -36,12 +34,12 @@ class GraphBase {
 
    public:
     /*************************************************************************/
-    GraphBase(void) {
+    AbstractBase(void) {
         this->initialize();
     }
 
     /*************************************************************************/
-    virtual ~GraphBase(void) = default;
+    virtual ~AbstractBase(void) = default;
 
     /*************************************************************************/
     virtual void initialize(void) {

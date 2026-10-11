@@ -6,32 +6,24 @@
 #ifndef PRINTEMPS_UTILITY_GRAPH_DIRECTED_GRAPH_H__
 #define PRINTEMPS_UTILITY_GRAPH_DIRECTED_GRAPH_H__
 
-#include <vector>
-#include <unordered_map>
-#include <algorithm>
-
 #include "adjacent_node.h"
-#include "graph_base.h"
+#include "abstract_graph.h"
 
 namespace printemps::utility::graph {
 /*****************************************************************************/
 template <class T>
-class DirectedGraph : public GraphBase<T> {
+class DirectedGraph : public AbstractBase<T> {
    private:
     std::vector<std::vector<AdjacentNode>> m_successors;
     std::vector<std::vector<AdjacentNode>> m_predecessors;
     std::vector<int>                       m_in_degrees;
 
     /*************************************************************************/
-    void dfs_tarjan(const int                    a_NODE_INDEX,
-                    int                         &a_current_order,
-                    std::vector<int>            &a_dfs_order,
-                    std::vector<int>            &a_lowlink,
-                    std::vector<bool>           &a_is_on_stack,
-                    std::vector<int>            &a_stack,
+    void dfs_tarjan(const int a_NODE_INDEX, int &a_current_order,
+                    std::vector<int> &a_dfs_order, std::vector<int> &a_lowlink,
+                    std::vector<bool> &a_is_on_stack, std::vector<int> &a_stack,
                     std::vector<std::vector<T>> &a_components) const {
-        a_dfs_order[a_NODE_INDEX] = a_lowlink[a_NODE_INDEX] =
-            a_current_order++;
+        a_dfs_order[a_NODE_INDEX] = a_lowlink[a_NODE_INDEX] = a_current_order++;
         a_stack.push_back(a_NODE_INDEX);
         a_is_on_stack[a_NODE_INDEX] = true;
 
@@ -66,12 +58,12 @@ class DirectedGraph : public GraphBase<T> {
 
    public:
     /*************************************************************************/
-    DirectedGraph(void) : GraphBase<T>() {
+    DirectedGraph(void) : AbstractBase<T>() {
         this->initialize();
     }
 
     /*************************************************************************/
-    explicit DirectedGraph(const std::vector<T> &a_NODES) : GraphBase<T>() {
+    explicit DirectedGraph(const std::vector<T> &a_NODES) : AbstractBase<T>() {
         this->initialize();
         this->add_nodes(a_NODES);
     }
@@ -81,15 +73,14 @@ class DirectedGraph : public GraphBase<T> {
 
     /*************************************************************************/
     inline void initialize(void) override {
-        GraphBase<T>::initialize();
+        AbstractBase<T>::initialize();
         m_successors.clear();
         m_predecessors.clear();
         m_in_degrees.clear();
     }
 
     /*************************************************************************/
-    inline int add_node(const T     &a_NODE,
-                        const double a_WEIGHT = 0.0) override {
+    inline int add_node(const T &a_NODE, const double a_WEIGHT = 0.0) override {
         const auto [INDEX, IS_NEW] = this->register_node(a_NODE, a_WEIGHT);
         if (IS_NEW) {
             m_successors.emplace_back();
@@ -270,7 +261,7 @@ class DirectedGraph : public GraphBase<T> {
     /*************************************************************************/
     inline std::vector<std::vector<T>> strongly_connected_components(
         void) const {
-        const int SIZE = static_cast<int>(this->m_nodes.size());
+        const int         SIZE = static_cast<int>(this->m_nodes.size());
         std::vector<int>  dfs_order(SIZE, -1);
         std::vector<int>  lowlink(SIZE, 0);
         std::vector<bool> is_on_stack(SIZE, false);
