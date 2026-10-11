@@ -124,16 +124,14 @@ struct Status {
 
         if (GLOBAL_STATE.termination_status != TerminationStatus::UNKNOWN) {
             this->termination_status = GLOBAL_STATE.termination_status;
-        } else if (this->is_found_feasible_solution) {
-            this->termination_status = TerminationStatus::FEASIBLE;
+        } else if (this->option.general.time_max >= 0 &&
+                   a_solver_ptr->time_keeper().elapsed_time() >=
+                       this->option.general.time_max) {
+            this->termination_status = TerminationStatus::TIME_OVER;
+        } else if (this->option.general.iteration_max >= 0) {
+            this->termination_status = TerminationStatus::ITERATION_OVER;
         } else {
-            if (this->option.general.time_max >= 0 &&
-                a_solver_ptr->time_keeper().elapsed_time() >=
-                    this->option.general.time_max) {
-                this->termination_status = TerminationStatus::TIME_OVER;
-            } else {
-                this->termination_status = TerminationStatus::UNKNOWN;
-            }
+            this->termination_status = TerminationStatus::UNKNOWN;
         }
 
         this->start_date_time  = a_solver_ptr->start_date_time();

@@ -368,6 +368,28 @@ class ProblemSizeReducerBasic {
             a_constraint_ptr->expression().constant_value();
 
         /**
+         * If the constraint cannot be satisfied obviously, the problem is
+         * infeasible.
+         */
+        if ((a_constraint_ptr->sense() ==
+                 model_component::ConstraintSense::Equal &&
+             (constraint_lower_bound > constant::EPSILON ||
+              constraint_upper_bound < -constant::EPSILON)) ||
+            (a_constraint_ptr->sense() ==
+                 model_component::ConstraintSense::Less &&
+             constraint_lower_bound > constant::EPSILON) ||
+            (a_constraint_ptr->sense() ==
+                 model_component::ConstraintSense::Greater &&
+             constraint_upper_bound < -constant::EPSILON)) {
+            throw error_handler::InfeasibleError(utility::format_error_location(
+                __FILE__, __LINE__, __func__,
+                "The constraint " + a_constraint_ptr->name() +
+                    " cannot be satisfied. lower bound: " +
+                    std::to_string(constraint_lower_bound) +
+                    ", upper bound: " + std::to_string(constraint_upper_bound)));
+        }
+
+        /**
          * If the constraint is always satisfied obviously, it will be removed.
          */
         if ((a_constraint_ptr->sense() ==

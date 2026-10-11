@@ -948,6 +948,8 @@ class TabuSearchController
              */
             if (this->satisfy_interrupted_terminate_condition(
                     this->m_option.output.verbose >= option::verbose::Outer)) {
+                this->m_global_state_ptr->termination_status =
+                    TerminationStatus::INTERRUPTION;
                 break;
             }
 
@@ -956,6 +958,8 @@ class TabuSearchController
              */
             if (this->satisfy_time_over_terminate_condition(  //
                     this->m_option.output.verbose >= option::verbose::Outer)) {
+                this->m_global_state_ptr->termination_status =
+                    TerminationStatus::TIME_OVER;
                 break;
             }
 
@@ -964,6 +968,8 @@ class TabuSearchController
              */
             if (this->satisfy_iteration_over_terminate_condition(  //
                     this->m_option.output.verbose >= option::verbose::Outer)) {
+                this->m_global_state_ptr->termination_status =
+                    TerminationStatus::ITERATION_OVER;
                 break;
             }
 
@@ -973,6 +979,8 @@ class TabuSearchController
              */
             if (this->satisfy_reach_target_terminate_condition(  //
                     this->m_option.output.verbose >= option::verbose::Outer)) {
+                this->m_global_state_ptr->termination_status =
+                    TerminationStatus::REACH_TARGET;
                 break;
             }
 
@@ -981,6 +989,8 @@ class TabuSearchController
              */
             if (this->satisfy_optimal_terminate_condition(  //
                     this->m_option.output.verbose >= option::verbose::Outer)) {
+                this->m_global_state_ptr->termination_status =
+                    TerminationStatus::OPTIMAL;
                 break;
             }
 

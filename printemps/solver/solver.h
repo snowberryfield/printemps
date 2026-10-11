@@ -125,6 +125,9 @@ class Solver {
          */
         m_time_keeper.clock();
         Status<T_Variable, T_Expression> status(this);
+        named_solution.set_termination_status(
+            TerminationStatusInverseMap.at(status.termination_status));
+        named_solution.set_is_proven_infeasible(status.is_proven_infeasible());
         Result<T_Variable, T_Expression> result(  //
             named_solution, status, m_global_state.feasible_solution_archive);
 
@@ -347,9 +350,6 @@ class Solver {
                 m_model_ptr->name(),                             //
                 m_model_ptr->reference().number_of_variables(),  //
                 m_model_ptr->reference().number_of_constraints());
-            utility::print_message(
-                "Preprocessing proved infeasibility.",
-                m_option.output.verbose >= option::verbose::Outer);
             return;
         }
 
@@ -472,6 +472,9 @@ class Solver {
          * If preprocessing proved the problem infeasible, skip optimization.
          */
         if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "Preprocessing proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
             auto result = this->postprocess();
             return result;
         }
@@ -531,10 +534,32 @@ class Solver {
         }
 
         /**
+         * If Lagrange dual terminated early, skip remaining phases.
+         */
+        if (m_global_state.termination_status != TerminationStatus::UNKNOWN) {
+            utility::print_message(
+                "Lagrange dual terminated early. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            auto result = this->postprocess();
+            return result;
+        }
+
+        /**
          * Run a local search to improve the initial solution (optional).
          */
         if (m_option.local_search.is_enabled) {
             this->run_local_search();
+        }
+
+        /**
+         * If local search terminated early, skip remaining phases.
+         */
+        if (m_global_state.termination_status != TerminationStatus::UNKNOWN) {
+            utility::print_message(
+                "Local search terminated early. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            auto result = this->postprocess();
+            return result;
         }
 
         /**
@@ -561,6 +586,9 @@ class Solver {
          * If preprocessing proved the problem infeasible, skip optimization.
          */
         if (m_global_state.is_proven_infeasible()) {
+            utility::print_message(
+                "Preprocessing proved infeasibility. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
             return;
         }
 
@@ -616,10 +644,30 @@ class Solver {
         }
 
         /**
+         * If Lagrange dual terminated early, skip remaining phases.
+         */
+        if (m_global_state.termination_status != TerminationStatus::UNKNOWN) {
+            utility::print_message(
+                "Lagrange dual terminated early. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            return;
+        }
+
+        /**
          * Run a local search to improve the initial solution (optional).
          */
         if (m_option.local_search.is_enabled) {
             this->run_local_search();
+        }
+
+        /**
+         * If local search terminated early, skip remaining phases.
+         */
+        if (m_global_state.termination_status != TerminationStatus::UNKNOWN) {
+            utility::print_message(
+                "Local search terminated early. Skipping remaining phases.",
+                m_option.output.verbose >= option::verbose::Outer);
+            return;
         }
 
         /**

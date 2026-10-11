@@ -30,6 +30,8 @@ class NamedSolution {
     T_Expression m_total_violation;
     double       m_global_augmented_objective;
     bool         m_is_feasible;
+    std::string  m_termination_status;
+    bool         m_is_proven_infeasible;
 
    public:
     /*************************************************************************/
@@ -51,6 +53,8 @@ class NamedSolution {
         m_total_violation            = 0;
         m_global_augmented_objective = 0.0;
         m_is_feasible                = false;
+        m_termination_status         = "UNKNOWN";
+        m_is_proven_infeasible       = false;
     }
 
     /*************************************************************************/
@@ -83,28 +87,39 @@ class NamedSolution {
         object.emplace_back("number_of_variables", m_number_of_variables);
         object.emplace_back("number_of_constraints", m_number_of_constraints);
         object.emplace_back("is_found_feasible_solution", m_is_feasible);
-        object.emplace_back("objective", m_objective);
-        object.emplace_back("total_violation", m_total_violation);
+        object.emplace_back("termination_status", m_termination_status);
 
-        /// Decision variables
-        object.emplace_back(
-            "variables",  //
-            multi_array::create_json_object(m_variable_value_proxies));
+        if (m_is_proven_infeasible) {
+            object.emplace_back("objective", std::any());
+            object.emplace_back("total_violation", std::any());
+            object.emplace_back("variables", std::any());
+            object.emplace_back("expressions", std::any());
+            object.emplace_back("constraints", std::any());
+            object.emplace_back("violations", std::any());
+        } else {
+            object.emplace_back("objective", m_objective);
+            object.emplace_back("total_violation", m_total_violation);
 
-        /// Expressions
-        object.emplace_back(
-            "expressions",  //
-            multi_array::create_json_object(m_expression_value_proxies));
+            /// Decision variables
+            object.emplace_back(
+                "variables",  //
+                multi_array::create_json_object(m_variable_value_proxies));
 
-        /// Constraints
-        object.emplace_back(
-            "constraints",  //
-            multi_array::create_json_object(m_constraint_value_proxies));
+            /// Expressions
+            object.emplace_back(
+                "expressions",  //
+                multi_array::create_json_object(m_expression_value_proxies));
 
-        /// Violations
-        object.emplace_back(
-            "violations",  //
-            multi_array::create_json_object(m_violation_value_proxies));
+            /// Constraints
+            object.emplace_back(
+                "constraints",  //
+                multi_array::create_json_object(m_constraint_value_proxies));
+
+            /// Violations
+            object.emplace_back(
+                "violations",  //
+                multi_array::create_json_object(m_violation_value_proxies));
+        }
 
         utility::json::write_json_object(object, a_FILE_NAME);
     }
@@ -119,28 +134,39 @@ class NamedSolution {
         object.emplace_back("number_of_variables", m_number_of_variables);
         object.emplace_back("number_of_constraints", m_number_of_constraints);
         object.emplace_back("is_found_feasible_solution", m_is_feasible);
-        object.emplace_back("objective", m_objective);
-        object.emplace_back("total_violation", m_total_violation);
+        object.emplace_back("termination_status", m_termination_status);
 
-        /// Decision variables
-        object.emplace_back(
-            "variables",  //
-            multi_array::create_json_array(m_variable_value_proxies));
+        if (m_is_proven_infeasible) {
+            object.emplace_back("objective", std::any());
+            object.emplace_back("total_violation", std::any());
+            object.emplace_back("variables", std::any());
+            object.emplace_back("expressions", std::any());
+            object.emplace_back("constraints", std::any());
+            object.emplace_back("violations", std::any());
+        } else {
+            object.emplace_back("objective", m_objective);
+            object.emplace_back("total_violation", m_total_violation);
 
-        /// Expressions
-        object.emplace_back(
-            "expressions",  //
-            multi_array::create_json_array(m_expression_value_proxies));
+            /// Decision variables
+            object.emplace_back(
+                "variables",  //
+                multi_array::create_json_array(m_variable_value_proxies));
 
-        /// Constraints
-        object.emplace_back(
-            "constraints",  //
-            multi_array::create_json_array(m_constraint_value_proxies));
+            /// Expressions
+            object.emplace_back(
+                "expressions",  //
+                multi_array::create_json_array(m_expression_value_proxies));
 
-        /// Violations
-        object.emplace_back(
-            "violations",  //
-            multi_array::create_json_array(m_violation_value_proxies));
+            /// Constraints
+            object.emplace_back(
+                "constraints",  //
+                multi_array::create_json_array(m_constraint_value_proxies));
+
+            /// Violations
+            object.emplace_back(
+                "violations",  //
+                multi_array::create_json_array(m_violation_value_proxies));
+        }
 
         utility::json::write_json_object(object, a_FILE_NAME);
     }
@@ -148,6 +174,12 @@ class NamedSolution {
     /*************************************************************************/
     void write_solution(const std::string& a_FILE_NAME) const {
         std::ofstream ofs(a_FILE_NAME.c_str());
+
+        if (m_is_proven_infeasible) {
+            ofs << "=infeasible=" << std::endl;
+            ofs.close();
+            return;
+        }
 
         if (m_is_feasible) {
             ofs << "=obj= " << utility::to_string(m_objective, "%.10e")
@@ -247,6 +279,27 @@ class NamedSolution {
     /*************************************************************************/
     inline bool is_feasible(void) const {
         return m_is_feasible;
+    }
+
+    /*************************************************************************/
+    inline const std::string& termination_status(void) const {
+        return m_termination_status;
+    }
+
+    /*************************************************************************/
+    inline void set_termination_status(
+        const std::string& a_TERMINATION_STATUS) {
+        m_termination_status = a_TERMINATION_STATUS;
+    }
+
+    /*************************************************************************/
+    inline bool is_proven_infeasible(void) const {
+        return m_is_proven_infeasible;
+    }
+
+    /*************************************************************************/
+    inline void set_is_proven_infeasible(const bool a_IS_PROVEN_INFEASIBLE) {
+        m_is_proven_infeasible = a_IS_PROVEN_INFEASIBLE;
     }
 };
 using IPNamedSolution = NamedSolution<int, double>;

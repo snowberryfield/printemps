@@ -164,6 +164,30 @@ class LocalSearchController
             local_search_result);
 
         /**
+         * Propagate termination status to GlobalState.
+         */
+        if (local_search_result.termination_status ==
+            core::LocalSearchCoreTerminationStatus::INTERRUPTION) {
+            this->m_global_state_ptr->termination_status =
+                TerminationStatus::INTERRUPTION;
+        } else if (local_search_result.termination_status ==
+                   core::LocalSearchCoreTerminationStatus::OPTIMAL) {
+            this->m_global_state_ptr->termination_status =
+                TerminationStatus::OPTIMAL;
+        } else if (local_search_result.termination_status ==
+                   core::LocalSearchCoreTerminationStatus::REACH_TARGET) {
+            this->m_global_state_ptr->termination_status =
+                TerminationStatus::REACH_TARGET;
+        } else if (local_search_result.termination_status ==
+                       core::LocalSearchCoreTerminationStatus::TIME_OVER &&
+                   this->m_option.general.time_max >= 0 &&
+                   this->m_time_keeper.clock() >
+                       this->m_option.general.time_max) {
+            this->m_global_state_ptr->termination_status =
+                TerminationStatus::TIME_OVER;
+        }
+
+        /**
          * Print the search summary.
          */
         utility::print_message(

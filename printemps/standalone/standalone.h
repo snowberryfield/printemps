@@ -244,22 +244,34 @@ class Standalone {
 
         const auto RESULT = solver.solve();
 
-        /**
-         * Print the result summary.
-         */
-        printemps::utility::print_info(
-            "status: " + std::to_string(RESULT.solution.is_feasible()),
-            m_option.output.verbose >= printemps::option::verbose::Warning);
+        if (RESULT.status.is_proven_infeasible()) {
+            printemps::utility::print_info(
+                "status: INFEASIBLE (No feasible solution exists)",
+                m_option.output.verbose >= printemps::option::verbose::Warning);
+        } else {
+            if (RESULT.solution.is_feasible()) {
+                printemps::utility::print_info(
+                    "status: " + RESULT.solution.termination_status() +
+                        " (feasible solution found)",
+                    m_option.output.verbose >=
+                        printemps::option::verbose::Warning);
+            } else {
+                printemps::utility::print_info(
+                    "status: " + RESULT.solution.termination_status() +
+                        " (No feasible solution found)",
+                    m_option.output.verbose >=
+                        printemps::option::verbose::Warning);
+            }
 
-        printemps::utility::print_info(
-            "objective: " + std::to_string(RESULT.solution.objective()),
-            m_option.output.verbose >= printemps::option::verbose::Warning);
+            printemps::utility::print_info(
+                "objective: " + std::to_string(RESULT.solution.objective()),
+                m_option.output.verbose >= printemps::option::verbose::Warning);
 
-        printemps::utility::print_info(
-            "total violation: " +
-                std::to_string(RESULT.solution.total_violation()),
-            m_option.output.verbose >= printemps::option::verbose::Warning);
-
+            printemps::utility::print_info(
+                "total violation: " +
+                    std::to_string(RESULT.solution.total_violation()),
+                m_option.output.verbose >= printemps::option::verbose::Warning);
+        }
         RESULT.solution.write_json_by_name("incumbent.json");
         RESULT.solution.write_solution("incumbent.sol");
         RESULT.status.write_json_by_name("status.json");

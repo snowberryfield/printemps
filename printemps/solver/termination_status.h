@@ -15,7 +15,8 @@ enum class TerminationStatus {
     INFEASIBLE,
     TIME_OVER,
     ITERATION_OVER,
-    INTERRUPTION
+    INTERRUPTION,
+    REACH_TARGET
 };
 
 /*****************************************************************************/
@@ -27,7 +28,8 @@ static std::unordered_map<std::string, TerminationStatus>
         {"INFEASIBLE", TerminationStatus::INFEASIBLE},
         {"TIME_OVER", TerminationStatus::TIME_OVER},
         {"ITERATION_OVER", TerminationStatus::ITERATION_OVER},
-        {"INTERRUPTION", TerminationStatus::INTERRUPTION}};
+        {"INTERRUPTION", TerminationStatus::INTERRUPTION},
+        {"REACH_TARGET", TerminationStatus::REACH_TARGET}};
 
 /*****************************************************************************/
 static std::unordered_map<TerminationStatus, std::string>
@@ -38,7 +40,8 @@ static std::unordered_map<TerminationStatus, std::string>
         {TerminationStatus::INFEASIBLE, "INFEASIBLE"},
         {TerminationStatus::TIME_OVER, "TIME_OVER"},
         {TerminationStatus::ITERATION_OVER, "ITERATION_OVER"},
-        {TerminationStatus::INTERRUPTION, "INTERRUPTION"}};
+        {TerminationStatus::INTERRUPTION, "INTERRUPTION"},
+        {TerminationStatus::REACH_TARGET, "REACH_TARGET"}};
 
 }  // namespace printemps::solver
 

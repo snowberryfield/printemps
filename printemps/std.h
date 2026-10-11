@@ -15,6 +15,7 @@
 #include <chrono>
 #include <cmath>
 #include <csignal>
+#include <cstdio>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>

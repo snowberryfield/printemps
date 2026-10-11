@@ -133,6 +133,7 @@ PYBIND11_MODULE(_printemps, m) {
         .value("TIME_OVER", pp::solver::TerminationStatus::TIME_OVER)
         .value("ITERATION_OVER", pp::solver::TerminationStatus::ITERATION_OVER)
         .value("INTERRUPTION", pp::solver::TerminationStatus::INTERRUPTION)
+        .value("REACH_TARGET", pp::solver::TerminationStatus::REACH_TARGET)
         .export_values();
 
     // ----- Variable -------------------------------------------------------
@@ -706,6 +707,8 @@ PYBIND11_MODULE(_printemps, m) {
         .def("objective", &NamedSol::objective)
         .def("total_violation", &NamedSol::total_violation)
         .def("is_feasible", &NamedSol::is_feasible)
+        .def("termination_status", &NamedSol::termination_status)
+        .def("is_proven_infeasible", &NamedSol::is_proven_infeasible)
         .def("variables",
              py::overload_cast<const std::string &>(&NamedSol::variables,
                                                     py::const_),
