@@ -8,7 +8,7 @@
 
 namespace printemps::neighborhood {
 /*****************************************************************************/
-enum class MoveType {
+enum class MoveType : std::uint8_t {
     Binary,                      //
     Integer,                     //
     Selection,                   //

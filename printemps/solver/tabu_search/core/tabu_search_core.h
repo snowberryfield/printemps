@@ -517,7 +517,8 @@ class TabuSearchCore {
             }
 
             if (chain_move.overlap_rate >
-                    m_option.neighborhood.chain_move_overlap_rate_threshold &&
+                    static_cast<float>(
+                        m_option.neighborhood.chain_move_overlap_rate_threshold) &&
                 !chain_move.has_duplicate_variable()) {
                 auto back_chain_move = chain_move;
                 for (auto&& alteration : back_chain_move.alterations) {

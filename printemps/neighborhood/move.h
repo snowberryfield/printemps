@@ -22,15 +22,14 @@ struct Move {
     model_component::Constraint<T_Variable, T_Expression>
         *associated_constraint_ptr;
 
-    std::uint_fast64_t hash;
-    double             overlap_rate;
+    float         overlap_rate;
+    std::uint16_t hash;
+    MoveType      type;
 
-    MoveType type;
-
-    bool is_univariable_move;
-    bool is_selection_move;
-    bool is_special_neighborhood_move;
-    bool is_available;
+    std::uint8_t is_univariable_move : 1;
+    std::uint8_t is_selection_move : 1;
+    std::uint8_t is_special_neighborhood_move : 1;
+    std::uint8_t is_available : 1;
 
     /*************************************************************************/
     Move(void) {
@@ -43,7 +42,7 @@ struct Move {
         this->related_constraint_ptrs.clear();
         this->associated_constraint_ptr    = nullptr;
         this->hash                         = 0;
-        this->overlap_rate                 = 0.0;
+        this->overlap_rate                 = 0.0f;
         this->type                         = MoveType::General;
         this->is_univariable_move          = false;
         this->is_selection_move            = false;
@@ -188,10 +187,10 @@ struct Move {
          * ^{1/(#alterations -1)}, where # denotes the number of elements in a
          * set.
          */
-        this->overlap_rate =
+        this->overlap_rate = static_cast<float>(
             pow(static_cast<double>(intersection_ptrs.size()) /
                     static_cast<double>(union_ptrs.size()),
-                1.0 / static_cast<double>(ALTERATIONS_SIZE - 1));
+                1.0 / static_cast<double>(ALTERATIONS_SIZE - 1)));
     }
 
     /*************************************************************************/
@@ -208,7 +207,8 @@ struct Move {
             hash =
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
-        this->hash = hash;
+        this->hash = static_cast<std::uint16_t>(
+            (hash ^ (hash >> 16) ^ (hash >> 32) ^ (hash >> 48)) & 0xFFFF);
     }
 
     /*************************************************************************/
@@ -314,7 +314,7 @@ inline bool operator==(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
      * are likely to be different. See compute_hash() for detail.
      */
     if (std::fabs(a_MOVE_FIRST.overlap_rate - a_MOVE_SECOND.overlap_rate) >
-        constant::EPSILON_10) {
+        constant::EPSILON) {
         return false;
     }
 
@@ -342,6 +342,7 @@ inline bool operator!=(const Move<T_Variable, T_Expression> &a_MOVE_FIRST,
 }
 
 using IPMove = Move<int, double>;
+static_assert(sizeof(IPMove) == 64, "IPMove must be exactly 64 bytes");
 }  // namespace printemps::neighborhood
 #endif
 /*****************************************************************************/

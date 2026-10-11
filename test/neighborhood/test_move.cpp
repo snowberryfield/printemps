@@ -302,9 +302,11 @@ TEST_F(TestMove, setup_hash) {
             hash =
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
+        const std::uint16_t EXPECTED_HASH = static_cast<std::uint16_t>(
+            (hash ^ (hash >> 16) ^ (hash >> 32) ^ (hash >> 48)) & 0xFFFF);
 
         move.setup_hash();
-        EXPECT_EQ(hash, move.hash);
+        EXPECT_EQ(EXPECTED_HASH, move.hash);
     }
 
     /// Case 2
@@ -319,9 +321,11 @@ TEST_F(TestMove, setup_hash) {
             hash =
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
+        const std::uint16_t EXPECTED_HASH = static_cast<std::uint16_t>(
+            (hash ^ (hash >> 16) ^ (hash >> 32) ^ (hash >> 48)) & 0xFFFF);
 
         move.setup_hash();
-        EXPECT_EQ(hash, move.hash);
+        EXPECT_EQ(EXPECTED_HASH, move.hash);
     }
 
     /// Case 3
@@ -337,9 +341,11 @@ TEST_F(TestMove, setup_hash) {
             hash =
                 hash ^ reinterpret_cast<std::uint_fast64_t>(alteration.first);
         }
+        const std::uint16_t EXPECTED_HASH = static_cast<std::uint16_t>(
+            (hash ^ (hash >> 16) ^ (hash >> 32) ^ (hash >> 48)) & 0xFFFF);
 
         move.setup_hash();
-        EXPECT_EQ(hash, move.hash);
+        EXPECT_EQ(EXPECTED_HASH, move.hash);
     }
 }
 
