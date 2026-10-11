@@ -6,6 +6,8 @@
 #ifndef PRINTEMPS_SOLVER_MEMORY_H__
 #define PRINTEMPS_SOLVER_MEMORY_H__
 
+#include "../utility/intensity.h"
+
 namespace printemps::solver {
 /*****************************************************************************/
 struct MemoryConstant {
@@ -18,19 +20,8 @@ class Memory {
    private:
     model::Model<T_Variable, T_Expression> *m_model_ptr;
 
-    long long m_total_update_count;
-    double    m_total_update_count_reciprocal;
-
-    long long m_total_violation_count;
-    double    m_total_violation_count_reciprocal;
-
-    double m_primal_intensity_numerator;
-    double m_primal_intensity_denominator_reciprocal;
-    double m_primal_intensity;
-
-    double m_dual_intensity_numerator;
-    double m_dual_intensity_denominator_reciprocal;
-    double m_dual_intensity;
+    utility::Intensity<int> m_primal_intensity;
+    utility::Intensity<int> m_dual_intensity;
 
    public:
     /*************************************************************************/
@@ -46,20 +37,8 @@ class Memory {
     /*************************************************************************/
     void initialize(void) {
         m_model_ptr = nullptr;
-
-        m_total_update_count            = 0;
-        m_total_update_count_reciprocal = 0.0;
-
-        m_total_violation_count            = 0;
-        m_total_violation_count_reciprocal = 0.0;
-
-        m_primal_intensity_numerator              = 0.0;
-        m_primal_intensity_denominator_reciprocal = 0.0;
-        m_primal_intensity                        = 0.0;
-
-        m_dual_intensity_numerator              = 0.0;
-        m_dual_intensity_denominator_reciprocal = 0.0;
-        m_dual_intensity                        = 0.0;
+        m_primal_intensity.reset();
+        m_dual_intensity.reset();
     }
 
     /*************************************************************************/
@@ -82,12 +61,12 @@ class Memory {
 
     /*************************************************************************/
     inline double primal_intensity(void) const noexcept {
-        return m_primal_intensity;
+        return m_primal_intensity.value();
     }
 
     /*************************************************************************/
     inline double dual_intensity(void) const noexcept {
-        return m_dual_intensity;
+        return m_dual_intensity.value();
     }
 
     /*************************************************************************/
@@ -117,36 +96,19 @@ class Memory {
             alteration.first->set_local_last_update_iteration(a_ITERATION +
                                                               randomness);
             alteration.first->set_global_last_update_iteration(
-                m_total_update_count);
+                m_primal_intensity.total_count());
 
-            m_primal_intensity_numerator +=
-                2.0 * alteration.first->update_count() + 1;
+            m_primal_intensity.update_with_previous_count(
+                alteration.first->update_count());
             alteration.first->increment_update_count();
-            m_total_update_count++;
         }
 
         for (const auto &constraint_ptr :
              m_model_ptr->current_violative_constraint_ptrs()) {
-            m_dual_intensity_numerator +=
-                2.0 * constraint_ptr->violation_count() + 1;
+            m_dual_intensity.update_with_previous_count(
+                constraint_ptr->violation_count());
             constraint_ptr->update_violation_count();
-            m_total_violation_count++;
         }
-
-        m_total_update_count_reciprocal =
-            1.0 / static_cast<double>(std::max(1LL, m_total_update_count));
-        m_primal_intensity_denominator_reciprocal =
-            m_total_update_count_reciprocal * m_total_update_count_reciprocal;
-        m_primal_intensity = m_primal_intensity_numerator *
-                             m_primal_intensity_denominator_reciprocal;
-
-        m_total_violation_count_reciprocal =
-            1.0 / static_cast<double>(std::max(1LL, m_total_violation_count));
-        m_dual_intensity_denominator_reciprocal =
-            m_total_violation_count_reciprocal *
-            m_total_violation_count_reciprocal;
-        m_dual_intensity = m_dual_intensity_numerator *
-                           m_dual_intensity_denominator_reciprocal;
     }
 
     /*************************************************************************/
@@ -158,23 +120,23 @@ class Memory {
     }
 
     /*************************************************************************/
-    inline long total_update_count(void) const {
-        return m_total_update_count;
+    inline long long total_update_count(void) const noexcept {
+        return m_primal_intensity.total_count();
     }
 
     /*************************************************************************/
-    inline double total_update_count_reciprocal(void) const {
-        return m_total_update_count_reciprocal;
+    inline double total_update_count_reciprocal(void) const noexcept {
+        return m_primal_intensity.total_count_reciprocal();
     }
 
     /*************************************************************************/
-    inline long total_violation_count(void) const {
-        return m_total_violation_count;
+    inline long long total_violation_count(void) const noexcept {
+        return m_dual_intensity.total_count();
     }
 
     /*************************************************************************/
-    inline double total_violation_count_reciprocal(void) const {
-        return m_total_violation_count_reciprocal;
+    inline double total_violation_count_reciprocal(void) const noexcept {
+        return m_dual_intensity.total_count_reciprocal();
     }
 };
 }  // namespace printemps::solver

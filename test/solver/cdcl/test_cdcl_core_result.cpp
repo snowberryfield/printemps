@@ -35,25 +35,30 @@ TEST_F(TestCDCLCoreResult, initialize) {
     EXPECT_EQ(result.number_of_decisions, 0);
     EXPECT_EQ(result.number_of_propagations, 0);
     EXPECT_EQ(result.total_learned_count, 0);
+    EXPECT_EQ(result.unique_conflict_constraints_count, 0);
+    EXPECT_EQ(result.repeated_conflict_constraints_count, 0);
     EXPECT_DOUBLE_EQ(result.average_learned_literal_block_distance, 0.0);
     EXPECT_DOUBLE_EQ(result.average_learned_length, 0.0);
+    EXPECT_DOUBLE_EQ(result.decision_intensity, 0.0);
+    EXPECT_DOUBLE_EQ(result.conflict_intensity, 0.0);
     EXPECT_DOUBLE_EQ(result.elapsed_time, 0.0);
 }
 
 /*****************************************************************************/
 TEST_F(TestCDCLCoreResult, constructor) {
     CDCLCoreState state;
-    state.termination_status     = CDCLCoreTerminationStatus::FEASIBLE;
-    state.solution               = {1, 0, 1};
-    state.best_solution          = {1, 0, 1};
-    state.best_total_violation   = 0.0;
-    state.number_of_conflicts    = 10;
-    state.number_of_restarts     = 2;
-    state.number_of_decisions    = 50;
-    state.number_of_propagations = 100;
-    state.total_learned_count    = 5;
+    state.termination_status                  = CDCLCoreTerminationStatus::FEASIBLE;
+    state.solution                            = {1, 0, 1};
+    state.best_solution                       = {1, 0, 1};
+    state.best_total_violation                = 0.0;
+    state.number_of_conflicts                 = 10;
+    state.number_of_restarts                  = 2;
+    state.number_of_decisions                 = 50;
+    state.number_of_propagations              = 100;
+    state.total_learned_count                 = 5;
     state.total_learned_literal_block_distance = 15;
     state.total_learned_length                 = 25;
+    state.repeated_conflict_constraints_count = 3;
     state.elapsed_time                         = 1.5;
 
     CDCLCoreResult result(state);
@@ -67,6 +72,7 @@ TEST_F(TestCDCLCoreResult, constructor) {
     EXPECT_EQ(result.number_of_decisions, 50);
     EXPECT_EQ(result.number_of_propagations, 100);
     EXPECT_EQ(result.total_learned_count, 5);
+    EXPECT_EQ(result.repeated_conflict_constraints_count, 3);
     EXPECT_DOUBLE_EQ(result.average_learned_literal_block_distance, 3.0);
     EXPECT_DOUBLE_EQ(result.average_learned_length, 5.0);
     EXPECT_DOUBLE_EQ(result.elapsed_time, 1.5);

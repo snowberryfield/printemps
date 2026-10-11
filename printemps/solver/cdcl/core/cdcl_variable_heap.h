@@ -18,17 +18,6 @@ class CDCLVariableHeap {
     std::vector<int> m_heap_array;
     std::vector<int> m_positions;
 
-    /*************************************************************************/
-    inline void swap_nodes(const int a_POSITION_FIRST,
-                           const int a_POSITION_SECOND) noexcept {
-        const int VARIABLE_INDEX_FIRST  = m_heap_array[a_POSITION_FIRST];
-        const int VARIABLE_INDEX_SECOND = m_heap_array[a_POSITION_SECOND];
-        std::swap(m_heap_array[a_POSITION_FIRST],
-                  m_heap_array[a_POSITION_SECOND]);
-        m_positions[VARIABLE_INDEX_FIRST]  = a_POSITION_SECOND;
-        m_positions[VARIABLE_INDEX_SECOND] = a_POSITION_FIRST;
-    }
-
    public:
     /*************************************************************************/
     inline bool greater_than(

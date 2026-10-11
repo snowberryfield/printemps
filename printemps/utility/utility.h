@@ -21,6 +21,7 @@
 #include "fixed_size_queue.h"
 #include "bidirectional_map.h"
 #include "range.h"
+#include "intensity.h"
 #include "union_find.h"
 #include "topological_sorter.h"
 #include "graph/graph.h"

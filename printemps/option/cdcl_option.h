@@ -33,9 +33,10 @@ struct CDCLOptionConstant {
     static constexpr int DEFAULT_LITERAL_BLOCK_DISTANCE_PROTECTION_THRESHOLD =
         2;
 
-    static constexpr double DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE   = 0.85;
-    static constexpr bool   DEFAULT_IS_ENABLED_PHASE_SAVING        = true;
-    static constexpr bool   DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION = true;
+    static constexpr double DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE    = 0.85;
+    static constexpr double DEFAULT_VARIABLE_ACTIVITY_FEEDBACK_RATE = 0.0;
+    static constexpr bool   DEFAULT_IS_ENABLED_PHASE_SAVING         = true;
+    static constexpr bool   DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION  = true;
 
     static constexpr double DEFAULT_RANDOM_VARIABLE_SELECTION_RATE = 0.0;
     static constexpr double DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO   = 0.0;
@@ -67,6 +68,7 @@ struct CDCLOption {
     int    literal_block_distance_protection_threshold;
 
     double variable_activity_decay_rate;
+    double variable_activity_feedback_rate;
     bool   is_enabled_phase_saving;
     bool   is_enabled_clause_minimization;
 
@@ -120,6 +122,8 @@ struct CDCLOption {
 
         this->variable_activity_decay_rate =
             CDCLOptionConstant::DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE;
+        this->variable_activity_feedback_rate =
+            CDCLOptionConstant::DEFAULT_VARIABLE_ACTIVITY_FEEDBACK_RATE;
         this->is_enabled_phase_saving =
             CDCLOptionConstant::DEFAULT_IS_ENABLED_PHASE_SAVING;
         this->is_enabled_clause_minimization =
@@ -230,6 +234,11 @@ struct CDCLOption {
             utility::to_string(                          //
                 this->variable_activity_decay_rate, "%f"));
 
+        utility::print(                                     //
+            " -- cdcl.variable_activity_feedback_rate: " +  //
+            utility::to_string(                             //
+                this->variable_activity_feedback_rate, "%f"));
+
         utility::print(                             //
             " -- cdcl.is_enabled_phase_saving: " +  //
             utility::to_true_or_false(              //
@@ -297,6 +306,8 @@ struct CDCLOption {
 
         read_json(&this->variable_activity_decay_rate,
                   "variable_activity_decay_rate", a_OBJECT);
+        read_json(&this->variable_activity_feedback_rate,
+                  "variable_activity_feedback_rate", a_OBJECT);
         read_json(&this->is_enabled_phase_saving, "is_enabled_phase_saving",
                   a_OBJECT);
         read_json(&this->is_enabled_clause_minimization,
@@ -349,6 +360,8 @@ struct CDCLOption {
 
         obj.emplace_back("variable_activity_decay_rate",
                          this->variable_activity_decay_rate);
+        obj.emplace_back("variable_activity_feedback_rate",
+                         this->variable_activity_feedback_rate);
         obj.emplace_back("is_enabled_phase_saving",
                          this->is_enabled_phase_saving);
         obj.emplace_back("is_enabled_clause_minimization",

@@ -47,6 +47,17 @@ TEST_F(TestStatus, is_proven_infeasible) {
 
     status.termination_status = TerminationStatus::OPTIMAL;
     EXPECT_FALSE(status.is_proven_infeasible());
+
+    status.termination_status = TerminationStatus::REACH_TARGET;
+    EXPECT_FALSE(status.is_proven_infeasible());
+}
+
+/*****************************************************************************/
+TEST_F(TestStatus, termination_status_maps) {
+    EXPECT_EQ(TerminationStatus::REACH_TARGET,
+              TerminationStatusMap.at("REACH_TARGET"));
+    EXPECT_EQ("REACH_TARGET",
+              TerminationStatusInverseMap.at(TerminationStatus::REACH_TARGET));
 }
 
 }  // namespace

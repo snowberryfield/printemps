@@ -130,12 +130,37 @@ class CDCLController
                 .feasible_incumbent_objective() <=
             this->m_option.general.target_objective_value) {
             utility::print_message(
-                "CDCL was skipped because of feasible objective "
-                "reaches the target limit.",
+                "CDCL was skipped because the objective value of the "
+                "feasible incumbent reached the target value.",
                 a_IS_ENABLED_PRINT);
             return true;
         }
         return false;
+    }
+
+    /*************************************************************************/
+    inline double compute_portfolio_feedback_rate(
+        const int a_THREAD_INDEX,
+        const double a_MAX_FEEDBACK_RATE = 0.90) const {
+        if (a_THREAD_INDEX <= 0) {
+            return 0.0;
+        }
+        if (a_THREAD_INDEX == 1) {
+            return a_MAX_FEEDBACK_RATE;
+        }
+        // Van der Corput sequence (base 2) inverted for high-value
+        // prioritization
+        uint64_t thread_number      = static_cast<uint64_t>(a_THREAD_INDEX - 1);
+        double   quasi_random_value = 0.0;
+        double   base_weight        = 0.5;
+        while (thread_number > 0) {
+            if (thread_number & 1) {
+                quasi_random_value += base_weight;
+            }
+            base_weight *= 0.5;
+            thread_number >>= 1;
+        }
+        return a_MAX_FEEDBACK_RATE * (1.0 - quasi_random_value);
     }
 
     /*************************************************************************/
@@ -144,30 +169,26 @@ class CDCLController
         const int             a_NUMBER_OF_THREADS) const {
         std::vector<option::Option> portfolio(a_NUMBER_OF_THREADS,
                                               a_BASE_OPTION);
+
         for (int i = 0; i < a_NUMBER_OF_THREADS; i++) {
-            portfolio[i].output.verbose = option::verbose::Off;
+            portfolio[i].output.verbose = (a_NUMBER_OF_THREADS == 1)
+                                              ? a_BASE_OPTION.output.verbose
+                                              : option::verbose::Off;
             portfolio[i].cdcl.seed      = a_BASE_OPTION.cdcl.seed + i;
 
-            if (i == 0) {
-                // Thread 0: Baseline thread using base options directly
-                continue;
+            // Disable random perturbations (differentiate portfolio purely by feedback rate)
+            portfolio[i].cdcl.random_variable_selection_rate  = 0.0;
+            portfolio[i].cdcl.initial_activity_noise_ratio    = 0.0;
+            portfolio[i].cdcl.initial_phase_perturbation_rate = 0.0;
+
+            if (a_NUMBER_OF_THREADS == 1) {
+                // Use baseline value for single-thread execution
+                portfolio[i].cdcl.variable_activity_feedback_rate =
+                    a_BASE_OPTION.cdcl.variable_activity_feedback_rate;
+            } else {
+                portfolio[i].cdcl.variable_activity_feedback_rate =
+                    this->compute_portfolio_feedback_rate(i);
             }
-
-            // Worker threads i >= 1: Diversify randomness parameters
-            portfolio[i].cdcl.random_variable_selection_rate =
-                (a_BASE_OPTION.cdcl.random_variable_selection_rate > 0.0)
-                    ? a_BASE_OPTION.cdcl.random_variable_selection_rate
-                    : (0.01 + 0.005 * (i % 4));
-
-            portfolio[i].cdcl.initial_activity_noise_ratio =
-                (a_BASE_OPTION.cdcl.initial_activity_noise_ratio > 0.0)
-                    ? a_BASE_OPTION.cdcl.initial_activity_noise_ratio
-                    : (0.01 * ((i % 5) + 1));
-
-            portfolio[i].cdcl.initial_phase_perturbation_rate =
-                (a_BASE_OPTION.cdcl.initial_phase_perturbation_rate > 0.0)
-                    ? a_BASE_OPTION.cdcl.initial_phase_perturbation_rate
-                    : (0.05 * (i % 5));
         }
         return portfolio;
     }
@@ -254,13 +275,16 @@ class CDCLController
 #endif
         }();
 
+        const auto portfolio_options =
+            this->generate_portfolio_options(base_option, NUMBER_OF_THREADS);
+
         core::CDCLCoreResult              cdcl_result;
         int                               winning_thread_id = -1;
         std::vector<core::CDCLCoreResult> thread_results;
 
         if (NUMBER_OF_THREADS <= 1) {
             core::CDCLCore cdcl_core(&matrix_model, this->m_check_interrupt,
-                                     base_option);
+                                     portfolio_options[0]);
             cdcl_core.run();
             cdcl_result       = cdcl_core.result();
             thread_results    = {cdcl_result};
@@ -273,9 +297,6 @@ class CDCLController
                                            " threads).",
                                        true);
             }
-
-            const auto portfolio_options = this->generate_portfolio_options(
-                base_option, NUMBER_OF_THREADS);
 
             std::atomic<bool> is_interrupted_by_solution{false};
             std::mutex        result_mutex;
@@ -425,35 +446,28 @@ class CDCLController
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
-        utility::print_info(
-            " -- CDCL elapsed time: " +
-                utility::to_string(cdcl_result.elapsed_time, "%.3f") +
-                "sec, Conflicts: " +
-                std::to_string(cdcl_result.number_of_conflicts) +
-                ", Decisions: " +
-                std::to_string(cdcl_result.number_of_decisions) +
-                ", Propagations: " +
-                std::to_string(cdcl_result.number_of_propagations),
-            this->m_option.output.verbose >= option::verbose::Outer);
-
         if (NUMBER_OF_THREADS > 1) {
             const bool IS_ENABLED_PRINT =
                 this->m_option.output.verbose >= option::verbose::Outer;
 
             utility::print(
-                "---------+-------+-------------------+---------+---------+----"
-                "----+-------------",
+                "------+-------+--------------+--------+--------+-------+-----"
+                "--------+----------",
                 IS_ENABLED_PRINT);
             utility::print(
-                "  Thread |  Seed | Status            |  Confl. |  Decis. |  "
-                "Rest. |  Best Viol. ",
+                "Thread|  Act. |    Status    |Conflict|Decision|Restart|  "
+                "Intensity  |Best Viol.",
                 IS_ENABLED_PRINT);
             utility::print(
-                "---------+-------+-------------------+---------+---------+----"
-                "----+-------------",
+                "      |Feedbk.|              |        |        |       | "
+                "Var./Constr.|          ",
+                IS_ENABLED_PRINT);
+            utility::print(
+                "------+-------+--------------+--------+--------+-------+-----"
+                "--------+----------",
                 IS_ENABLED_PRINT);
 
-            for (int t = 0; t < NUMBER_OF_THREADS; ++t) {
+            for (int t = 0; t < NUMBER_OF_THREADS; t++) {
                 const auto& thread_result = thread_results[t];
                 std::string status_string =
                     core::CDCLCoreTerminationStatusInverseMap.at(
@@ -462,31 +476,49 @@ class CDCLController
                 std::string violation_string = "-";
                 if (thread_result.termination_status ==
                     core::CDCLCoreTerminationStatus::FEASIBLE) {
-                    violation_string = "0.00000e+00";
+                    violation_string = "0.00e+00";
                 } else if (this->m_option.cdcl
                                .is_enabled_evaluate_full_solutions &&
                            !std::isinf(thread_result.best_total_violation)) {
                     violation_string = utility::to_string(
-                        thread_result.best_total_violation, "%.5e");
+                        thread_result.best_total_violation, "%.2e");
                 }
 
-                char row[128];
+                char intensity_buffer[32];
+                if (thread_result.number_of_decisions > 0 &&
+                    thread_result.number_of_conflicts > 0) {
+                    std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                                  " %5.3f/%-5.3f ",
+                                  thread_result.decision_intensity,
+                                  thread_result.conflict_intensity);
+                } else if (thread_result.number_of_decisions > 0) {
+                    std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                                  " %5.3f/  -   ",
+                                  thread_result.decision_intensity);
+                } else {
+                    std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                                  "   -  /  -   ");
+                }
+
+                char row[160];
                 std::snprintf(row, sizeof(row),
-                              "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
-                              (t == winning_thread_id ? " *" : "  "),  //
+                              "%2s%4d| %5.3f | %-12s |%7d |%7d |%6d |%s| %8s ",
+                              (t == winning_thread_id ? "* " : "  "),  //
                               t,                                       //
-                              base_option.cdcl.seed + t,               //
-                              status_string.c_str(),                   //
-                              thread_result.number_of_conflicts,       //
-                              thread_result.number_of_decisions,       //
-                              thread_result.number_of_restarts,        //
+                              portfolio_options[t]
+                                  .cdcl.variable_activity_feedback_rate,  //
+                              status_string.c_str(),                      //
+                              thread_result.number_of_conflicts,          //
+                              thread_result.number_of_decisions,          //
+                              thread_result.number_of_restarts,           //
+                              intensity_buffer,                           //
                               violation_string.c_str());
                 utility::print(std::string(row), IS_ENABLED_PRINT);
             }
 
             utility::print(
-                "---------+-------+-------------------+---------+---------+----"
-                "----+-------------",
+                "------+-------+--------------+--------+--------+-------+-----"
+                "--------+----------",
                 IS_ENABLED_PRINT);
         }
 

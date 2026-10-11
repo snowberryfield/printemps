@@ -154,6 +154,31 @@ TEST_F(TestCDCLVariableHeap, update_after_bump) {
     EXPECT_TRUE(heap.empty());
 }
 
+/*****************************************************************************/
+TEST_F(TestCDCLVariableHeap, greater_than) {
+    CDCLVariableHeap    heap;
+    std::vector<double> activities = {10.0, 20.0, 10.0};
+
+    // activity difference: 1 (20.0) > 0 (10.0)
+    EXPECT_TRUE(heap.greater_than(1, 0, activities));
+    EXPECT_FALSE(heap.greater_than(0, 1, activities));
+
+    // tie-breaker by index: 0 < 2
+    EXPECT_TRUE(heap.greater_than(0, 2, activities));
+    EXPECT_FALSE(heap.greater_than(2, 0, activities));
+}
+
+/*****************************************************************************/
+TEST_F(TestCDCLVariableHeap, heap_array_and_positions) {
+    std::vector<double> activities = {10.0, 50.0, 20.0};
+    CDCLVariableHeap    heap;
+    heap.setup(3, activities);
+
+    EXPECT_EQ(heap.heap_array().size(), 3u);
+    EXPECT_EQ(heap.heap_positions().size(), 3u);
+    EXPECT_EQ(heap.heap_array().front(), 1);
+}
+
 }  // namespace
 /*****************************************************************************/
 // END

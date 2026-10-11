@@ -97,6 +97,10 @@ TEST_F(TestCDCLOption, initialize) {
         CDCLOptionConstant::DEFAULT_VARIABLE_ACTIVITY_DECAY_RATE,  //
         option.variable_activity_decay_rate);
 
+    EXPECT_FLOAT_EQ(                                                  //
+        CDCLOptionConstant::DEFAULT_VARIABLE_ACTIVITY_FEEDBACK_RATE,  //
+        option.variable_activity_feedback_rate);
+
     EXPECT_EQ(                                                //
         CDCLOptionConstant::DEFAULT_IS_ENABLED_PHASE_SAVING,  //
         option.is_enabled_phase_saving);

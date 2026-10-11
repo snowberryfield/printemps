@@ -24,6 +24,8 @@ struct CDCLCoreState {
     std::vector<int>        trail_level_offsets;
     int                     propagation_queue_head;
     CDCLConstraintReference conflict_constraint_index;
+    CDCLConstraintReference last_conflict_constraint;
+    int                     repeated_conflict_constraints_count;
 
     std::vector<double> activities;
     double              variable_activity_increment;
@@ -72,6 +74,9 @@ struct CDCLCoreState {
         this->propagation_queue_head    = 0;
         this->conflict_constraint_index = {CDCLConstraintType::NONE,
                                            CDCLCoreConstant::NO_CONFLICT};
+        this->last_conflict_constraint  = {CDCLConstraintType::NONE,
+                                          CDCLCoreConstant::NO_CONFLICT};
+        this->repeated_conflict_constraints_count = 0;
 
         this->activities.clear();
         this->variable_activity_increment = 1.0;

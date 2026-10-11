@@ -209,6 +209,29 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
+    inline CDCLConstraintReference last_conflict_constraint(
+        void) const noexcept {
+        return m_state.last_conflict_constraint;
+    }
+
+    /*************************************************************************/
+    inline void set_last_conflict_constraint(
+        const CDCLConstraintReference& a_REFERENCE) noexcept {
+        m_state.last_conflict_constraint = a_REFERENCE;
+    }
+
+    /*************************************************************************/
+    inline int repeated_conflict_constraints_count(void) const noexcept {
+        return m_state.repeated_conflict_constraints_count;
+    }
+
+    /*************************************************************************/
+    inline void increment_repeated_conflict_constraints_count(
+        void) noexcept {
+        m_state.repeated_conflict_constraints_count++;
+    }
+
+    /*************************************************************************/
     inline double activity_of(const int a_VARIABLE_INDEX) const {
         return m_state.activities[a_VARIABLE_INDEX];
     }
@@ -232,14 +255,20 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
-    inline void bump_activity(const int a_VARIABLE_INDEX) {
-        m_state.activities[a_VARIABLE_INDEX] +=
-            m_state.variable_activity_increment;
+    inline void bump_activity(const int    a_VARIABLE_INDEX,
+                              const double a_INCREMENT) {
+        m_state.activities[a_VARIABLE_INDEX] += a_INCREMENT;
         if (m_state.activities[a_VARIABLE_INDEX] > 1e20) {
             this->rescale_activities();
         }
         m_heap.update_after_bump(a_VARIABLE_INDEX,
                                  m_state.activities);
+    }
+
+    /*************************************************************************/
+    inline void bump_activity(const int a_VARIABLE_INDEX) {
+        this->bump_activity(a_VARIABLE_INDEX,
+                            m_state.variable_activity_increment);
     }
 
     /*************************************************************************/

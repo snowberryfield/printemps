@@ -461,6 +461,89 @@ TEST_F(TestCDCLBehavior, simple_feasible) {
     EXPECT_GE(solver.result().solution[0] + solver.result().solution[1], 1);
 }
 
+/*****************************************************************************/
+TEST_F(TestCDCLBehavior, variable_activity_feedback) {
+    /**
+     * Problem with conflicts to trigger conflict analysis and variable activity feedback:
+     * x0 + x1 + x2 + x3 >= 3
+     * x0 + x1 <= 1
+     * x2 + x3 <= 1
+     *
+     * Infeasible problem that requires branching and learning.
+     */
+    matrix_model::MatrixModel matrix_model;
+    matrix_model.number_of_variables   = 4;
+    matrix_model.number_of_constraints = 3;
+
+    // Row 0: x0 + x1 + x2 + x3 >= 3
+    // Row 1: x0 + x1 <= 1
+    // Row 2: x2 + x3 <= 1
+    matrix_model.constraint_coefficients.row_ptrs       = {0, 4, 6, 8};
+    matrix_model.constraint_coefficients.column_indices = {0, 1, 2, 3, 0, 1, 2, 3};
+    matrix_model.constraint_coefficients.values         = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
+    matrix_model.constraint_lower_bounds.values = {3.0, 0.0, 0.0};
+    matrix_model.constraint_upper_bounds.values = {4.0, 1.0, 1.0};
+
+    matrix_model.less_constraint_index_range    = {1, 3};
+    matrix_model.equal_constraint_index_range   = {0, 0};
+    matrix_model.greater_constraint_index_range = {0, 1};
+
+    for (int i = 0; i < 4; i++) {
+        matrix_model.variable_lower_bounds.values.push_back(0.0);
+        matrix_model.variable_upper_bounds.values.push_back(1.0);
+    }
+    matrix_model.is_minimization = true;
+
+    // Test with variable activity feedback (rate = 0.8)
+    {
+        option::Option option;
+        option.cdcl.time_max                           = 10.0;
+        option.cdcl.iteration_max                      = 1000;
+        option.cdcl.variable_activity_feedback_rate   = 0.8;
+        option.output.verbose                          = option::verbose::Off;
+
+        CDCLCore solver(&matrix_model, std::nullopt, option);
+        solver.run();
+
+        EXPECT_EQ(solver.result().termination_status,
+                  CDCLCoreTerminationStatus::INFEASIBLE);
+        EXPECT_GT(solver.result().number_of_conflicts, 0);
+    }
+
+    // Test with no feedback (rate = 0.0)
+    {
+        option::Option option;
+        option.cdcl.time_max                           = 10.0;
+        option.cdcl.iteration_max                      = 1000;
+        option.cdcl.variable_activity_feedback_rate   = 0.0;
+        option.output.verbose                          = option::verbose::Off;
+
+        CDCLCore solver(&matrix_model, std::nullopt, option);
+        solver.run();
+
+        EXPECT_EQ(solver.result().termination_status,
+                  CDCLCoreTerminationStatus::INFEASIBLE);
+        EXPECT_GT(solver.result().number_of_conflicts, 0);
+    }
+
+    // Test with custom feedback rate (0.5)
+    {
+        option::Option option;
+        option.cdcl.time_max                           = 10.0;
+        option.cdcl.iteration_max                      = 1000;
+        option.cdcl.variable_activity_feedback_rate   = 0.5;
+        option.output.verbose                          = option::verbose::Off;
+
+        CDCLCore solver(&matrix_model, std::nullopt, option);
+        solver.run();
+
+        EXPECT_EQ(solver.result().termination_status,
+                  CDCLCoreTerminationStatus::INFEASIBLE);
+        EXPECT_GT(solver.result().number_of_conflicts, 0);
+    }
+}
+
 }  // namespace
 /*****************************************************************************/
 // END

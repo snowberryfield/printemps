@@ -50,9 +50,22 @@ class CDCLCore {
     std::vector<int> m_analyze_stack;
     std::vector<int> m_analyze_to_clear;
 
+    struct ConstraintReferenceHash {
+        inline size_t operator()(
+            const CDCLConstraintReference& a_REFERENCE) const noexcept {
+            return (static_cast<size_t>(a_REFERENCE.type) << 32) ^
+                   static_cast<size_t>(static_cast<uint32_t>(a_REFERENCE.index));
+        }
+    };
+    utility::Intensity<CDCLConstraintReference, ConstraintReferenceHash>
+                            m_conflict_intensity;
+    utility::Intensity<int> m_decision_intensity;
+
     /*************************************************************************/
     inline void preprocess(void) {
         m_state_manager.reset_iteration();
+        m_conflict_intensity.reset();
+        m_decision_intensity.reset();
         if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
             m_state_manager.check_and_update_best_solution();
         }
@@ -107,8 +120,7 @@ class CDCLCore {
                 assign_callback);
 
         if (CONFLICT_REFERENCE.type != CDCLConstraintType::NONE) {
-            m_state_manager.set_conflict_constraint_index(
-                CONFLICT_REFERENCE);
+            m_state_manager.set_conflict_constraint_index(CONFLICT_REFERENCE);
             return false;
         }
         return true;
@@ -236,7 +248,8 @@ class CDCLCore {
                 constexpr int MAX_STEPS = 50;
 
                 while (!m_analyze_stack.empty()) {
-                    if (++steps > MAX_STEPS) {
+                    steps++;
+                    if (steps > MAX_STEPS) {
                         for (const int CLEARED_VARIABLE : m_analyze_to_clear) {
                             m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                         }
@@ -329,7 +342,7 @@ class CDCLCore {
             auto filter_redundant = [&](std::vector<int>& a_variables) {
                 size_t write_index = 0;
                 for (size_t read_index = 0; read_index < a_variables.size();
-                     ++read_index) {
+                     read_index++) {
                     const int VARIABLE_INDEX = a_variables[read_index];
                     if (MODEL.variable(VARIABLE_INDEX).reason_constraint.type ==
                         CDCLConstraintType::NONE) {
@@ -340,8 +353,7 @@ class CDCLCore {
                     if (is_redundant(VARIABLE_INDEX)) {
                         // Redundant: leave marked as 0
                     } else {
-                        m_state_manager.mark_seen(VARIABLE_INDEX,
-                                                  CONFLICT_ID);
+                        m_state_manager.mark_seen(VARIABLE_INDEX, CONFLICT_ID);
                         a_variables[write_index++] = VARIABLE_INDEX;
                     }
                 }
@@ -422,6 +434,58 @@ class CDCLCore {
     }
 
     /*************************************************************************/
+    inline void bump_decision_variables_with_discount(
+        const std::vector<int>& a_LEARNED_POSITIVE_VARIABLE_INDICES,
+        const std::vector<int>& a_LEARNED_NEGATIVE_VARIABLE_INDICES) {
+        const int CURRENT_DECISION_LEVEL =
+            m_state_manager.current_decision_level();
+        if (CURRENT_DECISION_LEVEL <= 1) {
+            return;
+        }
+
+        const double FEEDBACK_RATE =
+            m_option.cdcl.variable_activity_feedback_rate;
+        if (FEEDBACK_RATE <= 0.0) {
+            return;
+        }
+
+        const auto&  MODEL    = m_state_manager.model();
+        const auto&  TRAIL    = m_state_manager.trail();
+        const int    LEVEL_ID = m_state_manager.next_seen_level_id();
+        const double BASE_INCREMENT =
+            m_state_manager.variable_activity_increment();
+
+        auto process_literal = [&](const int a_VARIABLE_INDEX) {
+            const int LEVEL = MODEL.variable(a_VARIABLE_INDEX).decision_level;
+            if (LEVEL > 0 && LEVEL < CURRENT_DECISION_LEVEL &&
+                !m_state_manager.is_level_seen(LEVEL, LEVEL_ID)) {
+                m_state_manager.mark_level_seen(LEVEL, LEVEL_ID);
+
+                if (LEVEL - 1 < m_state_manager.trail_level_offsets_size()) {
+                    const int LEVEL_OFFSET =
+                        m_state_manager.trail_level_offset_at(LEVEL - 1);
+                    if (LEVEL_OFFSET >= 0 &&
+                        LEVEL_OFFSET < static_cast<int>(TRAIL.size())) {
+                        const int DECISION_VARIABLE_INDEX = TRAIL[LEVEL_OFFSET];
+                        const int LEVEL_DIFF = CURRENT_DECISION_LEVEL - LEVEL;
+                        const double DISCOUNT =
+                            std::pow(FEEDBACK_RATE, LEVEL_DIFF);
+                        m_state_manager.bump_activity(
+                            DECISION_VARIABLE_INDEX, BASE_INCREMENT * DISCOUNT);
+                    }
+                }
+            }
+        };
+
+        for (const int VARIABLE_INDEX : a_LEARNED_POSITIVE_VARIABLE_INDICES) {
+            process_literal(VARIABLE_INDEX);
+        }
+        for (const int VARIABLE_INDEX : a_LEARNED_NEGATIVE_VARIABLE_INDICES) {
+            process_literal(VARIABLE_INDEX);
+        }
+    }
+
+    /*************************************************************************/
     inline ConflictAnalysisResult analyze_conflict(void) {
         const auto [UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
                     LEARNED_POSITIVE_VARIABLE_INDICES,
@@ -441,15 +505,18 @@ class CDCLCore {
                     CardinalityConstraint{}};
         }
 
+        this->bump_decision_variables_with_discount(
+            LEARNED_POSITIVE_VARIABLE_INDICES,
+            LEARNED_NEGATIVE_VARIABLE_INDICES);
+
         const int BACKJUMP_LEVEL = this->compute_backjump_level(
             LEARNED_POSITIVE_VARIABLE_INDICES,
             LEARNED_NEGATIVE_VARIABLE_INDICES,
             UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX);
 
-        const int LITERAL_BLOCK_DISTANCE =
-            this->compute_literal_block_distance(
-                LEARNED_POSITIVE_VARIABLE_INDICES,
-                LEARNED_NEGATIVE_VARIABLE_INDICES);
+        const int LITERAL_BLOCK_DISTANCE = this->compute_literal_block_distance(
+            LEARNED_POSITIVE_VARIABLE_INDICES,
+            LEARNED_NEGATIVE_VARIABLE_INDICES);
 
         const int UNIQUE_IMPLICATION_POINT_CURRENT_VALUE =
             m_state_manager.model()
@@ -493,6 +560,7 @@ class CDCLCore {
             return false;
         }
 
+        m_decision_intensity.increment(BEST_VARIABLE_INDEX);
         m_state_manager.on_decision();
         m_state_manager.increment_decision_level();
 
@@ -571,6 +639,16 @@ class CDCLCore {
             m_state_manager.set_termination_status(
                 CDCLCoreTerminationStatus::INFEASIBLE);
             return {false, CDCLIterationEventType::None};
+        }
+
+        const CDCLConstraintReference CURRENT_CONFLICT =
+            m_state_manager.conflict_constraint_index();
+        const bool IS_REPEATED_CONFLICT =
+            (CURRENT_CONFLICT == m_state_manager.last_conflict_constraint());
+        m_state_manager.set_last_conflict_constraint(CURRENT_CONFLICT);
+        m_conflict_intensity.increment(CURRENT_CONFLICT);
+        if (IS_REPEATED_CONFLICT) {
+            m_state_manager.increment_repeated_conflict_constraints_count();
         }
 
         auto [BACKJUMP_LEVEL, UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
@@ -694,22 +772,60 @@ class CDCLCore {
     }
 
     /*************************************************************************/
+    inline std::string format_constraint_reference(
+        const CDCLConstraintReference& a_REFERENCE,
+        const size_t                   a_MAX_NAME_LENGTH = 20) const {
+        if (a_REFERENCE.type == CDCLConstraintType::NONE ||
+            a_REFERENCE.index == CDCLCoreConstant::NO_CONSTRAINT) {
+            return "-";
+        }
+
+        std::string raw_name = "";
+        if (a_REFERENCE.type != CDCLConstraintType::LEARNED &&
+            m_instance_ptr != nullptr &&
+            m_instance_ptr->constraint_index_map.contains_second(
+                a_REFERENCE.index)) {
+            const auto* constraint_ptr =
+                m_instance_ptr->constraint_index_map.reverse_at(
+                    a_REFERENCE.index);
+            if (constraint_ptr != nullptr && !constraint_ptr->name().empty()) {
+                raw_name = constraint_ptr->name();
+            }
+        }
+
+        if (raw_name.empty()) {
+            raw_name = CDCLConstraintTypeInverseMap.at(a_REFERENCE.type) + "#" +
+                       std::to_string(a_REFERENCE.index);
+        }
+
+        if (raw_name.size() > a_MAX_NAME_LENGTH) {
+            raw_name = raw_name.substr(0, a_MAX_NAME_LENGTH);
+        }
+
+        return raw_name;
+    }
+
+    /*************************************************************************/
     inline void print_table_header(const bool a_IS_ENABLED_PRINT) const {
         if (!a_IS_ENABLED_PRINT) {
             return;
         }
 
         utility::print(
-            "---------+-------+---------------------------+-------+----------"
-            "----------------",
+            "---------+-------+----------------------+-------+-------------+---"
+            "-------+------",
             true);
         utility::print(
-            "Iteration| Level | Assigned Variables (1s/%) | Confl.| "
-            "Learned (Avg. Len/LBD) ",
+            "Iteration| Level |       Assigned       | Confl.|  Intensity  | "
+            "Conflict |  Hits",
             true);
         utility::print(
-            "---------+-------+---------------------------+-------+----------"
-            "----------------",
+            "         |       |     (Total / %)      |       | "
+            "Var./Constr.|Constraint|      ",
+            true);
+        utility::print(
+            "---------+-------+----------------------+-------+-------------+---"
+            "-------+------",
             true);
     }
 
@@ -732,7 +848,6 @@ class CDCLCore {
 
         const int ASSIGNED_VARIABLES =
             m_state_manager.number_of_assigned_variables();
-        const int ASSIGNED_ONES = m_state_manager.number_of_assigned_ones();
         const int TOTAL_VARIABLES =
             m_state_manager.model().number_of_variables();
         const double ASSIGNED_PERCENTAGE =
@@ -757,36 +872,61 @@ class CDCLCore {
         }
 #endif
 
-        std::string average_length_string =
-            (m_state_manager.total_learned_count() > 0)
-                ? utility::to_string(m_state_manager.average_learned_length(),
-                                     "%.2e")
-                : "       -";
-        std::string average_literal_block_distance_string =
-            (m_state_manager.total_learned_count() > 0)
-                ? utility::to_string(
-                      m_state_manager.average_learned_literal_block_distance(),
-                      "%.2e")
-                : "       -";
+        const auto  LAST_CONFLICT   = m_state_manager.last_conflict_constraint();
+        std::string constraint_name = "-";
+        int64_t     hits            = -1;
+        if (LAST_CONFLICT.type != CDCLConstraintType::NONE &&
+            LAST_CONFLICT.index != CDCLCoreConstant::NO_CONSTRAINT) {
+            hits            = m_conflict_intensity.count(LAST_CONFLICT);
+            constraint_name = this->format_constraint_reference(LAST_CONFLICT, 8);
+        }
+
+        char assigned_buffer[64];
+        std::snprintf(assigned_buffer, sizeof(assigned_buffer),
+                      "%6d/%6d (%s%5.1f%%%s)", ASSIGNED_VARIABLES,
+                      TOTAL_VARIABLES, color_feasible_begin.c_str(),
+                      ASSIGNED_PERCENTAGE, color_feasible_end.c_str());
+
+        char intensity_buffer[32];
+        if (m_decision_intensity.total_count() > 0 &&
+            m_conflict_intensity.total_count() > 0) {
+            std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                          " %5.3f/%-5.3f ", m_decision_intensity.value(),
+                          m_conflict_intensity.value());
+        } else if (m_decision_intensity.total_count() > 0) {
+            std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                          " %5.3f/  -   ", m_decision_intensity.value());
+        } else {
+            std::snprintf(intensity_buffer, sizeof(intensity_buffer),
+                          "   -  /  -   ");
+        }
+
+        char conflict_buffer[32];
+        std::snprintf(conflict_buffer, sizeof(conflict_buffer), " %-8s ",
+                      constraint_name.c_str());
+
+        char hits_buffer[16];
+        if (hits >= 0) {
+            std::snprintf(hits_buffer, sizeof(hits_buffer), "%6d",
+                          static_cast<int>(hits));
+        } else {
+            std::snprintf(hits_buffer, sizeof(hits_buffer), "     -");
+        }
 
         std::printf(
-            "%s%c| %s |%8d (%8d/%s%6.2f%%%s)| %s | %s (%s/%s)\n",
+            "%s%c|%s|%s|%s|%s|%s|%s\n",
             utility::int_format(m_state_manager.iteration(), 8).c_str(),  //
             suffix,                                                       //
-            utility::int_format(m_state_manager.current_decision_level())
-                .c_str(),                                                 //
-            ASSIGNED_VARIABLES,                                           //
-            ASSIGNED_ONES,                                                //
-            color_feasible_begin.c_str(),                                 //
-            ASSIGNED_PERCENTAGE,                                          //
-            color_feasible_end.c_str(),                                   //
-            utility::int_format(m_state_manager.number_of_conflicts())    //
-                .c_str(),                                                 //
-            utility::int_format(                                          //
-                m_state_manager.model().number_of_learned_constraints())  //
-                .c_str(),                                                 //
-            average_length_string.c_str(),                                //
-            average_literal_block_distance_string.c_str());
+            (utility::int_format(m_state_manager.current_decision_level(), 6) +
+             " ")
+                .c_str(),      //
+            assigned_buffer,   //
+            (utility::int_format(m_state_manager.number_of_conflicts(), 6) +
+             " ")
+                .c_str(),        //
+            intensity_buffer,   //
+            conflict_buffer,    //
+            hits_buffer);
     }
 
     /*************************************************************************/
@@ -796,8 +936,8 @@ class CDCLCore {
         }
 
         utility::print(
-            "---------+-------+---------------------------+-------+----------"
-            "----------------",
+            "---------+-------+----------------------+-------+-------------+---"
+            "-------+------",
             true);
         utility::print_info(  //
             " -- r: Search was restarted from decision level 0.", true);
@@ -809,6 +949,49 @@ class CDCLCore {
     }
 
     /*************************************************************************/
+    inline void print_conflict_constraints_summary(void) const {
+        if (m_state_manager.number_of_conflicts() == 0 ||
+            m_option.output.verbose < option::verbose::Outer) {
+            return;
+        }
+
+        std::vector<std::pair<CDCLConstraintReference, int64_t>> sorted_counts(
+            m_conflict_intensity.counts().begin(),
+            m_conflict_intensity.counts().end());
+        std::sort(
+            sorted_counts.begin(), sorted_counts.end(),
+            [](const auto& a, const auto& b) { return a.second > b.second; });
+
+        std::string top_string = "";
+        for (size_t i = 0; i < std::min<size_t>(5, sorted_counts.size()); i++) {
+            if (i > 0) {
+                top_string += ", ";
+            }
+            top_string +=
+                CDCLConstraintTypeInverseMap.at(sorted_counts[i].first.type) +
+                "#" + std::to_string(sorted_counts[i].first.index) + " (" +
+                std::to_string(sorted_counts[i].second) + " hits)";
+        }
+
+        const double REPEATED_RATIO =
+            (m_state_manager.number_of_conflicts() > 0)
+                ? (100.0 *
+                   m_state_manager.repeated_conflict_constraints_count() /
+                   m_state_manager.number_of_conflicts())
+                : 0.0;
+
+        utility::print_info(
+            " -- CDCL conflict constraints: Unique=" +
+                std::to_string(m_conflict_intensity.counts().size()) +
+                ", Repeated=" +
+                std::to_string(
+                    m_state_manager.repeated_conflict_constraints_count()) +
+                " (" + utility::to_string(REPEATED_RATIO, "%.1f") +
+                "%), Top: " + top_string,
+            true);
+    }
+
+    /*************************************************************************/
     inline void postprocess(void) {
         if (m_option.cdcl.is_enabled_evaluate_full_solutions &&
             m_state_manager.termination_status() !=
@@ -816,6 +999,14 @@ class CDCLCore {
             m_state_manager.check_and_update_best_solution();
         }
         m_result = CDCLCoreResult(m_state_manager.state(), m_option);
+        m_result.unique_conflict_constraints_count =
+            static_cast<int>(m_conflict_intensity.counts().size());
+        m_result.repeated_conflict_constraints_count =
+            m_state_manager.repeated_conflict_constraints_count();
+        m_result.decision_intensity = m_decision_intensity.value();
+        m_result.conflict_intensity = m_conflict_intensity.value();
+
+        this->print_conflict_constraints_summary();
     }
 
    public:
@@ -838,6 +1029,8 @@ class CDCLCore {
         m_option.initialize();
         m_state_manager.initialize();
         m_result.initialize();
+        m_conflict_intensity.reset();
+        m_decision_intensity.reset();
     }
 
     /*************************************************************************/

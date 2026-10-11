@@ -36,6 +36,9 @@ TEST_F(TestCDCLCoreState, initialize) {
     EXPECT_EQ(state.propagation_queue_head, 0);
     EXPECT_EQ(state.conflict_constraint_index.index,
               CDCLCoreConstant::NO_CONSTRAINT);
+    EXPECT_EQ(state.last_conflict_constraint.index,
+              CDCLCoreConstant::NO_CONFLICT);
+    EXPECT_EQ(state.repeated_conflict_constraints_count, 0);
 
     EXPECT_TRUE(state.activities.empty());
     EXPECT_DOUBLE_EQ(state.variable_activity_increment, 1.0);

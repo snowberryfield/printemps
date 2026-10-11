@@ -29,6 +29,8 @@ TEST_F(TestNamedSolution, constructor) {
     EXPECT_EQ(0.0, solution.objective());
     EXPECT_EQ(0.0, solution.total_violation());
     EXPECT_FALSE(solution.is_feasible());
+    EXPECT_EQ("UNKNOWN", solution.termination_status());
+    EXPECT_FALSE(solution.is_proven_infeasible());
 }
 
 /*****************************************************************************/
@@ -76,6 +78,8 @@ TEST_F(TestNamedSolution, initialize) {
     EXPECT_EQ(0.0, solution.objective());
     EXPECT_EQ(0.0, solution.total_violation());
     EXPECT_FALSE(solution.is_feasible());
+    EXPECT_EQ("UNKNOWN", solution.termination_status());
+    EXPECT_FALSE(solution.is_proven_infeasible());
 }
 
 /*****************************************************************************/
@@ -146,6 +150,22 @@ TEST_F(TestNamedSolution, total_violation) {
 /*****************************************************************************/
 TEST_F(TestNamedSolution, is_feasible) {
     /// This test is covered by initialize().
+}
+
+/*****************************************************************************/
+TEST_F(TestNamedSolution, termination_status) {
+    solution::NamedSolution<int, double> solution;
+    EXPECT_EQ("UNKNOWN", solution.termination_status());
+    solution.set_termination_status("OPTIMAL");
+    EXPECT_EQ("OPTIMAL", solution.termination_status());
+}
+
+/*****************************************************************************/
+TEST_F(TestNamedSolution, is_proven_infeasible) {
+    solution::NamedSolution<int, double> solution;
+    EXPECT_FALSE(solution.is_proven_infeasible());
+    solution.set_is_proven_infeasible(true);
+    EXPECT_TRUE(solution.is_proven_infeasible());
 }
 
 }  // namespace

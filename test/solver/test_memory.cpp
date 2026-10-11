@@ -27,6 +27,10 @@ TEST_F(TestMemory, initialize) {
 
     EXPECT_DOUBLE_EQ(memory.primal_intensity(), 0.0);
     EXPECT_DOUBLE_EQ(memory.dual_intensity(), 0.0);
+    EXPECT_EQ(memory.total_update_count(), 0);
+    EXPECT_DOUBLE_EQ(memory.total_update_count_reciprocal(), 0.0);
+    EXPECT_EQ(memory.total_violation_count(), 0);
+    EXPECT_DOUBLE_EQ(memory.total_violation_count_reciprocal(), 0.0);
 }
 
 /*****************************************************************************/
@@ -64,6 +68,8 @@ TEST_F(TestMemory, update) {
     memory.update(move, 1);
 
     EXPECT_GT(memory.primal_intensity(), 0.0);
+    EXPECT_EQ(memory.total_update_count(), 1);
+    EXPECT_DOUBLE_EQ(memory.total_update_count_reciprocal(), 1.0);
     EXPECT_EQ(x(0).local_last_update_iteration(), 1);
     EXPECT_EQ(x(0).update_count(), 1);
 }

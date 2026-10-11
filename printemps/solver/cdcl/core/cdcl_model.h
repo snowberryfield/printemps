@@ -70,8 +70,8 @@ class CDCLModel {
         bool is_pure_cardinality = utility::is_integer(a_RHS);
         if (is_pure_cardinality) {
             for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
-                const double c = a_COEFFICIENTS[j];
-                if (c != 1.0 && c != -1.0) {
+                const double COEFFICIENT = a_COEFFICIENTS[j];
+                if (COEFFICIENT != 1.0 && COEFFICIENT != -1.0) {
                     is_pure_cardinality = false;
                     break;
                 }
@@ -111,8 +111,8 @@ class CDCLModel {
         max_decimal_places =
             std::max(max_decimal_places, utility::decimal_places(a_RHS));
 
-        std::vector<int64_t> int_coefficients(NUMBER_OF_NON_ZERO_ELEMENTS);
-        int64_t              int_rhs = 0;
+        std::vector<int64_t> integer_coefficients(NUMBER_OF_NON_ZERO_ELEMENTS);
+        int64_t              integer_rhs = 0;
 
         if (max_decimal_places > 0) {
             const double         SCALE = std::pow(10.0, max_decimal_places);
@@ -122,14 +122,14 @@ class CDCLModel {
             for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
                 const int64_t COEFFICIENT =
                     std::llround(a_COEFFICIENTS[j] * SCALE);
-                int_coefficients[j] = COEFFICIENT;
+                integer_coefficients[j] = COEFFICIENT;
                 if (COEFFICIENT != 0) {
                     scaled_values.push_back(std::abs(COEFFICIENT));
                 }
             }
 
             const int64_t RHS = std::llround(a_RHS * SCALE);
-            int_rhs           = RHS;
+            integer_rhs       = RHS;
             if (RHS != 0) {
                 scaled_values.push_back(std::abs(RHS));
             }
@@ -143,24 +143,24 @@ class CDCLModel {
                 }
                 if (gcd > 1) {
                     for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
-                        int_coefficients[j] /= gcd;
+                        integer_coefficients[j] /= gcd;
                     }
-                    int_rhs /= gcd;
+                    integer_rhs /= gcd;
                 }
             }
         } else {
             for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
-                int_coefficients[j] =
+                integer_coefficients[j] =
                     static_cast<int64_t>(std::round(a_COEFFICIENTS[j]));
             }
-            int_rhs = static_cast<int64_t>(std::round(a_RHS));
+            integer_rhs = static_cast<int64_t>(std::round(a_RHS));
         }
 
         // 2. Check if the constraint is Cardinality (all non-zero coefficients
         // are +/- 1)
         bool is_cardinality = true;
         for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
-            if (std::abs(int_coefficients[j]) != 1) {
+            if (std::abs(integer_coefficients[j]) != 1) {
                 is_cardinality = false;
                 break;
             }
@@ -171,7 +171,7 @@ class CDCLModel {
             std::vector<int> negative_variable_indices;
             for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
                 const int     VARIABLE_INDEX = a_VARIABLE_INDICES[j];
-                const int64_t COEFFICIENT    = int_coefficients[j];
+                const int64_t COEFFICIENT    = integer_coefficients[j];
 
                 if (COEFFICIENT > 0) {
                     positive_variable_indices.push_back(VARIABLE_INDEX);
@@ -180,7 +180,7 @@ class CDCLModel {
                 }
             }
 
-            int64_t rhs = int_rhs;
+            int64_t rhs = integer_rhs;
             rhs += static_cast<int64_t>(negative_variable_indices.size());
 
             const int INDEX =
@@ -193,11 +193,11 @@ class CDCLModel {
             std::vector<std::pair<int, int64_t>> negative_terms;
 
             int64_t total_positive_coefficient = 0;
-            int64_t rhs                        = int_rhs;
+            int64_t rhs                        = integer_rhs;
 
             for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
                 const int     VARIABLE_INDEX = a_VARIABLE_INDICES[j];
-                const int64_t COEFFICIENT    = int_coefficients[j];
+                const int64_t COEFFICIENT    = integer_coefficients[j];
 
                 if (COEFFICIENT == 0) {
                     continue;
@@ -1340,7 +1340,7 @@ class CDCLModel {
             const int PTR_END   = MATRIX.row_ptrs[i + 1];
 
             double lhs = 0.0;
-            for (int j = PTR_BEGIN; j < PTR_END; ++j) {
+            for (int j = PTR_BEGIN; j < PTR_END; j++) {
                 if (a_SOLUTION[MATRIX.column_indices[j]]) {
                     lhs += MATRIX.values[j];
                 }
