@@ -27,8 +27,10 @@
     "parallel": {
         "is_enabled_move_update_parallelization": false,
         "is_enabled_move_evaluation_parallelization": false,
+        "is_enabled_cdcl_parallelization": false,
         "number_of_threads_move_update": 2,
         "number_of_threads_move_evaluation": 2,
+        "number_of_threads_cdcl": 2,
         "is_enabled_thread_count_optimization": false,
         "thread_count_optimization_decay_factor": 0.6
     },
@@ -129,6 +131,7 @@
         "learned_constraint_reduction_rate": 0.1, 
         "literal_block_distance_protection_threshold": 1, 
         "variable_activity_decay_rate": 0.1, 
+        "variable_activity_feedback_rate": 0.1, 
         "is_enabled_phase_saving": false,
         "is_enabled_clause_minimization": false,
         "random_variable_selection_rate": 0.1,

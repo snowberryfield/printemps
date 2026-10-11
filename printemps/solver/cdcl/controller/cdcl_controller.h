@@ -266,10 +266,12 @@ class CDCLController
             if (!this->m_option.parallel.is_enabled_cdcl_parallelization) {
                 return 1;
             }
+            const int MAX_THREADS = omp_get_max_threads();
             if (this->m_option.parallel.number_of_threads_cdcl > 0) {
-                return this->m_option.parallel.number_of_threads_cdcl;
+                return std::min(this->m_option.parallel.number_of_threads_cdcl,
+                                MAX_THREADS);
             }
-            return omp_get_max_threads();
+            return MAX_THREADS;
 #else
             return 1;
 #endif

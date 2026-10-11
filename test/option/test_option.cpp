@@ -123,12 +123,20 @@ TEST_F(TestOption, setup) {
             option.parallel.is_enabled_move_evaluation_parallelization);
 
         EXPECT_EQ(  //
-            -1,     //
+            false,  //
+            option.parallel.is_enabled_cdcl_parallelization);
+
+        EXPECT_EQ(  //
+            2,      //
             option.parallel.number_of_threads_move_update);
 
         EXPECT_EQ(  //
             2,      //
             option.parallel.number_of_threads_move_evaluation);
+
+        EXPECT_EQ(  //
+            2,      //
+            option.parallel.number_of_threads_cdcl);
 
         EXPECT_EQ(  //
             false,  //
@@ -494,6 +502,10 @@ TEST_F(TestOption, setup) {
             0.1,          //
             option.cdcl.variable_activity_decay_rate);
 
+        EXPECT_FLOAT_EQ(  //
+            0.1,          //
+            option.cdcl.variable_activity_feedback_rate);
+
         EXPECT_EQ(  //
             false,  //
             option.cdcl.is_enabled_phase_saving);
@@ -815,12 +827,20 @@ TEST_F(TestOption, to_json) {
         to_bool(parallel.at("is_enabled_move_evaluation_parallelization")));
 
     EXPECT_EQ(  //
-        -1,     //
+        false,  //
+        to_bool(parallel.at("is_enabled_cdcl_parallelization")));
+
+    EXPECT_EQ(  //
+        2,      //
         to_int(parallel.at("number_of_threads_move_update")));
 
     EXPECT_EQ(  //
         2,      //
         to_int(parallel.at("number_of_threads_move_evaluation")));
+
+    EXPECT_EQ(  //
+        2,      //
+        to_int(parallel.at("number_of_threads_cdcl")));
 
     EXPECT_EQ(  //
         false,  //
@@ -1105,6 +1125,10 @@ TEST_F(TestOption, to_json) {
     EXPECT_FLOAT_EQ(  //
         0.1,          //
         to_double(cdcl.at("variable_activity_decay_rate")));
+
+    EXPECT_FLOAT_EQ(  //
+        0.1,          //
+        to_double(cdcl.at("variable_activity_feedback_rate")));
 
     EXPECT_EQ(  //
         false,  //

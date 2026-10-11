@@ -111,14 +111,21 @@ class TabuSearchControllerStateManager {
         {
 #pragma omp single
             {
-                if (m_state.max_number_of_threads_move_update < 0) {
+                const int MAX_THREADS = omp_get_max_threads();
+                if (m_state.max_number_of_threads_move_update <= 0) {
+                    m_state.max_number_of_threads_move_update = MAX_THREADS;
+                } else {
                     m_state.max_number_of_threads_move_update =
-                        omp_get_max_threads();
+                        std::min(m_state.max_number_of_threads_move_update,
+                                 MAX_THREADS);
                 }
 
-                if (m_state.max_number_of_threads_move_evaluation < 0) {
+                if (m_state.max_number_of_threads_move_evaluation <= 0) {
+                    m_state.max_number_of_threads_move_evaluation = MAX_THREADS;
+                } else {
                     m_state.max_number_of_threads_move_evaluation =
-                        omp_get_max_threads();
+                        std::min(m_state.max_number_of_threads_move_evaluation,
+                                 MAX_THREADS);
                 }
             }
         }

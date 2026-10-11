@@ -14,14 +14,14 @@ struct ParallelOptionConstant {
     static constexpr bool  //
         DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION = true;
     static constexpr bool  //
-        DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION = false;
+        DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION = true;
 
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION = -1;  // Adjust to max
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE = -1;      // Adjust to max
     static constexpr int                                 //
-        DEFAULT_NUMBER_OF_THREADS_CDCL = -1;             // Adjust to max
+        DEFAULT_NUMBER_OF_THREADS_CDCL = 4;              // Max 4, clipped to max
 
     static constexpr bool  //
         DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION = true;
@@ -148,7 +148,7 @@ struct ParallelOption {
 
         read_json(                                 //
             &this->number_of_threads_move_update,  //
-            "number_of_threads_move_update;",      //
+            "number_of_threads_move_update",       //
             a_OBJECT);
 
         read_json(                                     //

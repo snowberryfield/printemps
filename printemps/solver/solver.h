@@ -376,16 +376,33 @@ class Solver {
         if (m_option.parallel.number_of_threads_move_update <= 0) {
             m_option.parallel.number_of_threads_move_update =
                 max_number_of_threads;
+        } else {
+            m_option.parallel.number_of_threads_move_update =
+                std::min(m_option.parallel.number_of_threads_move_update,
+                         max_number_of_threads);
         }
 
         if (m_option.parallel.number_of_threads_move_evaluation <= 0) {
             m_option.parallel.number_of_threads_move_evaluation =
                 max_number_of_threads;
+        } else {
+            m_option.parallel.number_of_threads_move_evaluation =
+                std::min(m_option.parallel.number_of_threads_move_evaluation,
+                         max_number_of_threads);
+        }
+
+        if (m_option.parallel.number_of_threads_cdcl <= 0) {
+            m_option.parallel.number_of_threads_cdcl = max_number_of_threads;
+        } else {
+            m_option.parallel.number_of_threads_cdcl =
+                std::min(m_option.parallel.number_of_threads_cdcl,
+                         max_number_of_threads);
         }
 
 #else
         m_option.parallel.number_of_threads_move_update     = 1;
         m_option.parallel.number_of_threads_move_evaluation = 1;
+        m_option.parallel.number_of_threads_cdcl            = 1;
 #endif
 
         /**
