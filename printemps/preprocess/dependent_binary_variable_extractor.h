@@ -25,10 +25,11 @@ class DependentBinaryVariableExtractor {
     std::vector<model_component::Expression<T_Variable, T_Expression>>
         m_additional_expressions;
 
-    utility::UnionFind<model_component::Variable<T_Variable, T_Expression> *>
+    utility::graph::UnionFind<
+        model_component::Variable<T_Variable, T_Expression> *>
         m_uf;
 
-    std::vector<utility::UnionFindRootGroup<
+    std::vector<utility::graph::UnionFindRootGroup<
         model_component::Variable<T_Variable, T_Expression> *>>
         m_groups;
 
@@ -114,7 +115,7 @@ class DependentBinaryVariableExtractor {
                              return a_FIRST->name() < a_SECOND->name();
                          });
 
-        utility::UnionFind<
+        utility::graph::UnionFind<
             model_component::Variable<T_Variable, T_Expression> *>
             uf(variable_ptr_vector);
 

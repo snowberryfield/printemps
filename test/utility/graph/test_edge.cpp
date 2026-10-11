@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -18,49 +18,33 @@ class TestEdge : public ::testing::Test {
         /// nothing to do
     }
 };
+
 /*****************************************************************************/
-TEST_F(TestEdge, constructor_without_arg) {
+TEST_F(TestEdge, default_constructor) {
     utility::graph::Edge<int> edge;
 
-    EXPECT_FLOAT_EQ(0.0, edge.weight());
+    EXPECT_EQ(0, edge.first);
+    EXPECT_EQ(0, edge.second);
+    EXPECT_FLOAT_EQ(0.0, edge.weight);
 }
 
 /*****************************************************************************/
-TEST_F(TestEdge, constructor_with_arg_1) {
-    utility::graph::Edge<int> edge(1, 2);
+TEST_F(TestEdge, constructor_with_args) {
+    utility::graph::Edge<int> edge_default_weight(1, 2);
+    EXPECT_EQ(1, edge_default_weight.first);
+    EXPECT_EQ(2, edge_default_weight.second);
+    EXPECT_FLOAT_EQ(0.0, edge_default_weight.weight);
 
-    EXPECT_FLOAT_EQ(0.0, edge.weight());
-    EXPECT_EQ(1, edge.node_keys().first);
-    EXPECT_EQ(2, edge.node_keys().second);
+    utility::graph::Edge<int> edge_with_weight(1, 2, 3.14);
+    EXPECT_EQ(1, edge_with_weight.first);
+    EXPECT_EQ(2, edge_with_weight.second);
+    EXPECT_FLOAT_EQ(3.14, edge_with_weight.weight);
+
+    utility::graph::Edge<std::string> edge_string("a", "b", 1.5);
+    EXPECT_EQ("a", edge_string.first);
+    EXPECT_EQ("b", edge_string.second);
+    EXPECT_FLOAT_EQ(1.5, edge_string.weight);
 }
-
-/*****************************************************************************/
-TEST_F(TestEdge, constructor_with_arg_2) {
-    utility::graph::Edge<int> edge(1, 2, 3.14);
-
-    EXPECT_FLOAT_EQ(3.14, edge.weight());
-    EXPECT_EQ(1, edge.node_keys().first);
-    EXPECT_EQ(2, edge.node_keys().second);
-}
-
-/*****************************************************************************/
-TEST_F(TestEdge, initialize) {
-    utility::graph::Node<int> edge(10, 3.14);
-    edge.initialize();
-
-    EXPECT_FLOAT_EQ(0.0, edge.weight());
-}
-
-/*****************************************************************************/
-TEST_F(TestEdge, setup_with_arg_1) {
-    /// This test is covered by constructor_with_arg_1()
-}
-
-/*****************************************************************************/
-TEST_F(TestEdge, setup_with_arg_2) {
-    /// This test is covered by constructor_with_arg_2()
-}
-
 }  // namespace
 /*****************************************************************************/
 // END

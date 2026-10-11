@@ -11,7 +11,7 @@ namespace printemps::solver {
 template <class T_Variable, class T_Expression>
 class SearchTree {
    private:
-    utility::graph::Graph<int> m_tree;
+    utility::graph::UndirectedGraph<int> m_tree;
     std::vector<
         std::pair<solution::SparseSolution<T_Variable, T_Expression>, int>>
         m_frontier_solutions;
@@ -58,7 +58,7 @@ class SearchTree {
 
         auto&     solutions          = a_SOLUTION_ARCHIVE.solutions();
         const int NEW_SOLUTIONS_SIZE = solutions.size();
-        const int OLD_SOLUTION_SIZE  = m_tree.nodes().size();
+        const int OLD_SOLUTION_SIZE  = m_tree.number_of_nodes();
 
         for (int i = OLD_SOLUTION_SIZE; i < NEW_SOLUTIONS_SIZE; i++) {
             m_tree.add_node(i, solutions[i].global_augmented_objective);
@@ -76,37 +76,18 @@ class SearchTree {
             }
         }
 
-        const auto  MINIMUM_SPANNING_TREE = m_tree.minimum_spanning_tree();
-        const auto& MST_NODES             = MINIMUM_SPANNING_TREE.nodes();
-        const auto& MST_EDGES             = MINIMUM_SPANNING_TREE.edges();
+        const auto MINIMUM_SPANNING_TREE = m_tree.minimum_spanning_tree();
 
         for (int i = 0; i < NEW_SOLUTIONS_SIZE; i++) {
             const double DISTANCE = solutions[i].distance(a_INCUMBENT_SOLUTION);
-            if (MST_NODES.at(i).edge_indices().size() == 1) {
+            if (MINIMUM_SPANNING_TREE.degree(i) == 1) {
                 m_frontier_solutions.emplace_back(solutions[i], DISTANCE);
             }
 
-            bool  is_local_optimal = true;
-            auto& edge_indices     = MST_NODES.at(i).edge_indices();
-
-            for (auto&& edge_index : edge_indices) {
-                const int NODE_INDEX_FIRST =
-                    MST_EDGES[edge_index].node_keys().first;
-                const int NODE_INDEX_SECOND =
-                    MST_EDGES[edge_index].node_keys().second;
-
-                if (NODE_INDEX_FIRST != i &&
-                    solutions[i].global_augmented_objective >
-                        solutions[NODE_INDEX_FIRST]
-                            .global_augmented_objective) {
-                    is_local_optimal = false;
-                    break;
-                }
-
-                if (NODE_INDEX_SECOND != i &&
-                    solutions[i].global_augmented_objective >
-                        solutions[NODE_INDEX_SECOND]
-                            .global_augmented_objective) {
+            bool is_local_optimal = true;
+            for (const int NEIGHBOR : MINIMUM_SPANNING_TREE.neighbors(i)) {
+                if (solutions[i].global_augmented_objective >
+                    solutions[NEIGHBOR].global_augmented_objective) {
                     is_local_optimal = false;
                     break;
                 }

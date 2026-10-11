@@ -21,8 +21,8 @@ class DependentIntegerVariableExtractor {
                        int>
         m_candidate_dependent_variable_ptr_counts;
 
-    std::vector<std::vector<int>> m_constraint_graph;
-    std::vector<bool>             m_extractable_flags;
+    utility::graph::DirectedGraph<int> m_constraint_graph;
+    std::vector<bool>                  m_extractable_flags;
 
     std::vector<model_component::Constraint<T_Variable, T_Expression> *>
         m_target_constraint_ptrs;
@@ -64,7 +64,7 @@ class DependentIntegerVariableExtractor {
     inline void clear_work_buffers(void) {
         m_candidate_constraint_ptrs.clear();
         m_candidate_dependent_variable_ptr_counts.clear();
-        m_constraint_graph.clear();
+        m_constraint_graph.initialize();
         m_extractable_flags.clear();
         m_target_constraint_ptrs.clear();
         m_dependent_variable_ptrs.clear();
@@ -155,7 +155,10 @@ class DependentIntegerVariableExtractor {
     /*************************************************************************/
     inline void build_constraint_graph(void) {
         const int SIZE = m_candidate_constraint_ptrs.size();
-        m_constraint_graph.assign(SIZE, {});
+        m_constraint_graph.initialize();
+        for (int i = 0; i < SIZE; i++) {
+            m_constraint_graph.add_node(i);
+        }
 
         std::unordered_map<
             model_component::Variable<T_Variable, T_Expression> *,
@@ -176,8 +179,9 @@ class DependentIntegerVariableExtractor {
             auto it = variable_to_constraints.find(key_variable_ptr);
             if (it != variable_to_constraints.end()) {
                 for (int j : it->second) {
-                    if (i != j)
-                        m_constraint_graph[i].push_back(j);
+                    if (i != j) {
+                        m_constraint_graph.add_edge(i, j);
+                    }
                 }
             }
         }
@@ -185,61 +189,16 @@ class DependentIntegerVariableExtractor {
 
     /*************************************************************************/
     inline void build_extractable_flags(void) {
-        const int         SIZE = m_constraint_graph.size();
-        std::vector<int>  dfs_order(SIZE, -1);
-        std::vector<int>  lowlink(SIZE, 0);
-        std::vector<bool> is_on_stack(SIZE, false);
-        std::vector<int>  scc_id(SIZE, -1);
-        int               scc_count = 0;
-
-        std::vector<int> dfs_stack;
-        dfs_stack.reserve(SIZE);
-
-        int current_order = 0;
-
-        std::function<void(int)> dfs = [&](int node) {
-            dfs_order[node] = lowlink[node] = current_order++;
-            dfs_stack.push_back(node);
-            is_on_stack[node] = true;
-
-            for (int next : m_constraint_graph[node]) {
-                if (dfs_order[next] < 0) {
-                    dfs(next);
-                    lowlink[node] = std::min(lowlink[node], lowlink[next]);
-                } else if (is_on_stack[next]) {
-                    lowlink[node] = std::min(lowlink[node], dfs_order[next]);
-                }
-            }
-
-            if (lowlink[node] == dfs_order[node]) {
-                while (true) {
-                    int v = dfs_stack.back();
-                    dfs_stack.pop_back();
-                    is_on_stack[v] = false;
-                    scc_id[v]      = scc_count;
-                    if (v == node) {
-                        break;
-                    }
-                }
-                scc_count++;
-            }
-        };
-
-        for (int i = 0; i < SIZE; i++) {
-            if (dfs_order[i] < 0) {
-                dfs(i);
-            }
-        }
-
-        std::vector<int> scc_size(scc_count, 0);
-        for (int i = 0; i < SIZE; i++) {
-            scc_size[scc_id[i]]++;
-        }
-
+        const int SIZE = m_candidate_constraint_ptrs.size();
         m_extractable_flags.assign(SIZE, true);
-        for (int i = 0; i < SIZE; i++) {
-            if (scc_size[scc_id[i]] > 1) {
-                m_extractable_flags[i] = false;
+
+        const auto COMPONENTS =
+            m_constraint_graph.strongly_connected_components();
+        for (const auto &component : COMPONENTS) {
+            if (component.size() > 1) {
+                for (const int CONSTRAINT_INDEX : component) {
+                    m_extractable_flags[CONSTRAINT_INDEX] = false;
+                }
             }
         }
     }

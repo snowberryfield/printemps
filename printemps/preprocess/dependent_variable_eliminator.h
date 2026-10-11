@@ -68,9 +68,9 @@ class DependentVariableEliminator {
             return;
         }
 
-        utility::TopologicalSorter<
+        utility::graph::DirectedGraph<
             model_component::Variable<T_Variable, T_Expression> *>
-            sorter(a_DEPENDENT_VARIABLE_PTRS);
+            graph(a_DEPENDENT_VARIABLE_PTRS);
 
         for (auto *variable_ptr_target : a_DEPENDENT_VARIABLE_PTRS) {
             auto *expression_ptr =
@@ -80,12 +80,12 @@ class DependentVariableEliminator {
             }
             for (auto &&sensitivity : expression_ptr->sensitivities()) {
                 auto *variable_ptr_source = sensitivity.first;
-                if (sorter.has_node(variable_ptr_source)) {
-                    sorter.add_edge(variable_ptr_source, variable_ptr_target);
+                if (graph.has_node(variable_ptr_source)) {
+                    graph.add_edge(variable_ptr_source, variable_ptr_target);
                 }
             }
         }
-        const auto SORTED_VARIABLE_PTRS = sorter.sort();
+        const auto SORTED_VARIABLE_PTRS = graph.topological_sort();
         for (auto *variable_ptr_source : SORTED_VARIABLE_PTRS) {
             auto *expression_ptr =
                 variable_ptr_source->dependent_expression_ptr();
@@ -94,7 +94,7 @@ class DependentVariableEliminator {
             }
 
             for (auto *variable_ptr_target :
-                 sorter.successors(variable_ptr_source)) {
+                 graph.successors(variable_ptr_source)) {
                 auto *expression_ptr_target =
                     variable_ptr_target->dependent_expression_ptr();
                 if (expression_ptr_target == nullptr) {

@@ -3,10 +3,10 @@
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
-#ifndef PRINTEMPS_UTILITY_UNION_FIND_H__
-#define PRINTEMPS_UTILITY_UNION_FIND_H__
+#ifndef PRINTEMPS_UTILITY_GRAPH_UNION_FIND_H__
+#define PRINTEMPS_UTILITY_GRAPH_UNION_FIND_H__
 
-namespace printemps::utility {
+namespace printemps::utility::graph {
 /*****************************************************************************/
 template <class T>
 struct UnionFindRootGroup {
@@ -220,7 +220,7 @@ class UnionFind {
     /*************************************************************************/
     inline std::vector<UnionFindRootGroup<T>> groups(void) const {
         std::vector<UnionFindRootGroup<T>> result;
-        const int        ELEMENTS_SIZE = static_cast<int>(m_elements.size());
+        const int ELEMENTS_SIZE = static_cast<int>(m_elements.size());
         std::vector<int> root_to_group(ELEMENTS_SIZE, -1);
         for (int i = 0; i < ELEMENTS_SIZE; i++) {
             const auto [ROOT_ID, PARITY] =
@@ -243,19 +243,21 @@ class UnionFind {
     /*************************************************************************/
     inline const std::vector<int>& parents(void) const noexcept {
         return m_parents;
-    };
+    }
 
     /*************************************************************************/
     inline const std::vector<int>& sizes(void) const noexcept {
         return m_sizes;
-    };
+    }
 
     /*************************************************************************/
     inline const std::vector<int>& parities(void) const noexcept {
         return m_parities;
-    };
+    }
 };
-}  // namespace printemps::utility
-/*****************************************************************************/
+}  // namespace printemps::utility::graph
+
 #endif
+/*****************************************************************************/
+// END
 /*****************************************************************************/
