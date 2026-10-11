@@ -195,8 +195,8 @@ TEST_F(TestMPS, parse_rows) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"E", "c1"};
         mps.parse_rows(items);
-        EXPECT_EQ("c1", mps.constraints["c1"].name);
-        EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraints["c1"].sense);
+        EXPECT_EQ("c1", mps.constraint("c1").name);
+        EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraint("c1").sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
 
@@ -204,8 +204,8 @@ TEST_F(TestMPS, parse_rows) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"E", "c1", "extra"};
         mps.parse_rows(items);
-        EXPECT_EQ("c1", mps.constraints["c1"].name);
-        EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraints["c1"].sense);
+        EXPECT_EQ("c1", mps.constraint("c1").name);
+        EXPECT_EQ(mps::MPSConstraintSense::Equal, mps.constraint("c1").sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
 
@@ -213,8 +213,8 @@ TEST_F(TestMPS, parse_rows) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"L", "c2"};
         mps.parse_rows(items);
-        EXPECT_EQ("c2", mps.constraints["c2"].name);
-        EXPECT_EQ(mps::MPSConstraintSense::Less, mps.constraints["c2"].sense);
+        EXPECT_EQ("c2", mps.constraint("c2").name);
+        EXPECT_EQ(mps::MPSConstraintSense::Less, mps.constraint("c2").sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
 
@@ -222,9 +222,9 @@ TEST_F(TestMPS, parse_rows) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"G", "c3"};
         mps.parse_rows(items);
-        EXPECT_EQ("c3", mps.constraints["c3"].name);
+        EXPECT_EQ("c3", mps.constraint("c3").name);
         EXPECT_EQ(mps::MPSConstraintSense::Greater,
-                  mps.constraints["c3"].sense);
+                  mps.constraint("c3").sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
 
@@ -233,7 +233,8 @@ TEST_F(TestMPS, parse_rows) {
         std::vector<std::string_view> items = {"N", "obj"};
         mps.parse_rows(items);
         EXPECT_EQ("obj", mps.objective.name);
-        EXPECT_TRUE(mps.constraints.find("obj") == mps.constraints.end());
+        EXPECT_TRUE(mps.constraint_name_to_index_map.find("obj") ==
+                    mps.constraint_name_to_index_map.end());
     }
 
     {
@@ -241,7 +242,8 @@ TEST_F(TestMPS, parse_rows) {
         std::vector<std::string_view> items = {"N", "obj", "extra"};
         mps.parse_rows(items);
         EXPECT_EQ("obj", mps.objective.name);
-        EXPECT_TRUE(mps.constraints.find("obj") == mps.constraints.end());
+        EXPECT_TRUE(mps.constraint_name_to_index_map.find("obj") ==
+                    mps.constraint_name_to_index_map.end());
     }
 
     {
@@ -274,10 +276,23 @@ TEST_F(TestMPS, parse_columns) {
         items = {"x1", "c1", "1.0", "c2", "2.0"};
         mps.parse_columns(items, &variable_type);
 
-        EXPECT_EQ("x1", mps.variables["x1"].name);
-        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variables["x1"].type);
-        EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x1"]);
-        EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x1"]);
+        auto get_sensitivity = [&](const mps::MPSConstraint &a_constraint,
+                                   const std::string        &a_variable_name) {
+            const int TARGET_VARIABLE_INDEX =
+                mps.variable_name_to_index_map.at(a_variable_name);
+            for (const auto &[variable_index, sensitivity] :
+                 a_constraint.sensitivities) {
+                if (variable_index == TARGET_VARIABLE_INDEX) {
+                    return sensitivity;
+                }
+            }
+            return 0.0;
+        };
+
+        EXPECT_EQ("x1", mps.variable("x1").name);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variable("x1").type);
+        EXPECT_FLOAT_EQ(1.0, get_sensitivity(mps.constraint("c1"), "x1"));
+        EXPECT_FLOAT_EQ(2.0, get_sensitivity(mps.constraint("c2"), "x1"));
     }
 
     {
@@ -304,15 +319,28 @@ TEST_F(TestMPS, parse_columns) {
         items = {"x2", "c1", "1.0", "c2", "2.0"};
         mps.parse_columns(items, &variable_type);
 
-        EXPECT_EQ("x1", mps.variables["x1"].name);
-        EXPECT_EQ(mps::MPSVariableType::Integer, mps.variables["x1"].type);
-        EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x1"]);
-        EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x1"]);
+        auto get_sensitivity = [&](const mps::MPSConstraint &a_constraint,
+                                   const std::string        &a_variable_name) {
+            const int TARGET_VARIABLE_INDEX =
+                mps.variable_name_to_index_map.at(a_variable_name);
+            for (const auto &[variable_index, sensitivity] :
+                 a_constraint.sensitivities) {
+                if (variable_index == TARGET_VARIABLE_INDEX) {
+                    return sensitivity;
+                }
+            }
+            return 0.0;
+        };
 
-        EXPECT_EQ("x2", mps.variables["x2"].name);
-        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variables["x2"].type);
-        EXPECT_FLOAT_EQ(1.0, mps.constraints["c1"].sensitivities["x2"]);
-        EXPECT_FLOAT_EQ(2.0, mps.constraints["c2"].sensitivities["x2"]);
+        EXPECT_EQ("x1", mps.variable("x1").name);
+        EXPECT_EQ(mps::MPSVariableType::Integer, mps.variable("x1").type);
+        EXPECT_FLOAT_EQ(1.0, get_sensitivity(mps.constraint("c1"), "x1"));
+        EXPECT_FLOAT_EQ(2.0, get_sensitivity(mps.constraint("c2"), "x1"));
+
+        EXPECT_EQ("x2", mps.variable("x2").name);
+        EXPECT_EQ(mps::MPSVariableType::Continuous, mps.variable("x2").type);
+        EXPECT_FLOAT_EQ(1.0, get_sensitivity(mps.constraint("c1"), "x2"));
+        EXPECT_FLOAT_EQ(2.0, get_sensitivity(mps.constraint("c2"), "x2"));
     }
 
     {
@@ -368,11 +396,15 @@ TEST_F(TestMPS, parse_columns) {
 TEST_F(TestMPS, parse_rhs) {
     {
         mps::MPS                      mps;
+        std::vector<std::string_view> rows1 = {"E", "_C1"};
+        std::vector<std::string_view> rows2 = {"E", "_C2"};
+        mps.parse_rows(rows1);
+        mps.parse_rows(rows2);
         std::vector<std::string_view> items = {"rhs1", "_C1", "10", "_C2",
                                                "20"};
         mps.parse_rhs(items);
-        EXPECT_EQ(10, mps.constraints["_C1"].rhs);
-        EXPECT_EQ(20, mps.constraints["_C2"].rhs);
+        EXPECT_EQ(10, mps.constraint("_C1").rhs);
+        EXPECT_EQ(20, mps.constraint("_C2").rhs);
     }
 
     {
@@ -383,6 +415,10 @@ TEST_F(TestMPS, parse_rhs) {
 
     {
         mps::MPS                      mps;
+        std::vector<std::string_view> rows1 = {"E", "_C1"};
+        std::vector<std::string_view> rows2 = {"E", "_C2"};
+        mps.parse_rows(rows1);
+        mps.parse_rows(rows2);
         std::vector<std::string_view> items = {"rhs1", "_C1", "ten", "_C2",
                                                "20"};
         ASSERT_THROW(mps.parse_rhs(items), std::runtime_error);
@@ -400,7 +436,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"FR", "bnd", "x_0"};
         mps.parse_bounds(items);
-        auto x_0 = mps.variables["x_0"];
+        auto x_0 = mps.variable("x_0");
         EXPECT_EQ("x_0", x_0.name);
         EXPECT_TRUE(x_0.is_bound_defined);
         EXPECT_FALSE(x_0.is_fixed);
@@ -415,7 +451,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"BV", "bnd", "x"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -430,7 +466,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"MI", "bnd", "x"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -445,7 +481,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"PL", "bnd", "x"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -460,7 +496,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"LO", "bnd", "x", "0"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -475,7 +511,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"LI", "bnd", "x", "0"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -490,7 +526,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"UP", "bnd", "x", "100"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -505,7 +541,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"UI", "bnd", "x", "100"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_FALSE(x.is_fixed);
@@ -520,7 +556,7 @@ TEST_F(TestMPS, parse_bounds) {
         mps::MPS                      mps;
         std::vector<std::string_view> items = {"FX", "bnd", "x", "10"};
         mps.parse_bounds(items);
-        auto x = mps.variables["x"];
+        auto x = mps.variable("x");
         EXPECT_EQ("x", x.name);
         EXPECT_TRUE(x.is_bound_defined);
         EXPECT_TRUE(x.is_fixed);
@@ -557,8 +593,22 @@ TEST_F(TestMPS, read_mps_00) {
     mps.read_mps("./dat/mps/test_00.mps");
     EXPECT_EQ("problem", mps.name);
 
+    auto get_sensitivity =
+        [&](const std::vector<std::pair<int, double>> &a_sensitivities,
+            const std::string                         &a_variable_name) {
+            const int TARGET_VARIABLE_INDEX =
+                mps.variable_name_to_index_map.at(a_variable_name);
+            for (const auto &[variable_index, sensitivity] :
+                 a_sensitivities) {
+                if (variable_index == TARGET_VARIABLE_INDEX) {
+                    return sensitivity;
+                }
+            }
+            return 0.0;
+        };
+
     {
-        auto x_0 = mps.variables["x_0"];
+        auto x_0 = mps.variable("x_0");
         EXPECT_EQ("x_0", x_0.name);
         EXPECT_EQ(mps::MPSVariableType::Integer, x_0.type);
         EXPECT_EQ(0, x_0.integer_lower_bound);
@@ -568,7 +618,7 @@ TEST_F(TestMPS, read_mps_00) {
     }
 
     {
-        auto y_0 = mps.variables["y_0"];
+        auto y_0 = mps.variable("y_0");
         EXPECT_EQ("y_0", y_0.name);
         EXPECT_EQ(mps::MPSVariableType::Continuous, y_0.type);
         EXPECT_EQ(constant::INT_HALF_MIN, y_0.integer_lower_bound);
@@ -580,7 +630,7 @@ TEST_F(TestMPS, read_mps_00) {
     }
 
     {
-        auto z_0 = mps.variables["z_0"];
+        auto z_0 = mps.variable("z_0");
         EXPECT_EQ("z_0", z_0.name);
         EXPECT_EQ(mps::MPSVariableType::Integer, z_0.type);
         EXPECT_EQ(-100, z_0.integer_lower_bound);
@@ -590,35 +640,35 @@ TEST_F(TestMPS, read_mps_00) {
     }
 
     {
-        auto c_1 = mps.constraints["_C1"];
+        auto c_1 = mps.constraint("_C1");
         EXPECT_EQ("_C1", c_1.name);
         EXPECT_EQ(mps::MPSConstraintSense::Equal, c_1.sense);
-        EXPECT_EQ(1, c_1.sensitivities["x_0"]);
-        EXPECT_EQ(1, c_1.sensitivities["x_9"]);
+        EXPECT_EQ(1, get_sensitivity(c_1.sensitivities, "x_0"));
+        EXPECT_EQ(1, get_sensitivity(c_1.sensitivities, "x_9"));
         EXPECT_EQ(1, c_1.rhs);
     }
 
     {
-        auto c_2 = mps.constraints["_C2"];
+        auto c_2 = mps.constraint("_C2");
         EXPECT_EQ("_C2", c_2.name);
         EXPECT_EQ(mps::MPSConstraintSense::Less, c_2.sense);
-        EXPECT_EQ(1, c_2.sensitivities["y_0"]);
-        EXPECT_EQ(20, c_2.sensitivities["y_19"]);
+        EXPECT_EQ(1, get_sensitivity(c_2.sensitivities, "y_0"));
+        EXPECT_EQ(20, get_sensitivity(c_2.sensitivities, "y_19"));
         EXPECT_FLOAT_EQ(2E7, c_2.rhs);
     }
 
     {
-        auto c_3 = mps.constraints["_C3"];
+        auto c_3 = mps.constraint("_C3");
         EXPECT_EQ("_C3", c_3.name);
         EXPECT_EQ(mps::MPSConstraintSense::Greater, c_3.sense);
-        EXPECT_EQ(1, c_3.sensitivities["z_0"]);
-        EXPECT_EQ(30, c_3.sensitivities["z_29"]);
+        EXPECT_EQ(1, get_sensitivity(c_3.sensitivities, "z_0"));
+        EXPECT_EQ(30, get_sensitivity(c_3.sensitivities, "z_29"));
         EXPECT_FLOAT_EQ(300, c_3.rhs);
     }
 
     {
-        EXPECT_EQ(1, mps.objective.sensitivities["x_0"]);
-        EXPECT_EQ(10, mps.objective.sensitivities["x_9"]);
+        EXPECT_EQ(1, get_sensitivity(mps.objective.sensitivities, "x_0"));
+        EXPECT_EQ(10, get_sensitivity(mps.objective.sensitivities, "x_9"));
     }
 }
 
@@ -628,27 +678,27 @@ TEST_F(TestMPS, read_mps_01) {
     // values.
     mps::MPS mps("./dat/mps/test_01.mps");
 
-    auto c_1 = mps.constraints["_C1"];
+    auto c_1 = mps.constraint("_C1");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_1.sense);
     EXPECT_EQ(1, c_1.rhs);
 
-    auto c_1_range = mps.constraints["_C1_range"];
+    auto c_1_range = mps.constraint("_C1_range");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_1_range.sense);
     EXPECT_EQ(1 + 10, c_1_range.rhs);
 
-    auto c_2 = mps.constraints["_C2"];
+    auto c_2 = mps.constraint("_C2");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_2.sense);
     EXPECT_EQ(2, c_2.rhs);
 
-    auto c_2_range = mps.constraints["_C2_range"];
+    auto c_2_range = mps.constraint("_C2_range");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_2_range.sense);
     EXPECT_EQ(2 - 10, c_2_range.rhs);
 
-    auto c_3 = mps.constraints["_C3"];
+    auto c_3 = mps.constraint("_C3");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_3.sense);
     EXPECT_EQ(3, c_3.rhs);
 
-    auto c_3_range = mps.constraints["_C3_range"];
+    auto c_3_range = mps.constraint("_C3_range");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_3_range.sense);
     EXPECT_EQ(3 + 10, c_3_range.rhs);
 }
@@ -659,27 +709,27 @@ TEST_F(TestMPS, read_mps_02) {
     // values.
     mps::MPS mps("./dat/mps/test_02.mps");
 
-    auto c_1 = mps.constraints["_C1"];
+    auto c_1 = mps.constraint("_C1");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_1.sense);
     EXPECT_EQ(1, c_1.rhs);
 
-    auto c_1_range = mps.constraints["_C1_range"];
+    auto c_1_range = mps.constraint("_C1_range");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_1_range.sense);
     EXPECT_EQ(1 + (-10), c_1_range.rhs);
 
-    auto c_2 = mps.constraints["_C2"];
+    auto c_2 = mps.constraint("_C2");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_2.sense);
     EXPECT_EQ(2, c_2.rhs);
 
-    auto c_2_range = mps.constraints["_C2_range"];
+    auto c_2_range = mps.constraint("_C2_range");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_2_range.sense);
     EXPECT_EQ(2 - 10, c_2_range.rhs);
 
-    auto c_3 = mps.constraints["_C3"];
+    auto c_3 = mps.constraint("_C3");
     EXPECT_EQ(mps::MPSConstraintSense::Greater, c_3.sense);
     EXPECT_EQ(3, c_3.rhs);
 
-    auto c_3_range = mps.constraints["_C3_range"];
+    auto c_3_range = mps.constraint("_C3_range");
     EXPECT_EQ(mps::MPSConstraintSense::Less, c_3_range.sense);
     EXPECT_EQ(3 + 10, c_3_range.rhs);
 }
@@ -691,7 +741,7 @@ TEST_F(TestMPS, read_mps_03) {
     mps::MPS mps("./dat/mps/test_03.mps");
     EXPECT_EQ("problem", mps.name);
 
-    auto x = mps.variables["x"];
+    auto x = mps.variable("x");
     EXPECT_EQ("x", x.name);
     EXPECT_EQ(mps::MPSVariableType::Continuous, x.type);
 }

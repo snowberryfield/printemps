@@ -39,27 +39,21 @@ class ModelMPSHandler {
     /*********************************************************************/
     void import(const mps::MPS &a_MPS, const bool a_ACCEPT_CONTINUOUS) {
         auto &model = *m_model_ptr;
-
-        using VariableMap = std::unordered_map<
-            std::string, model_component::Variable<T_Variable, T_Expression> *>;
-        using Sensitivities = std::unordered_map<
-            model_component::Variable<T_Variable, T_Expression> *,
-            T_Expression>;
-
-        VariableMap variable_ptrs;
         model.set_is_minimization(a_MPS.objective.is_minimization);
 
-        auto &variable_proxy = model.component_creator().create_variables(
-            "variables", a_MPS.variables.size());
+        const int NUMBER_OF_VARIABLES = a_MPS.variables.size();
+        auto     &variable_proxy = model.component_creator().create_variables(
+            "variables", NUMBER_OF_VARIABLES);
+
+        std::vector<model_component::Variable<T_Variable, T_Expression> *>
+            variable_ptrs(NUMBER_OF_VARIABLES);
 
         /**
          * Set up variables.
          */
-        const int NUMBER_OF_VARIABLES = a_MPS.variable_names.size();
-
         for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
-            const auto &VARIABLE_NAME = a_MPS.variable_names[i];
-            const auto &VARIABLE      = a_MPS.variables.at(VARIABLE_NAME);
+            const auto &VARIABLE      = a_MPS.variables[i];
+            const auto &VARIABLE_NAME = VARIABLE.name;
 
             if (VARIABLE.type == mps::MPSVariableType::Continuous) {
                 if (a_ACCEPT_CONTINUOUS) {
@@ -82,13 +76,13 @@ class ModelMPSHandler {
             }
 
             variable_proxy(i).set_name(VARIABLE_NAME);
-            variable_ptrs[VARIABLE_NAME] = &variable_proxy(i);
+            variable_ptrs[i] = &variable_proxy(i);
         }
 
         /**
          * Set up constraints.
          */
-        const int NUMBER_OF_CONSTRAINTS = a_MPS.constraint_names.size();
+        const int NUMBER_OF_CONSTRAINTS = a_MPS.constraints.size();
         auto &constraint_proxy = model.component_creator().create_constraints(
             "constraints", NUMBER_OF_CONSTRAINTS);
 
@@ -96,18 +90,22 @@ class ModelMPSHandler {
 #pragma omp parallel for schedule(static)
 #endif
         for (int i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
-            const auto &CONSTRAINT_NAME = a_MPS.constraint_names[i];
-            const auto &CONSTRAINT      = a_MPS.constraints.at(CONSTRAINT_NAME);
+            const auto &CONSTRAINT      = a_MPS.constraints[i];
+            const auto &CONSTRAINT_NAME = CONSTRAINT.name;
             auto        expression =
                 model_component::Expression<T_Variable,
                                             T_Expression>::create_instance();
 
-            Sensitivities expression_sensitivities;
+            std::unordered_map<
+                model_component::Variable<T_Variable, T_Expression> *,
+                T_Expression>
+                expression_sensitivities;
+            expression_sensitivities.reserve(CONSTRAINT.sensitivities.size());
             for (const auto &sensitivity : CONSTRAINT.sensitivities) {
-                const auto        &VARIABLE_NAME = sensitivity.first;
+                const int          VARIABLE_ID = sensitivity.first;
                 const T_Expression COEFFICIENT =
                     static_cast<T_Expression>(sensitivity.second);
-                expression_sensitivities[variable_ptrs[VARIABLE_NAME]] =
+                expression_sensitivities[variable_ptrs[VARIABLE_ID]] =
                     COEFFICIENT;
             }
             expression.set_sensitivities(expression_sensitivities);
@@ -137,12 +135,15 @@ class ModelMPSHandler {
         auto objective =
             model_component::Expression<T_Variable,
                                         T_Expression>::create_instance();
-        Sensitivities objective_sensitivities;
+        std::unordered_map<
+            model_component::Variable<T_Variable, T_Expression> *, T_Expression>
+            objective_sensitivities;
+        objective_sensitivities.reserve(a_MPS.objective.sensitivities.size());
         for (const auto &sensitivity : a_MPS.objective.sensitivities) {
-            const std::string  VARIABLE_NAME = sensitivity.first;
+            const int          VARIABLE_ID = sensitivity.first;
             const T_Expression COEFFICIENT =
                 static_cast<T_Expression>(sensitivity.second);
-            objective_sensitivities[variable_ptrs[VARIABLE_NAME]] = COEFFICIENT;
+            objective_sensitivities[variable_ptrs[VARIABLE_ID]] = COEFFICIENT;
         }
         objective.set_sensitivities(objective_sensitivities);
         model.minimize(objective);

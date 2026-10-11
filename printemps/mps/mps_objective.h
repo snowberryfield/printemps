@@ -9,9 +9,9 @@
 namespace printemps::mps {
 /*****************************************************************************/
 struct MPSObjective {
-    bool                                    is_minimization;
-    std::string                             name;
-    std::unordered_map<std::string, double> sensitivities;
+    bool                                is_minimization;
+    std::string                         name;
+    std::vector<std::pair<int, double>> sensitivities;
 
     /*************************************************************************/
     MPSObjective(void) {

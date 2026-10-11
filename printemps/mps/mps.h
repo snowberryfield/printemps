@@ -15,13 +15,19 @@
 namespace printemps::mps {
 /*****************************************************************************/
 struct MPS {
-    std::string                                    name;
-    std::unordered_map<std::string, MPSVariable>   variables;
-    std::unordered_map<std::string, MPSConstraint> constraints;
-    MPSObjective                                   objective;
+    std::string                name;
+    std::vector<MPSVariable>   variables;
+    std::vector<MPSConstraint> constraints;
+    MPSObjective               objective;
 
-    std::vector<std::string> variable_names;
-    std::vector<std::string> constraint_names;
+    std::vector<std::string>                  variable_names;
+    std::vector<std::string>                  constraint_names;
+    std::unordered_map<std::string_view, int> variable_name_to_index_map;
+    std::unordered_map<std::string_view, int> constraint_name_to_index_map;
+
+    std::string_view last_column_name;
+    int              last_column_id;
+    std::string      buffer;
 
     /*************************************************************************/
     MPS(void) {
@@ -42,23 +48,54 @@ struct MPS {
         this->objective.initialize();
         this->variable_names.clear();
         this->constraint_names.clear();
+        this->variable_name_to_index_map.clear();
+        this->constraint_name_to_index_map.clear();
+        this->last_column_name = "";
+        this->last_column_id   = -1;
+        this->buffer.clear();
+    }
+
+    /*************************************************************************/
+    inline MPSVariable &variable(const std::string_view &a_NAME) {
+        return this->variables[this->variable_name_to_index_map.at(a_NAME)];
+    }
+
+    /*************************************************************************/
+    inline const MPSVariable &variable(const std::string_view &a_NAME) const {
+        return this->variables[this->variable_name_to_index_map.at(a_NAME)];
+    }
+
+    /*************************************************************************/
+    inline MPSConstraint &constraint(const std::string_view &a_NAME) {
+        return this->constraints[this->constraint_name_to_index_map.at(a_NAME)];
+    }
+
+    /*************************************************************************/
+    inline const MPSConstraint &constraint(
+        const std::string_view &a_NAME) const {
+        return this->constraints[this->constraint_name_to_index_map.at(a_NAME)];
     }
 
     /*************************************************************************/
     inline double parse_value(const std::string_view &a_VALUE_SV) {
         switch (a_VALUE_SV.size()) {
-            case 1:
+            case 1: {
                 if (a_VALUE_SV[0] == '1') {
                     return 1.0;
+                } else if (a_VALUE_SV[0] == '0') {
+                    return 0.0;
                 }
                 break;
-            case 2:
+            }
+            case 2: {
                 if (a_VALUE_SV[0] == '-' && a_VALUE_SV[1] == '1') {
                     return -1.0;
                 }
                 break;
-            default:
+            }
+            default: {
                 break;
+            }
         }
 
         char       *end   = nullptr;
@@ -153,8 +190,10 @@ struct MPS {
                 "The MPS file has something wrong in ROWS section."));
         }
 
-        const auto       &SENSE_SV = a_ITEMS[0];
-        const std::string ROW_NAME(a_ITEMS[1]);
+        const auto &SENSE_SV    = a_ITEMS[0];
+        const auto &ROW_NAME_SV = a_ITEMS[1];
+
+        const std::string ROW_NAME(ROW_NAME_SV);
 
         if (SENSE_SV[0] == 'N' && (this->objective.name.empty() ||
                                    ROW_NAME == this->objective.name)) {
@@ -164,25 +203,32 @@ struct MPS {
 
         MPSConstraintSense sense;
         switch (SENSE_SV[0]) {
-            case 'L':
+            case 'L': {
                 sense = MPSConstraintSense::Less;
                 break;
-            case 'E':
+            }
+            case 'E': {
                 sense = MPSConstraintSense::Equal;
                 break;
-            case 'G':
+            }
+            case 'G': {
                 sense = MPSConstraintSense::Greater;
                 break;
-            default:
+            }
+            default: {
                 throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "The MPS file has something wrong in ROWS section."));
+            }
         }
 
-        auto &constraint = this->constraints[ROW_NAME];
+        const int ROW_ID = static_cast<int>(this->constraints.size());
+        this->constraints.emplace_back();
+        auto &constraint = this->constraints.back();
         constraint.sense = sense;
         constraint.name  = ROW_NAME;
         this->constraint_names.emplace_back(ROW_NAME);
+        this->constraint_name_to_index_map[ROW_NAME_SV] = ROW_ID;
     }
 
     /*************************************************************************/
@@ -206,14 +252,35 @@ struct MPS {
             }
         }
 
-        const std::string COLUMN_NAME(a_ITEMS[0]);
-        const int         WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
+        const auto &COLUMN_NAME_SV = a_ITEMS[0];
+        int         column_id      = -1;
+
+        if (this->last_column_name == COLUMN_NAME_SV) {
+            column_id = this->last_column_id;
+        } else {
+            auto it = this->variable_name_to_index_map.find(COLUMN_NAME_SV);
+            if (it != this->variable_name_to_index_map.end()) {
+                column_id = it->second;
+            } else {
+                column_id = static_cast<int>(this->variables.size());
+                this->variables.emplace_back();
+                auto &variable = this->variables.back();
+                variable.type  = *a_variable_type_ptr;
+                variable.name  = std::string(COLUMN_NAME_SV);
+                this->variable_names.emplace_back(variable.name);
+                this->variable_name_to_index_map[COLUMN_NAME_SV] = column_id;
+            }
+            this->last_column_name = COLUMN_NAME_SV;
+            this->last_column_id   = column_id;
+        }
+
+        const int WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
 
         for (int i = 0; i < WIDTH; i++) {
-            const auto k = 2 * i;
+            const int K = 2 * i;
 
-            const std::string EXPRESSION_NAME(a_ITEMS[k + 1]);
-            const auto       &SENSITIVITY_SV = a_ITEMS[k + 2];
+            const auto &EXPRESSION_NAME_SV = a_ITEMS[K + 1];
+            const auto &SENSITIVITY_SV     = a_ITEMS[K + 2];
 
             const double SENSITIVITY = this->parse_value(SENSITIVITY_SV);
             if (std::fabs(SENSITIVITY) < constant::EPSILON_10) {
@@ -221,28 +288,23 @@ struct MPS {
             }
 
             const auto &OBJ_NAME = this->objective.name;
-            if (!this->objective.name.empty() && EXPRESSION_NAME == OBJ_NAME) {
-                this->objective.sensitivities[COLUMN_NAME] = SENSITIVITY;
+            if (!OBJ_NAME.empty() && EXPRESSION_NAME_SV == OBJ_NAME) {
+                this->objective.sensitivities.emplace_back(column_id,
+                                                           SENSITIVITY);
             } else {
-                auto it = this->constraints.find(EXPRESSION_NAME);
-                if (it != this->constraints.end()) {
-                    it->second.sensitivities[COLUMN_NAME] = SENSITIVITY;
+                auto it =
+                    this->constraint_name_to_index_map.find(EXPRESSION_NAME_SV);
+                if (it != this->constraint_name_to_index_map.end()) {
+                    this->constraints[it->second].sensitivities.emplace_back(
+                        column_id, SENSITIVITY);
                 } else {
                     throw std::runtime_error(utility::format_error_location(
                         __FILE__, __LINE__, __func__,
                         "An undefined constraint or objective function "
                         "name is specified in COLUMNS section: " +
-                            EXPRESSION_NAME));
+                            std::string(EXPRESSION_NAME_SV)));
                 }
             }
-        }
-
-        auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
-        if (inserted) {
-            auto &variable = it->second;
-            variable.type  = *a_variable_type_ptr;
-            variable.name  = it->first;
-            this->variable_names.emplace_back(it->first);
         }
     }
 
@@ -258,12 +320,15 @@ struct MPS {
 
         const int WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
         for (int i = 0; i < WIDTH; i++) {
-            const auto k = 2 * i;
+            const int K = 2 * i;
 
-            const std::string ROW_NAME(a_ITEMS[k + 1]);
-            const auto       &RHS_SV = a_ITEMS[k + 2];
+            const auto &ROW_NAME_SV = a_ITEMS[K + 1];
+            const auto &RHS_SV      = a_ITEMS[K + 2];
 
-            this->constraints[ROW_NAME].rhs = this->parse_value(RHS_SV);
+            auto it = this->constraint_name_to_index_map.find(ROW_NAME_SV);
+            if (it != this->constraint_name_to_index_map.end()) {
+                this->constraints[it->second].rhs = this->parse_value(RHS_SV);
+            }
         }
     }
 
@@ -281,46 +346,51 @@ struct MPS {
         std::string name_new;
         double      range = 0.0;
 
-        constexpr auto Less    = MPSConstraintSense::Less;
-        constexpr auto Equal   = MPSConstraintSense::Equal;
-        constexpr auto Greater = MPSConstraintSense::Greater;
-
         const int WIDTH = static_cast<int>((ITEMS_SIZE - 1) / 2);
         for (int i = 0; i < WIDTH; i++) {
-            const auto k = 2 * i;
+            const int K = 2 * i;
 
-            name     = std::string(a_ITEMS[k + 1]);
-            name_new = name + "_range";
+            const auto &ROW_NAME_SV = a_ITEMS[K + 1];
+            name                    = std::string(ROW_NAME_SV);
+            name_new                = name + "_range";
 
-            const auto &RANGE_SV = a_ITEMS[k + 2];
+            const auto &RANGE_SV = a_ITEMS[K + 2];
             range                = this->parse_value(RANGE_SV);
 
-            auto &constraint     = this->constraints[name];
-            auto &constraint_new = this->constraints[name_new];
+            auto it = this->constraint_name_to_index_map.find(ROW_NAME_SV);
+            if (it == this->constraint_name_to_index_map.end()) {
+                continue;
+            }
+
+            const int CONSTRAINT_ID     = it->second;
+            const int NEW_CONSTRAINT_ID = static_cast<int>(this->constraints.size());
+            this->constraints.emplace_back();
+            auto &constraint     = this->constraints[CONSTRAINT_ID];
+            auto &constraint_new = this->constraints.back();
 
             constraint_new.name          = name_new;
             constraint_new.sensitivities = constraint.sensitivities;
             const double FABS_RANGE      = std::fabs(range);
 
             switch (constraint.sense) {
-                case Less: {
-                    constraint_new.sense = Greater;
+                case MPSConstraintSense::Less: {
+                    constraint_new.sense = MPSConstraintSense::Greater;
                     constraint_new.rhs   = constraint.rhs - FABS_RANGE;
                     break;
                 }
-                case Greater: {
-                    constraint_new.sense = Less;
+                case MPSConstraintSense::Greater: {
+                    constraint_new.sense = MPSConstraintSense::Less;
                     constraint_new.rhs   = constraint.rhs + FABS_RANGE;
                     break;
                 }
-                case Equal: {
+                case MPSConstraintSense::Equal: {
                     if (range > 0) {
-                        constraint.sense     = Greater;
-                        constraint_new.sense = Less;
+                        constraint.sense     = MPSConstraintSense::Greater;
+                        constraint_new.sense = MPSConstraintSense::Less;
                         constraint_new.rhs   = constraint.rhs + FABS_RANGE;
                     } else {
-                        constraint.sense     = Less;
-                        constraint_new.sense = Greater;
+                        constraint.sense     = MPSConstraintSense::Less;
+                        constraint_new.sense = MPSConstraintSense::Greater;
                         constraint_new.rhs   = constraint.rhs - FABS_RANGE;
                     }
                     break;
@@ -333,6 +403,8 @@ struct MPS {
             }
 
             this->constraint_names.emplace_back(name_new);
+            this->constraint_name_to_index_map[this->constraint_names.back()] =
+                NEW_CONSTRAINT_ID;
         }
     }
 
@@ -346,20 +418,25 @@ struct MPS {
                 "The MPS file has something wrong in BOUNDS section."));
         }
 
-        const std::string COLUMN_NAME(a_ITEMS[2]);
-        const auto       &BOUND_TYPE_SV = a_ITEMS.front();
+        const auto &COLUMN_NAME_SV = a_ITEMS[2];
+        const auto &BOUND_TYPE_SV  = a_ITEMS.front();
 
-        auto [it, inserted] = this->variables.try_emplace(COLUMN_NAME);
-
-        if (inserted) {
-            auto &variable = it->second;
+        int  column_id = -1;
+        auto it        = this->variable_name_to_index_map.find(COLUMN_NAME_SV);
+        if (it != this->variable_name_to_index_map.end()) {
+            column_id = it->second;
+        } else {
+            column_id = static_cast<int>(this->variables.size());
+            this->variables.emplace_back();
+            auto &variable = this->variables.back();
             variable.type  = MPSVariableType::Continuous;
-            variable.name  = it->first;
-            this->variable_names.emplace_back(it->first);
+            variable.name  = std::string(COLUMN_NAME_SV);
+            this->variable_names.emplace_back(variable.name);
+            this->variable_name_to_index_map[COLUMN_NAME_SV] = column_id;
         }
 
         const auto BOUND_TYPE = bound_type_map(BOUND_TYPE_SV);
-        auto      &variable   = this->variables[COLUMN_NAME];
+        auto      &variable   = this->variables[column_id];
 
         if (a_ITEMS.size() == 3) {
             switch (BOUND_TYPE) {
@@ -469,23 +546,28 @@ struct MPS {
         std::streamsize file_size = ifs.tellg();
         ifs.seekg(0, std::ios::beg);
 
-        std::string buffer;
-        buffer.resize(static_cast<size_t>(file_size));
-        if (!ifs.read(buffer.data(), file_size)) {
+        this->buffer.resize(static_cast<size_t>(file_size));
+        if (!ifs.read(this->buffer.data(), file_size)) {
             throw std::runtime_error(utility::format_error_location(
                 __FILE__, __LINE__, __func__,
                 "Failed to read the MPS file into buffer."));
         }
         ifs.close();
 
-        std::string_view content(buffer);
+        std::string_view content(this->buffer);
 
-        const std::size_t estimated_lines = static_cast<size_t>(
+        const std::size_t ESTIMATED_LINES = static_cast<size_t>(
             std::count(content.begin(), content.end(), '\n') + 1);
-        this->constraints.reserve(estimated_lines / 10 + 16);
-        this->variables.reserve(estimated_lines / 10 + 16);
-        this->variable_names.reserve(estimated_lines / 10 + 16);
-        this->constraint_names.reserve(estimated_lines / 10 + 16);
+        const std::size_t RESERVE_SIZE = ESTIMATED_LINES / 10 + 16;
+        this->constraints.reserve(RESERVE_SIZE);
+        this->variables.reserve(RESERVE_SIZE);
+        this->variable_names.reserve(RESERVE_SIZE);
+        this->constraint_names.reserve(RESERVE_SIZE);
+        this->variable_name_to_index_map.reserve(RESERVE_SIZE);
+        this->constraint_name_to_index_map.reserve(RESERVE_SIZE);
+
+        this->last_column_name = "";
+        this->last_column_id   = -1;
 
         MPSReadMode     read_mode     = MPSReadMode::Initial;
         MPSVariableType variable_type = MPSVariableType::Continuous;
@@ -495,71 +577,93 @@ struct MPS {
         bool is_read_objsense = false;
         bool is_read_objname  = false;
 
-        std::size_t       pos  = 0;
-        const std::size_t SIZE = content.size();
+        std::size_t       position = 0;
+        const std::size_t SIZE     = content.size();
 
         std::vector<std::string_view> items;
         items.reserve(8);
 
-        while (pos < SIZE) {
-            std::size_t line_end = pos;
+        while (position < SIZE) {
+            std::size_t line_end = position;
             while (line_end < SIZE && content[line_end] != '\n' &&
                    content[line_end] != '\r') {
                 line_end++;
             }
 
-            const std::size_t LINE_LENGTH = line_end - pos;
-            std::string_view  line_view   = content.substr(pos, LINE_LENGTH);
+            const std::size_t LINE_LENGTH = line_end - position;
+            std::string_view  line_view = content.substr(position, LINE_LENGTH);
 
-            pos = line_end;
-            while (pos < SIZE &&
-                   (content[pos] == '\n' || content[pos] == '\r')) {
-                pos++;
+            position = line_end;
+            while (position < SIZE &&
+                   (content[position] == '\n' || content[position] == '\r')) {
+                position++;
             }
 
-            utility::split_items(line_view, &items);
-
-            if (items.empty()) {
+            if (line_view.empty()) {
                 continue;
             }
 
-            if (!items.front().empty() && items.front().front() == '*') {
-                continue;
-            }
+            const char FIRST_CHAR = line_view[0];
 
-            auto first = items.front();
-
-            if (!is_read_name && utility::to_uppercase(first) == "NAME") {
-                read_mode = MPSReadMode::Name;
-                if (items.size() == 1) {
+            if (FIRST_CHAR != ' ' && FIRST_CHAR != '\t') {
+                if (FIRST_CHAR == '*') {
                     continue;
                 }
-            }
 
-            if (!is_read_objsense &&
-                utility::to_uppercase(first) == "OBJSENSE") {
-                read_mode = MPSReadMode::Objsense;
-                if (items.size() == 1) {
+                utility::split_items(line_view, &items);
+
+                if (items.empty()) {
                     continue;
                 }
-            }
 
-            if (!is_read_objname && utility::to_uppercase(first) == "OBJNAME") {
-                read_mode = MPSReadMode::Objname;
-                if (items.size() == 1) {
-                    continue;
-                }
-            }
+                auto first = items.front();
 
-            if (items.size() == 1) {
-                const std::string TOKEN = utility::to_uppercase(first);
-                auto              it    = MPSReadModeMap.find(TOKEN);
-                if (it != MPSReadModeMap.end()) {
-                    if (it->second == MPSReadMode::Endata) {
-                        is_valid = true;
-                        break;
+                if (!is_read_name && (first == "NAME" || first == "name" ||
+                                      utility::to_uppercase(first) == "NAME")) {
+                    read_mode = MPSReadMode::Name;
+                    if (items.size() == 1) {
+                        continue;
                     }
-                    read_mode = it->second;
+                }
+
+                if (!is_read_objsense &&
+                    (first == "OBJSENSE" || first == "objsense" ||
+                     utility::to_uppercase(first) == "OBJSENSE")) {
+                    read_mode = MPSReadMode::Objsense;
+                    if (items.size() == 1) {
+                        continue;
+                    }
+                }
+
+                if (!is_read_objname &&
+                    (first == "OBJNAME" || first == "objname" ||
+                     utility::to_uppercase(first) == "OBJNAME")) {
+                    read_mode = MPSReadMode::Objname;
+                    if (items.size() == 1) {
+                        continue;
+                    }
+                }
+
+                if (items.size() == 1) {
+                    const std::string TOKEN = utility::to_uppercase(first);
+                    auto              it    = MPSReadModeMap.find(TOKEN);
+                    if (it != MPSReadModeMap.end()) {
+                        if (it->second == MPSReadMode::Endata) {
+                            is_valid = true;
+                            break;
+                        }
+                        read_mode = it->second;
+                        continue;
+                    }
+                }
+            } else {
+                utility::split_items(line_view, &items);
+
+                if (items.empty()) {
+                    continue;
+                }
+
+                if (!items.front().empty() && items.front().front() == '*') {
                     continue;
                 }
             }
@@ -613,11 +717,11 @@ struct MPS {
 
         // default bounds for integer variables
         for (auto &&variable : this->variables) {
-            if (!variable.second.is_bound_defined &&
-                variable.second.type == MPSVariableType::Integer) {
-                variable.second.is_bounded          = true;
-                variable.second.integer_lower_bound = 0;
-                variable.second.integer_upper_bound = 1;
+            if (!variable.is_bound_defined &&
+                variable.type == MPSVariableType::Integer) {
+                variable.is_bounded          = true;
+                variable.integer_lower_bound = 0;
+                variable.integer_upper_bound = 1;
             }
         }
     }

@@ -11,10 +11,10 @@
 namespace printemps::mps {
 /*****************************************************************************/
 struct MPSConstraint {
-    MPSConstraintSense                      sense;
-    std::string                             name;
-    std::unordered_map<std::string, double> sensitivities;
-    double                                  rhs;
+    MPSConstraintSense                  sense;
+    std::string                         name;
+    std::vector<std::pair<int, double>> sensitivities;
+    double                              rhs;
 
     /*************************************************************************/
     MPSConstraint(void) {
