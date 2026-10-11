@@ -40,8 +40,8 @@ class TopologicalSorter {
 
     /*************************************************************************/
     inline void setup(const std::vector<T> &a_NODES) {
-        initialize();
-        add_nodes(a_NODES);
+        this->initialize();
+        this->add_nodes(a_NODES);
     }
 
     /*************************************************************************/
@@ -62,7 +62,7 @@ class TopologicalSorter {
     /*************************************************************************/
     inline void add_nodes(const std::vector<T> &a_NODES) {
         for (const auto &NODE : a_NODES) {
-            add_node(NODE);
+            this->add_node(NODE);
         }
     }
 
@@ -73,8 +73,8 @@ class TopologicalSorter {
 
     /*************************************************************************/
     inline void add_edge(const T &a_SOURCE, const T &a_TARGET) {
-        const int SOURCE_INDEX = add_node(a_SOURCE);
-        const int TARGET_INDEX = add_node(a_TARGET);
+        const int SOURCE_INDEX = this->add_node(a_SOURCE);
+        const int TARGET_INDEX = this->add_node(a_TARGET);
         m_successors[SOURCE_INDEX].push_back(TARGET_INDEX);
         m_in_degrees[TARGET_INDEX]++;
     }

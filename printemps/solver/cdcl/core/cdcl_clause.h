@@ -21,14 +21,17 @@ inline constexpr int literal_variable(const int a_LITERAL) noexcept {
     return a_LITERAL >> 1;
 }
 
+/*****************************************************************************/
 inline constexpr int literal_sign(const int a_LITERAL) noexcept {
     return a_LITERAL & 1;
 }
 
+/*****************************************************************************/
 inline constexpr int literal_negate(const int a_LITERAL) noexcept {
     return a_LITERAL ^ 1;
 }
 
+/*****************************************************************************/
 inline constexpr int make_literal(const int a_VARIABLE,
                                   const int a_SIGN) noexcept {
     return (a_VARIABLE << 1) | a_SIGN;

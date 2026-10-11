@@ -24,13 +24,13 @@ class CDCLCoreStateManager {
    public:
     /*************************************************************************/
     CDCLCoreStateManager(void) {
-        initialize();
+        this->initialize();
     }
 
     /*************************************************************************/
     CDCLCoreStateManager(matrix_model::MatrixModel* a_instance_ptr,
                          const option::Option&      a_OPTION) {
-        setup(a_instance_ptr, a_OPTION);
+        this->setup(a_instance_ptr, a_OPTION);
     }
 
     /*************************************************************************/
@@ -49,7 +49,7 @@ class CDCLCoreStateManager {
     /*************************************************************************/
     inline void setup(matrix_model::MatrixModel* a_instance_ptr,
                       const option::Option&      a_OPTION) {
-        initialize();
+        this->initialize();
         m_option = a_OPTION;
 
         m_model.setup(a_instance_ptr);
@@ -61,28 +61,28 @@ class CDCLCoreStateManager {
             m_option.cdcl.initial_phase_perturbation_rate > 0.0) {
             std::mt19937 random_engine(
                 static_cast<unsigned int>(m_option.cdcl.seed));
-            std::uniform_real_distribution<double> dist_real(0.0, 1.0);
+            std::uniform_real_distribution<double> distribution_real(0.0, 1.0);
 
             if (m_option.cdcl.initial_activity_noise_ratio > 0.0) {
                 for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
                     m_state.activities[i] +=
                         m_state.activities[i] *
                             m_option.cdcl.initial_activity_noise_ratio *
-                            dist_real(random_engine) +
-                        1e-6 * dist_real(random_engine);
+                            distribution_real(random_engine) +
+                        1e-6 * distribution_real(random_engine);
                 }
             }
 
             if (m_option.cdcl.initial_phase_perturbation_rate > 0.0) {
                 for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
-                    if (dist_real(random_engine) <
+                    if (distribution_real(random_engine) <
                         m_option.cdcl.initial_phase_perturbation_rate) {
                         auto& variable = m_model.mutable_variable(i);
                         if (variable.phase != CDCLCoreConstant::NO_PHASE) {
                             variable.phase = 1 - variable.phase;
                         } else {
                             variable.phase =
-                                dist_real(random_engine) < 0.5 ? 1 : 0;
+                                distribution_real(random_engine) < 0.5 ? 1 : 0;
                         }
                     }
                 }
@@ -93,7 +93,7 @@ class CDCLCoreStateManager {
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count = 1;
             m_state.conflict_limit =
-                compute_luby_value(1) *
+                this->compute_luby_value(1) *
                 m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
                    option::cdcl_restart_mode::CDCLRestartMode::Geometric) {
@@ -236,7 +236,7 @@ class CDCLCoreStateManager {
         m_state.activities[a_VARIABLE_INDEX] +=
             m_state.variable_activity_increment;
         if (m_state.activities[a_VARIABLE_INDEX] > 1e20) {
-            rescale_activities();
+            this->rescale_activities();
         }
         m_heap.update_after_bump(a_VARIABLE_INDEX,
                                  m_state.activities);
@@ -260,9 +260,9 @@ class CDCLCoreStateManager {
         constexpr int MAX_ATTEMPTS = 10;
         int           attempts     = 0;
         while (!m_heap.empty() && attempts < MAX_ATTEMPTS) {
-            std::uniform_int_distribution<int> dist(0,
-                                                    m_heap.size() - 1);
-            const int POSITION       = dist(a_engine);
+            std::uniform_int_distribution<int> distribution(0,
+                                                            m_heap.size() - 1);
+            const int POSITION       = distribution(a_engine);
             const int VARIABLE_INDEX = m_heap.heap_array()[POSITION];
             if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
                 m_heap.remove(VARIABLE_INDEX, m_state.activities);
@@ -323,7 +323,7 @@ class CDCLCoreStateManager {
         if (m_option.cdcl.restart_mode ==
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count++;
-            m_state.conflict_limit += CDCLCoreStateManager::compute_luby_value(
+            m_state.conflict_limit += this->compute_luby_value(
                                           m_state.restart_luby_count) *
                                       m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
@@ -411,7 +411,7 @@ class CDCLCoreStateManager {
         }
         m_state.variable_activity_increment *= (1.0 / DECAY_RATE);
         if (m_state.variable_activity_increment > 1e20) {
-            rescale_activities();
+            this->rescale_activities();
         }
     }
 

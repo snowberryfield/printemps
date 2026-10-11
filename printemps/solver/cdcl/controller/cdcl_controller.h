@@ -22,7 +22,7 @@ class CDCLController
    public:
     /*************************************************************************/
     CDCLController(void) {
-        initialize();
+        this->initialize();
     }
 
     /*************************************************************************/
@@ -36,13 +36,13 @@ class CDCLController
         const std::function<void(
             solver::GlobalState<T_Variable, T_Expression>*)>& a_CALLBACK,  //
         const option::Option&                                 a_OPTION) {
-        setup(a_model_ptr,         //
-              a_global_state_ptr,  //
-              a_INITIAL_SOLUTION,  //
-              a_TIME_KEEPER,       //
-              a_CHECK_INTERRUPT,   //
-              a_CALLBACK,          //
-              a_OPTION);
+        this->setup(a_model_ptr,         //
+                    a_global_state_ptr,  //
+                    a_INITIAL_SOLUTION,  //
+                    a_TIME_KEEPER,       //
+                    a_CHECK_INTERRUPT,   //
+                    a_CALLBACK,          //
+                    a_OPTION);
     }
 
     /*************************************************************************/
@@ -144,30 +144,30 @@ class CDCLController
         const int             a_NUMBER_OF_THREADS) const {
         std::vector<option::Option> portfolio(a_NUMBER_OF_THREADS,
                                               a_BASE_OPTION);
-        for (int t = 0; t < a_NUMBER_OF_THREADS; ++t) {
-            portfolio[t].output.verbose = option::verbose::Off;
-            portfolio[t].cdcl.seed      = a_BASE_OPTION.cdcl.seed + t;
+        for (int i = 0; i < a_NUMBER_OF_THREADS; i++) {
+            portfolio[i].output.verbose = option::verbose::Off;
+            portfolio[i].cdcl.seed      = a_BASE_OPTION.cdcl.seed + i;
 
-            if (t == 0) {
+            if (i == 0) {
                 // Thread 0: Baseline thread using base options directly
                 continue;
             }
 
-            // Worker threads t >= 1: Diversify randomness parameters
-            portfolio[t].cdcl.random_variable_selection_rate =
+            // Worker threads i >= 1: Diversify randomness parameters
+            portfolio[i].cdcl.random_variable_selection_rate =
                 (a_BASE_OPTION.cdcl.random_variable_selection_rate > 0.0)
                     ? a_BASE_OPTION.cdcl.random_variable_selection_rate
-                    : (0.01 + 0.005 * (t % 4));
+                    : (0.01 + 0.005 * (i % 4));
 
-            portfolio[t].cdcl.initial_activity_noise_ratio =
+            portfolio[i].cdcl.initial_activity_noise_ratio =
                 (a_BASE_OPTION.cdcl.initial_activity_noise_ratio > 0.0)
                     ? a_BASE_OPTION.cdcl.initial_activity_noise_ratio
-                    : (0.01 * ((t % 5) + 1));
+                    : (0.01 * ((i % 5) + 1));
 
-            portfolio[t].cdcl.initial_phase_perturbation_rate =
+            portfolio[i].cdcl.initial_phase_perturbation_rate =
                 (a_BASE_OPTION.cdcl.initial_phase_perturbation_rate > 0.0)
                     ? a_BASE_OPTION.cdcl.initial_phase_perturbation_rate
-                    : (0.05 * (t % 5));
+                    : (0.05 * (i % 5));
         }
         return portfolio;
     }
@@ -274,7 +274,7 @@ class CDCLController
                                        true);
             }
 
-            const auto portfolio_options = generate_portfolio_options(
+            const auto portfolio_options = this->generate_portfolio_options(
                 base_option, NUMBER_OF_THREADS);
 
             std::atomic<bool> is_interrupted_by_solution{false};
@@ -322,7 +322,7 @@ class CDCLController
                 cdcl_result       = thread_results[0];
                 winning_thread_id = 0;
                 if (this->m_option.cdcl.is_enabled_evaluate_full_solutions) {
-                    for (int i = 1; i < NUMBER_OF_THREADS; ++i) {
+                    for (int i = 1; i < NUMBER_OF_THREADS; i++) {
                         if (thread_results[i].best_total_violation <
                             cdcl_result.best_total_violation) {
                             cdcl_result       = thread_results[i];
@@ -330,7 +330,7 @@ class CDCLController
                         }
                     }
                 } else {
-                    for (int i = 1; i < NUMBER_OF_THREADS; ++i) {
+                    for (int i = 1; i < NUMBER_OF_THREADS; i++) {
                         if (thread_results[i].number_of_conflicts >
                             cdcl_result.number_of_conflicts) {
                             cdcl_result       = thread_results[i];
@@ -371,9 +371,9 @@ class CDCLController
                 candidate_solution);
 
             for (auto&& selection : this->m_model_ptr->selections()) {
-                for (auto* var_ptr : selection.variable_ptrs) {
-                    if (var_ptr->value() == 1) {
-                        var_ptr->select();
+                for (auto* variable_ptr : selection.variable_ptrs) {
+                    if (variable_ptr->value() == 1) {
+                        variable_ptr->select();
                         break;
                     }
                 }
@@ -413,8 +413,7 @@ class CDCLController
         /**
          * Store the result.
          */
-        m_result =
-            CDCLControllerResult<T_Variable, T_Expression>(cdcl_result);
+        m_result = CDCLControllerResult<T_Variable, T_Expression>(cdcl_result);
 
         /**
          * Print the search summary.
@@ -472,17 +471,16 @@ class CDCLController
                 }
 
                 char row[128];
-                std::snprintf(
-                    row, sizeof(row),
-                    "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
-                    (t == winning_thread_id ? " *" : "  "),          //
-                    t,                                               //
-                    base_option.cdcl.seed + t,                       //
-                    status_string.c_str(),                           //
-                    thread_result.number_of_conflicts,               //
-                    thread_result.number_of_decisions,               //
-                    thread_result.number_of_restarts,                //
-                    violation_string.c_str());
+                std::snprintf(row, sizeof(row),
+                              "%2s %5d | %5d | %-17s | %7d | %7d | %6d | %11s ",
+                              (t == winning_thread_id ? " *" : "  "),  //
+                              t,                                       //
+                              base_option.cdcl.seed + t,               //
+                              status_string.c_str(),                   //
+                              thread_result.number_of_conflicts,       //
+                              thread_result.number_of_decisions,       //
+                              thread_result.number_of_restarts,        //
+                              violation_string.c_str());
                 utility::print(std::string(row), IS_ENABLED_PRINT);
             }
 

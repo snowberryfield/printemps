@@ -10,7 +10,7 @@ namespace {
 using namespace printemps;
 
 /*****************************************************************************/
-class TestInfeasibilityHandling : public ::testing::Test {
+class TestInfeasibilityBehavior : public ::testing::Test {
    protected:
     virtual void SetUp(void) {
         /// nothing to do
@@ -21,7 +21,7 @@ class TestInfeasibilityHandling : public ::testing::Test {
 };
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, preprocess_infeasible) {
+TEST_F(TestInfeasibilityBehavior, preprocess_infeasible) {
     /**
      * Contradictory cycle on binary variables:
      * x0 == x1 == x2 == x3 == x4 == 1 - x0
@@ -50,7 +50,7 @@ TEST_F(TestInfeasibilityHandling, preprocess_infeasible) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, pdlp_infeasible) {
+TEST_F(TestInfeasibilityBehavior, pdlp_infeasible) {
     /**
      * LP relaxation is infeasible:
      * x >= 0, y >= 0
@@ -65,10 +65,10 @@ TEST_F(TestInfeasibilityHandling, pdlp_infeasible) {
     c1                = (x(0) + x(1) >= 2);
 
     option::Option option;
-    option.output.verbose                = option::verbose::Off;
+    option.output.verbose                 = option::verbose::Off;
     option.preprocess.is_enabled_presolve = false;
-    option.pdlp.is_enabled               = true;
-    option.cdcl.is_enabled               = false;
+    option.pdlp.is_enabled                = true;
+    option.cdcl.is_enabled                = false;
 
     solver::IPSolver solver(&model, option);
     const auto       RESULT = solver.solve();
@@ -80,7 +80,7 @@ TEST_F(TestInfeasibilityHandling, pdlp_infeasible) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, cdcl_infeasible) {
+TEST_F(TestInfeasibilityBehavior, cdcl_infeasible) {
     /**
      * Binary infeasible problem:
      * x0 + x1 == 1 and x0 - x1 == 0 (both in {0, 1})
@@ -93,10 +93,10 @@ TEST_F(TestInfeasibilityHandling, cdcl_infeasible) {
     c1                = (x(0) == x(1));
 
     option::Option option;
-    option.output.verbose                = option::verbose::Off;
+    option.output.verbose                 = option::verbose::Off;
     option.preprocess.is_enabled_presolve = false;
-    option.pdlp.is_enabled               = false;
-    option.cdcl.is_enabled               = true;
+    option.pdlp.is_enabled                = false;
+    option.cdcl.is_enabled                = true;
 
     solver::IPSolver solver(&model, option);
     const auto       RESULT = solver.solve();
@@ -108,7 +108,7 @@ TEST_F(TestInfeasibilityHandling, cdcl_infeasible) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, feasible_solution_status) {
+TEST_F(TestInfeasibilityBehavior, feasible_solution_status) {
     /**
      * Trivial feasible problem:
      * x0 + x1 <= 1
@@ -132,7 +132,7 @@ TEST_F(TestInfeasibilityHandling, feasible_solution_status) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, json_serialization) {
+TEST_F(TestInfeasibilityBehavior, json_serialization) {
     model::IPModel model;
     auto&          x = model.create_variables("x", 5, 0, 1);
     auto&          f = model.create_constraints("f", 5);
@@ -184,7 +184,7 @@ TEST_F(TestInfeasibilityHandling, json_serialization) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, cdcl_seeded_clauses) {
+TEST_F(TestInfeasibilityBehavior, cdcl_seeded_clauses) {
     /**
      * Problem with a small constraint group:
      * x0, x1, x2, x3 in {0, 1}
@@ -205,9 +205,10 @@ TEST_F(TestInfeasibilityHandling, cdcl_seeded_clauses) {
     f(1)             = (x(0) + x(1) + x(2) + x(3) == 2);
 
     option::Option option;
-    option.output.verbose                = option::verbose::Off;
+    option.output.verbose                 = option::verbose::Off;
     option.preprocess.is_enabled_presolve = false;
-    // option.cdcl.is_enabled_seed_clauses_from_partial_feasible_enumeration = true;
+    // option.cdcl.is_enabled_seed_clauses_from_partial_feasible_enumeration =
+    // true;
 
     model.build(option, false);
     auto matrix_model = model.matrix_model_handler().export_matrix_model();
@@ -233,7 +234,7 @@ TEST_F(TestInfeasibilityHandling, cdcl_seeded_clauses) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, preprocess_trivial_constraint_infeasible) {
+TEST_F(TestInfeasibilityBehavior, preprocess_trivial_constraint_infeasible) {
     /**
      * Trivial unsatisfiable constraint:
      * x0, x1 >= 0, x0 + x1 <= -1 (impossible since min is 0 > -1)
@@ -256,7 +257,7 @@ TEST_F(TestInfeasibilityHandling, preprocess_trivial_constraint_infeasible) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, preprocess_trivial_equality_infeasible) {
+TEST_F(TestInfeasibilityBehavior, preprocess_trivial_equality_infeasible) {
     /**
      * Trivial unsatisfiable equality constraint:
      * x0 in [0, 5], x0 == 10
@@ -279,18 +280,17 @@ TEST_F(TestInfeasibilityHandling, preprocess_trivial_equality_infeasible) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, standalone_infeasible_solution_output) {
+TEST_F(TestInfeasibilityBehavior, standalone_infeasible_solution_output) {
     const std::string OPB_FILE = "test_infeasible_standalone.opb";
-    std::ofstream ofs(OPB_FILE);
+    std::ofstream     ofs(OPB_FILE);
     ofs << "* #variable= 1 #constraint= 2\n";
     ofs << "1 x1 >= 2 ;\n";
     ofs << "1 x1 <= 0 ;\n";
     ofs.close();
 
-    std::vector<const char*> argv = {
-        "printemps", OPB_FILE.c_str(), "-v", "Off"
-    };
-    standalone::Standalone standalone(argv.size(), argv.data());
+    std::vector<const char*> argv = {"printemps", OPB_FILE.c_str(), "-v",
+                                     "Off"};
+    standalone::Standalone   standalone(argv.size(), argv.data());
     standalone.run();
 
     EXPECT_TRUE(std::ifstream("incumbent.json").good());
@@ -324,17 +324,16 @@ TEST_F(TestInfeasibilityHandling, standalone_infeasible_solution_output) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, standalone_feasible_solution_output) {
+TEST_F(TestInfeasibilityBehavior, standalone_feasible_solution_output) {
     const std::string OPB_FILE = "test_feasible_standalone.opb";
-    std::ofstream ofs(OPB_FILE);
+    std::ofstream     ofs(OPB_FILE);
     ofs << "* #variable= 1 #constraint= 1\n";
     ofs << "1 x1 >= 0 ;\n";
     ofs.close();
 
-    std::vector<const char*> argv = {
-        "printemps", OPB_FILE.c_str(), "-v", "Off"
-    };
-    standalone::Standalone standalone(argv.size(), argv.data());
+    std::vector<const char*> argv = {"printemps", OPB_FILE.c_str(), "-v",
+                                     "Off"};
+    standalone::Standalone   standalone(argv.size(), argv.data());
     standalone.run();
 
     EXPECT_TRUE(std::ifstream("incumbent.json").good());
@@ -363,7 +362,7 @@ TEST_F(TestInfeasibilityHandling, standalone_feasible_solution_output) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, reach_target_termination_status) {
+TEST_F(TestInfeasibilityBehavior, reach_target_termination_status) {
     model::IPModel model;
     auto&          x = model.create_variables("x", 2, 0, 1);
     auto&          c = model.create_constraint("c");
@@ -384,21 +383,21 @@ TEST_F(TestInfeasibilityHandling, reach_target_termination_status) {
 }
 
 /*****************************************************************************/
-TEST_F(TestInfeasibilityHandling, no_feasible_solution_found_iteration_over) {
+TEST_F(TestInfeasibilityBehavior, no_feasible_solution_found_iteration_over) {
     model::IPModel model;
-    auto&          x = model.create_variables("x", 2, 0, 1);
+    auto&          x  = model.create_variables("x", 2, 0, 1);
     auto&          c1 = model.create_constraint("c1");
     auto&          c2 = model.create_constraint("c2");
     c1                = (x(0) + x(1) >= 2);
     c2                = (x(0) + x(1) <= 1);
 
     option::Option option;
-    option.output.verbose                = option::verbose::Off;
+    option.output.verbose                 = option::verbose::Off;
     option.preprocess.is_enabled_presolve = false;
-    option.cdcl.is_enabled               = false;
-    option.lagrange_dual.is_enabled      = false;
-    option.local_search.is_enabled       = false;
-    option.general.iteration_max         = 0;
+    option.cdcl.is_enabled                = false;
+    option.lagrange_dual.is_enabled       = false;
+    option.local_search.is_enabled        = false;
+    option.general.iteration_max          = 0;
 
     solver::IPSolver solver(&model, option);
     const auto       RESULT = solver.solve();
@@ -411,4 +410,6 @@ TEST_F(TestInfeasibilityHandling, no_feasible_solution_found_iteration_over) {
 }
 
 }  // namespace
-
+/*****************************************************************************/
+// END
+/*****************************************************************************/

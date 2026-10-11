@@ -48,7 +48,7 @@ class CDCLCore {
     CDCLCoreResult       m_result;
 
     std::vector<int> m_analyze_stack;
-    std::vector<int> m_analyze_toclear;
+    std::vector<int> m_analyze_to_clear;
 
     /*************************************************************************/
     inline void preprocess(void) {
@@ -78,9 +78,9 @@ class CDCLCore {
         const auto& trail      = m_state_manager.trail();
         const int   TRAIL_SIZE = static_cast<int>(trail.size());
         for (int i = TRAIL_SIZE - 1; i >= BACKTRACK_INDEX; i--) {
-            const int VAR_INDEX = trail[i];
-            m_state_manager.on_variable_unassigned(VAR_INDEX);
-            m_state_manager.mutable_model().rollback(VAR_INDEX);
+            const int VARIABLE_INDEX = trail[i];
+            m_state_manager.on_variable_unassigned(VARIABLE_INDEX);
+            m_state_manager.mutable_model().rollback(VARIABLE_INDEX);
         }
 
         m_state_manager.resize_trail(BACKTRACK_INDEX);
@@ -96,7 +96,7 @@ class CDCLCore {
         auto assign_callback = [this](const int a_VARIABLE_INDEX,
                                       const int a_VALUE,
                                       const CDCLConstraintReference& a_REASON) {
-            assign(a_VARIABLE_INDEX, a_VALUE, a_REASON);
+            this->assign(a_VARIABLE_INDEX, a_VALUE, a_REASON);
             m_state_manager.on_propagation();
         };
 
@@ -227,90 +227,100 @@ class CDCLCore {
 
         // Recursive clause minimization (MiniSat-style)
         if (m_option.cdcl.is_enabled_clause_minimization) {
-            auto is_redundant = [&](const int a_var_index) -> bool {
+            auto is_redundant = [&](const int a_VARIABLE_INDEX) -> bool {
                 m_analyze_stack.clear();
-                m_analyze_toclear.clear();
-                m_analyze_stack.push_back(a_var_index);
+                m_analyze_to_clear.clear();
+                m_analyze_stack.push_back(a_VARIABLE_INDEX);
 
                 int           steps     = 0;
                 constexpr int MAX_STEPS = 50;
 
                 while (!m_analyze_stack.empty()) {
                     if (++steps > MAX_STEPS) {
-                        for (const int cleared_var : m_analyze_toclear) {
-                            m_state_manager.mark_seen(cleared_var, 0);
+                        for (const int CLEARED_VARIABLE : m_analyze_to_clear) {
+                            m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                         }
                         return false;
                     }
 
-                    const int curr_var = m_analyze_stack.back();
+                    const int CURRENT_VARIABLE = m_analyze_stack.back();
                     m_analyze_stack.pop_back();
 
-                    const auto reason =
-                        MODEL.variable(curr_var).reason_constraint;
-                    if (reason.type == CDCLConstraintType::NONE) {
-                        for (const int cleared_var : m_analyze_toclear) {
-                            m_state_manager.mark_seen(cleared_var, 0);
+                    const auto REASON =
+                        MODEL.variable(CURRENT_VARIABLE).reason_constraint;
+                    if (REASON.type == CDCLConstraintType::NONE) {
+                        for (const int CLEARED_VARIABLE : m_analyze_to_clear) {
+                            m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                         }
                         return false;
                     }
 
-                    const auto& pos_vars =
-                        MODEL.positive_variable_indices(reason);
-                    for (const int ant_var : pos_vars) {
-                        if (ant_var == curr_var) {
+                    const auto& POSITIVE_VARIABLE_INDICES =
+                        MODEL.positive_variable_indices(REASON);
+                    for (const int ANTECEDENT_VARIABLE :
+                         POSITIVE_VARIABLE_INDICES) {
+                        if (ANTECEDENT_VARIABLE == CURRENT_VARIABLE) {
                             continue;
                         }
-                        const auto& ant_v = MODEL.variable(ant_var);
-                        if (ant_v.value != 0 || ant_v.decision_level == 0) {
+                        const auto& ANTECEDENT_VARIABLE_REF =
+                            MODEL.variable(ANTECEDENT_VARIABLE);
+                        if (ANTECEDENT_VARIABLE_REF.value != 0 ||
+                            ANTECEDENT_VARIABLE_REF.decision_level == 0) {
                             continue;
                         }
-                        if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
-                            m_state_manager.is_seen(ant_var, -1)) {
+                        if (m_state_manager.is_seen(ANTECEDENT_VARIABLE,
+                                                    CONFLICT_ID) ||
+                            m_state_manager.is_seen(ANTECEDENT_VARIABLE, -1)) {
                             continue;
                         }
-                        if (ant_v.reason_constraint.type ==
+                        if (ANTECEDENT_VARIABLE_REF.reason_constraint.type ==
                             CDCLConstraintType::NONE) {
-                            for (const int cleared_var : m_analyze_toclear) {
-                                m_state_manager.mark_seen(cleared_var, 0);
+                            for (const int CLEARED_VARIABLE :
+                                 m_analyze_to_clear) {
+                                m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                             }
                             return false;
                         }
 
-                        m_state_manager.mark_seen(ant_var, -1);
-                        m_analyze_toclear.push_back(ant_var);
-                        m_analyze_stack.push_back(ant_var);
+                        m_state_manager.mark_seen(ANTECEDENT_VARIABLE, -1);
+                        m_analyze_to_clear.push_back(ANTECEDENT_VARIABLE);
+                        m_analyze_stack.push_back(ANTECEDENT_VARIABLE);
                     }
 
-                    const auto& neg_vars =
-                        MODEL.negative_variable_indices(reason);
-                    for (const int ant_var : neg_vars) {
-                        if (ant_var == curr_var) {
+                    const auto& NEGATIVE_VARIABLE_INDICES =
+                        MODEL.negative_variable_indices(REASON);
+                    for (const int ANTECEDENT_VARIABLE :
+                         NEGATIVE_VARIABLE_INDICES) {
+                        if (ANTECEDENT_VARIABLE == CURRENT_VARIABLE) {
                             continue;
                         }
-                        const auto& ant_v = MODEL.variable(ant_var);
-                        if (ant_v.value != 1 || ant_v.decision_level == 0) {
+                        const auto& ANTECEDENT_VARIABLE_REF =
+                            MODEL.variable(ANTECEDENT_VARIABLE);
+                        if (ANTECEDENT_VARIABLE_REF.value != 1 ||
+                            ANTECEDENT_VARIABLE_REF.decision_level == 0) {
                             continue;
                         }
-                        if (m_state_manager.is_seen(ant_var, CONFLICT_ID) ||
-                            m_state_manager.is_seen(ant_var, -1)) {
+                        if (m_state_manager.is_seen(ANTECEDENT_VARIABLE,
+                                                    CONFLICT_ID) ||
+                            m_state_manager.is_seen(ANTECEDENT_VARIABLE, -1)) {
                             continue;
                         }
-                        if (ant_v.reason_constraint.type ==
+                        if (ANTECEDENT_VARIABLE_REF.reason_constraint.type ==
                             CDCLConstraintType::NONE) {
-                            for (const int cleared_var : m_analyze_toclear) {
-                                m_state_manager.mark_seen(cleared_var, 0);
+                            for (const int CLEARED_VARIABLE :
+                                 m_analyze_to_clear) {
+                                m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                             }
                             return false;
                         }
 
-                        m_state_manager.mark_seen(ant_var, -1);
-                        m_analyze_toclear.push_back(ant_var);
-                        m_analyze_stack.push_back(ant_var);
+                        m_state_manager.mark_seen(ANTECEDENT_VARIABLE, -1);
+                        m_analyze_to_clear.push_back(ANTECEDENT_VARIABLE);
+                        m_analyze_stack.push_back(ANTECEDENT_VARIABLE);
                     }
                 }
 
-                for (const int CLEARED_VARIABLE : m_analyze_toclear) {
+                for (const int CLEARED_VARIABLE : m_analyze_to_clear) {
                     m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                 }
                 return true;
@@ -416,7 +426,7 @@ class CDCLCore {
         const auto [UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
                     LEARNED_POSITIVE_VARIABLE_INDICES,
                     LEARNED_NEGATIVE_VARIABLE_INDICES] =
-            find_first_unique_implication_point();
+            this->find_first_unique_implication_point();
 
         /**
          * If the trail was empty when find_first_UIP ran, it returns
@@ -431,14 +441,15 @@ class CDCLCore {
                     CardinalityConstraint{}};
         }
 
-        const int BACKJUMP_LEVEL = compute_backjump_level(
+        const int BACKJUMP_LEVEL = this->compute_backjump_level(
             LEARNED_POSITIVE_VARIABLE_INDICES,
             LEARNED_NEGATIVE_VARIABLE_INDICES,
             UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX);
 
-        const int LITERAL_BLOCK_DISTANCE = compute_literal_block_distance(
-            LEARNED_POSITIVE_VARIABLE_INDICES,
-            LEARNED_NEGATIVE_VARIABLE_INDICES);
+        const int LITERAL_BLOCK_DISTANCE =
+            this->compute_literal_block_distance(
+                LEARNED_POSITIVE_VARIABLE_INDICES,
+                LEARNED_NEGATIVE_VARIABLE_INDICES);
 
         const int UNIQUE_IMPLICATION_POINT_CURRENT_VALUE =
             m_state_manager.model()
@@ -477,7 +488,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool branch(void) {
-        const int BEST_VARIABLE_INDEX = find_branching_variable_index();
+        const int BEST_VARIABLE_INDEX = this->find_branching_variable_index();
         if (BEST_VARIABLE_INDEX == CDCLCoreConstant::NO_VARIABLE) {
             return false;
         }
@@ -498,9 +509,9 @@ class CDCLCore {
                                        ? MODEL.variable(BEST_VARIABLE_INDEX).phase
                                        : 0;
 
-        assign(BEST_VARIABLE_INDEX, BRANCH_VALUE,
-               CDCLConstraintReference{CDCLConstraintType::NONE,
-                                       CDCLCoreConstant::DECISION});
+        this->assign(BEST_VARIABLE_INDEX, BRANCH_VALUE,
+                     CDCLConstraintReference{CDCLConstraintType::NONE,
+                                             CDCLCoreConstant::DECISION});
 
         return true;
     }
@@ -551,7 +562,7 @@ class CDCLCore {
             m_state_manager.check_and_update_best_solution();
         }
         m_state_manager.on_restart();
-        backjump(0);
+        this->backjump(0);
     }
 
     /*************************************************************************/
@@ -564,7 +575,7 @@ class CDCLCore {
 
         auto [BACKJUMP_LEVEL, UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
               UNIQUE_IMPLICATION_POINT_FORCED_VALUE, LEARNED_CONSTRAINT] =
-            analyze_conflict();
+            this->analyze_conflict();
 
         /**
          * analyze_conflict returns BACKJUMP_LEVEL = NO_VARIABLE (= -1) when
@@ -582,7 +593,7 @@ class CDCLCore {
         m_state_manager.decay_activity_increment();
         m_state_manager.increment_number_of_conflicts();
 
-        backjump(BACKJUMP_LEVEL);
+        this->backjump(BACKJUMP_LEVEL);
 
         CDCLConstraintReference new_constraint_reference =
             m_state_manager.mutable_model().add_learned_constraint(
@@ -593,14 +604,14 @@ class CDCLCore {
             !m_state_manager.model()
                  .variable(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX)
                  .is_assigned()) {
-            assign(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
-                   UNIQUE_IMPLICATION_POINT_FORCED_VALUE,
-                   new_constraint_reference);
+            this->assign(UNIQUE_IMPLICATION_POINT_VARIABLE_INDEX,
+                         UNIQUE_IMPLICATION_POINT_FORCED_VALUE,
+                         new_constraint_reference);
         }
 
-        if (should_restart()) {
-            restart();
-            if (should_reduce_learned_constraints()) {
+        if (this->should_restart()) {
+            this->restart();
+            if (this->should_reduce_learned_constraints()) {
                 [[maybe_unused]] const int PURGED_COUNT =
                     m_state_manager.mutable_model().reduce_learned_constraints(
                         m_option.cdcl.learned_constraint_reduction_rate,
@@ -615,7 +626,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool handle_decision(void) {
-        const bool HAS_UNASSIGNED = branch();
+        const bool HAS_UNASSIGNED = this->branch();
 
         if (HAS_UNASSIGNED) {
             return true;
@@ -635,7 +646,7 @@ class CDCLCore {
 
     /*************************************************************************/
     inline bool satisfy_interrupted_terminate_condition(void) {
-        if (check_interrupt()) {
+        if (this->check_interrupt()) {
             m_state_manager.set_termination_status(
                 CDCLCoreTerminationStatus::INTERRUPTION);
             return true;
@@ -708,8 +719,8 @@ class CDCLCore {
             return;
         }
 
-        print_table_body(CDCLIterationEventType::None,
-                         a_IS_ENABLED_PRINT);
+        this->print_table_body(CDCLIterationEventType::None,
+                               a_IS_ENABLED_PRINT);
     }
 
     /*************************************************************************/
@@ -746,12 +757,12 @@ class CDCLCore {
         }
 #endif
 
-        std::string avg_len_str =
+        std::string average_length_string =
             (m_state_manager.total_learned_count() > 0)
                 ? utility::to_string(m_state_manager.average_learned_length(),
                                      "%.2e")
                 : "       -";
-        std::string avg_lbd_str =
+        std::string average_literal_block_distance_string =
             (m_state_manager.total_learned_count() > 0)
                 ? utility::to_string(
                       m_state_manager.average_learned_literal_block_distance(),
@@ -774,8 +785,8 @@ class CDCLCore {
             utility::int_format(                                          //
                 m_state_manager.model().number_of_learned_constraints())  //
                 .c_str(),                                                 //
-            avg_len_str.c_str(),                                          //
-            avg_lbd_str.c_str());
+            average_length_string.c_str(),                                //
+            average_literal_block_distance_string.c_str());
     }
 
     /*************************************************************************/
@@ -810,14 +821,14 @@ class CDCLCore {
    public:
     /*************************************************************************/
     CDCLCore(void) {
-        initialize();
+        this->initialize();
     }
 
     /*************************************************************************/
     CDCLCore(matrix_model::MatrixModel*                  a_instance_ptr,
              const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
              const option::Option&                       a_OPTION) {
-        setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
+        this->setup(a_instance_ptr, a_CHECK_INTERRUPT, a_OPTION);
     }
 
     /*************************************************************************/
@@ -834,7 +845,7 @@ class CDCLCore {
         matrix_model::MatrixModel*                  a_instance_ptr,
         const std::optional<std::function<bool()>>& a_CHECK_INTERRUPT,
         const option::Option&                       a_OPTION) {
-        initialize();
+        this->initialize();
         m_instance_ptr    = a_instance_ptr;
         m_check_interrupt = a_CHECK_INTERRUPT;
         m_option          = a_OPTION;
@@ -848,19 +859,19 @@ class CDCLCore {
         utility::TimeKeeper time_keeper;
         time_keeper.set_start_time();
 
-        preprocess();
+        this->preprocess();
         if (m_state_manager.termination_status() !=
             CDCLCoreTerminationStatus::NOT_SOLVED) {
             m_state_manager.set_elapsed_time(time_keeper.clock());
-            postprocess();
+            this->postprocess();
             return;
         }
 
         const bool IS_ENABLED_PRINT_TABLE =
             m_option.output.verbose >= option::verbose::Inner;
 
-        print_table_header(IS_ENABLED_PRINT_TABLE);
-        print_table_initial(IS_ENABLED_PRINT_TABLE);
+        this->print_table_header(IS_ENABLED_PRINT_TABLE);
+        this->print_table_initial(IS_ENABLED_PRINT_TABLE);
 
         while (true) {
             if ((m_state_manager.iteration() & 1023) == 0) {
@@ -869,14 +880,14 @@ class CDCLCore {
                 /**
                  * Terminate the loop if interrupted
                  */
-                if (satisfy_interrupted_terminate_condition()) {
+                if (this->satisfy_interrupted_terminate_condition()) {
                     break;
                 }
 
                 /**
                  * Terminate the loop if the time is over.
                  */
-                if (satisfy_time_over_terminate_condition()) {
+                if (this->satisfy_time_over_terminate_condition()) {
                     break;
                 }
             }
@@ -884,20 +895,20 @@ class CDCLCore {
             /**
              * Terminate the loop if the iteration is over.
              */
-            if (satisfy_iteration_over_terminate_condition()) {
+            if (this->satisfy_iteration_over_terminate_condition()) {
                 break;
             }
 
             /**
              * Terminate the loop if the conflict limit is reached.
              */
-            if (satisfy_conflict_over_terminate_condition()) {
+            if (this->satisfy_conflict_over_terminate_condition()) {
                 break;
             }
 
             CDCLIterationEventType event_type = CDCLIterationEventType::None;
 
-            if (!propagate()) {
+            if (!this->propagate()) {
                 if (m_option.cdcl.is_enabled_evaluate_full_solutions) {
                     const int CURRENT_TRAIL_SIZE =
                         static_cast<int>(m_state_manager.trail().size());
@@ -908,13 +919,13 @@ class CDCLCore {
                 }
 
                 const auto [IS_CONTINUABLE, CONFLICT_EVENT_TYPE] =
-                    handle_conflict();
+                    this->handle_conflict();
                 if (!IS_CONTINUABLE) {
                     break;
                 }
                 event_type = CONFLICT_EVENT_TYPE;
             } else {
-                if (!handle_decision()) {
+                if (!this->handle_decision()) {
                     break;
                 }
             }
@@ -927,16 +938,16 @@ class CDCLCore {
 
             if (event_type == CDCLIterationEventType::Restart ||
                 IS_LOG_ITERATION) {
-                print_table_body(event_type, IS_ENABLED_PRINT_TABLE);
+                this->print_table_body(event_type, IS_ENABLED_PRINT_TABLE);
             }
         }
 
-        print_table_body(CDCLIterationEventType::None,
-                         IS_ENABLED_PRINT_TABLE);
-        print_table_footer(IS_ENABLED_PRINT_TABLE);
+        this->print_table_body(CDCLIterationEventType::None,
+                               IS_ENABLED_PRINT_TABLE);
+        this->print_table_footer(IS_ENABLED_PRINT_TABLE);
 
         m_state_manager.set_elapsed_time(time_keeper.clock());
-        postprocess();
+        this->postprocess();
     }
 
     /*************************************************************************/

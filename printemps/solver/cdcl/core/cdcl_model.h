@@ -52,10 +52,8 @@ class CDCLModel {
     }
 
     inline bool is_literal_falsified(const int a_LITERAL) const noexcept {
-        return m_values[literal_variable(a_LITERAL)] ==
-               literal_sign(a_LITERAL);
+        return m_values[literal_variable(a_LITERAL)] == literal_sign(a_LITERAL);
     }
-
 
     /*************************************************************************/
     inline void build_constraint(const std::vector<int>&    a_VARIABLE_INDICES,
@@ -227,7 +225,7 @@ class CDCLModel {
    public:
     /*************************************************************************/
     CDCLModel(void) {
-        initialize();
+        this->initialize();
     }
 
     /*************************************************************************/
@@ -258,15 +256,15 @@ class CDCLModel {
 
     /*************************************************************************/
     inline void setup(matrix_model::MatrixModel* a_instance_ptr) {
-        initialize();
+        this->initialize();
         m_instance_ptr = a_instance_ptr;
 
-        setup_variables();
-        setup_selections();
-        setup_constraints();
-        setup_initial_propagation_queue();
-        setup_initial_activities();
-        setup_initial_phases();
+        this->setup_variables();
+        this->setup_selections();
+        this->setup_constraints();
+        this->setup_initial_propagation_queue();
+        this->setup_initial_activities();
+        this->setup_initial_phases();
     }
 
     /*************************************************************************/
@@ -293,13 +291,15 @@ class CDCLModel {
         }
         std::unordered_map<void*, std::vector<int>> selection_map;
         const int N = static_cast<int>(m_variables.size());
-        for (int i = 0; i < N; ++i) {
+        for (int i = 0; i < N; i++) {
             if (!m_instance_ptr->variable_index_map.contains_second(i)) {
                 continue;
             }
-            auto* var_ptr = m_instance_ptr->variable_index_map.reverse_at(i);
-            if (var_ptr != nullptr && var_ptr->selection_ptr() != nullptr) {
-                selection_map[static_cast<void*>(var_ptr->selection_ptr())]
+            auto* variable_ptr =
+                m_instance_ptr->variable_index_map.reverse_at(i);
+            if (variable_ptr != nullptr &&
+                variable_ptr->selection_ptr() != nullptr) {
+                selection_map[static_cast<void*>(variable_ptr->selection_ptr())]
                     .push_back(i);
             }
         }
@@ -339,8 +339,8 @@ class CDCLModel {
                 (UPPER_BOUND < constant::LARGE_VALUE_50);
 
             if (HAS_LOWER_BOUND) {
-                build_constraint(variable_indices, raw_coefficients,
-                                 LOWER_BOUND);
+                this->build_constraint(variable_indices, raw_coefficients,
+                                       LOWER_BOUND);
             }
 
             if (HAS_UPPER_BOUND) {
@@ -349,8 +349,8 @@ class CDCLModel {
                 for (int j = 0; j < NUMBER_OF_NON_ZERO_ELEMENTS; j++) {
                     negative_coefficients[j] = -raw_coefficients[j];
                 }
-                build_constraint(variable_indices, negative_coefficients,
-                                 -UPPER_BOUND);
+                this->build_constraint(variable_indices, negative_coefficients,
+                                       -UPPER_BOUND);
             }
         }
 
@@ -393,23 +393,22 @@ class CDCLModel {
                     .push_back(constraint_index);
             }
         }
-
     }
 
     /*************************************************************************/
     inline void setup_initial_propagation_queue(void) {
         m_in_pseudo_boolean_propagation_queue.assign(
-            number_of_pseudo_boolean_constraints(), 0);
+            this->number_of_pseudo_boolean_constraints(), 0);
         m_pseudo_boolean_propagation_queue.clear();
-        for (int i = 0; i < number_of_pseudo_boolean_constraints(); i++) {
+        for (int i = 0; i < this->number_of_pseudo_boolean_constraints(); i++) {
             m_pseudo_boolean_propagation_queue.push_back(i);
             m_in_pseudo_boolean_propagation_queue[i] = 1;
         }
 
         m_in_cardinality_propagation_queue.assign(
-            number_of_cardinality_constraints(), 0);
+            this->number_of_cardinality_constraints(), 0);
         m_cardinality_propagation_queue.clear();
-        for (int i = 0; i < number_of_cardinality_constraints(); i++) {
+        for (int i = 0; i < this->number_of_cardinality_constraints(); i++) {
             m_cardinality_propagation_queue.push_back(i);
             m_in_cardinality_propagation_queue[i] = 1;
         }
@@ -420,7 +419,7 @@ class CDCLModel {
         const int NUMBER_OF_CONSTRAINTS = m_instance_ptr->number_of_constraints;
         const auto& MATRIX = m_instance_ptr->constraint_coefficients;
 
-        std::vector<double> activity_scores(number_of_variables(), 0.0);
+        std::vector<double> activity_scores(this->number_of_variables(), 0.0);
 
         for (int i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
             const int PTR_BEGIN                   = MATRIX.row_ptrs[i];
@@ -460,8 +459,8 @@ class CDCLModel {
          *     InvariantKnapsack
          */
         const int NUMBER_OF_CONSTRAINTS = m_instance_ptr->number_of_constraints;
-        const auto& MATRIX              = m_instance_ptr->constraint_coefficients;
-        const int   NUMBER_OF_VARIABLES = number_of_variables();
+        const auto& MATRIX = m_instance_ptr->constraint_coefficients;
+        const int   NUMBER_OF_VARIABLES = this->number_of_variables();
 
         std::vector<int> must_cover_count(NUMBER_OF_VARIABLES, 0);
         std::vector<int> packing_count(NUMBER_OF_VARIABLES, 0);
@@ -534,7 +533,6 @@ class CDCLModel {
             }
         }
 
-
         for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             const bool ANY_MUST_COVER = (must_cover_count[i] > 0);
             const bool ANY_PACKING    = (packing_count[i] > 0);
@@ -546,54 +544,59 @@ class CDCLModel {
             }
         }
 
-        // Ensure that each Selection constraint has exactly one variable with phase = 1
-        for (const auto& sel_indices : m_selection_variable_indices) {
-            if (sel_indices.empty()) {
+        // Ensure that each Selection constraint has exactly one variable with
+        // phase = 1
+        for (const auto& selection_variable_indices :
+             m_selection_variable_indices) {
+            if (selection_variable_indices.empty()) {
                 continue;
             }
-            int selected_idx = -1;
-            // 1. Try to find if one variable was already designated as selected_variable_ptr
-            for (int var_idx : sel_indices) {
+            int selected_index = -1;
+            // 1. Try to find if one variable was already designated as
+            // selected_variable_ptr
+            for (int variable_index : selection_variable_indices) {
                 if (m_instance_ptr != nullptr &&
                     m_instance_ptr->variable_index_map.contains_second(
-                        var_idx)) {
-                    auto* var_ptr =
-                        m_instance_ptr->variable_index_map.reverse_at(var_idx);
-                    if (var_ptr != nullptr &&
-                        var_ptr->selection_ptr() != nullptr &&
-                        var_ptr->selection_ptr()->selected_variable_ptr ==
-                            var_ptr) {
-                        selected_idx = var_idx;
+                        variable_index)) {
+                    auto* variable_ptr =
+                        m_instance_ptr->variable_index_map.reverse_at(
+                            variable_index);
+                    if (variable_ptr != nullptr &&
+                        variable_ptr->selection_ptr() != nullptr &&
+                        variable_ptr->selection_ptr()->selected_variable_ptr ==
+                            variable_ptr) {
+                        selected_index = variable_index;
                         break;
                     }
                 }
             }
             // 2. If not found, check variable_initial_solution
-            if (selected_idx == -1 &&
+            if (selected_index == -1 &&
                 m_instance_ptr->variable_initial_solution.size() ==
                     static_cast<std::size_t>(NUMBER_OF_VARIABLES)) {
-                for (int var_idx : sel_indices) {
-                    if (m_instance_ptr->variable_initial_solution[var_idx] ==
-                        1) {
-                        selected_idx = var_idx;
+                for (int variable_index : selection_variable_indices) {
+                    if (m_instance_ptr
+                            ->variable_initial_solution[variable_index] == 1) {
+                        selected_index = variable_index;
                         break;
                     }
                 }
             }
             // 3. If still not found, pick variable with highest activity
-            if (selected_idx == -1) {
-                selected_idx = sel_indices.front();
-                for (int var_idx : sel_indices) {
+            if (selected_index == -1) {
+                selected_index = selection_variable_indices.front();
+                for (int variable_index : selection_variable_indices) {
                     if (!m_initial_activities.empty() &&
-                        m_initial_activities[var_idx] >
-                            m_initial_activities[selected_idx]) {
-                        selected_idx = var_idx;
+                        m_initial_activities[variable_index] >
+                            m_initial_activities[selected_index]) {
+                        selected_index = variable_index;
                     }
                 }
             }
-            // Set phase = 1 for selected_idx, phase = 0 for others
-            for (int var_idx : sel_indices) {
-                m_variables[var_idx].phase = (var_idx == selected_idx) ? 1 : 0;
+            // Set phase = 1 for selected_index, phase = 0 for others
+            for (int variable_index : selection_variable_indices) {
+                m_variables[variable_index].phase =
+                    (variable_index == selected_index) ? 1 : 0;
             }
         }
     }
@@ -700,15 +703,15 @@ class CDCLModel {
             for (const auto& [constraint_index, coefficient] :
                  m_variable_to_pseudo_boolean_positive_constraints
                      [a_VARIABLE_INDEX]) {
-                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                    true, coefficient);
+                m_pseudo_boolean_constraints[constraint_index]
+                    .on_variable_removed(true, coefficient);
             }
 
             for (const auto& [constraint_index, coefficient] :
                  m_variable_to_pseudo_boolean_negative_constraints
                      [a_VARIABLE_INDEX]) {
-                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                    false, coefficient);
+                m_pseudo_boolean_constraints[constraint_index]
+                    .on_variable_removed(false, coefficient);
             }
 
             for (int constraint_index :
@@ -728,15 +731,15 @@ class CDCLModel {
             for (const auto& [constraint_index, coefficient] :
                  m_variable_to_pseudo_boolean_positive_constraints
                      [a_VARIABLE_INDEX]) {
-                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                    false, coefficient);
+                m_pseudo_boolean_constraints[constraint_index]
+                    .on_variable_removed(false, coefficient);
             }
 
             for (const auto& [constraint_index, coefficient] :
                  m_variable_to_pseudo_boolean_negative_constraints
                      [a_VARIABLE_INDEX]) {
-                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                    true, coefficient);
+                m_pseudo_boolean_constraints[constraint_index]
+                    .on_variable_removed(true, coefficient);
             }
 
             for (int constraint_index :
@@ -770,8 +773,7 @@ class CDCLModel {
                !m_cardinality_propagation_queue.empty() ||
                !m_pseudo_boolean_propagation_queue.empty()) {
             if (a_propagation_queue_head < static_cast<int>(a_TRAIL.size())) {
-                const int VARIABLE_INDEX =
-                    a_TRAIL[a_propagation_queue_head++];
+                const int VARIABLE_INDEX = a_TRAIL[a_propagation_queue_head++];
                 const int VARIABLE_VALUE = m_values[VARIABLE_INDEX];
 
                 // Two-Watched Literals: literal falsified by this assignment
@@ -783,16 +785,16 @@ class CDCLModel {
                 const size_t WATCH_SIZE = watch_list.size();
 
                 while (i < WATCH_SIZE) {
-                    const auto WATCHER = watch_list[i];
+                    const auto WATCHER          = watch_list[i];
                     const int  CONSTRAINT_INDEX = WATCHER.constraint_index;
-                    auto&      clause = m_clauses[CONSTRAINT_INDEX];
+                    auto&      clause           = m_clauses[CONSTRAINT_INDEX];
                     if (clause.is_deleted) {
                         i++;
                         continue;
                     }
 
                     const int BLOCKER = WATCHER.blocker_literal;
-                    if (is_literal_satisfied(BLOCKER)) {
+                    if (this->is_literal_satisfied(BLOCKER)) {
                         watch_list[j++] = WATCHER;
                         i++;
                         continue;
@@ -804,7 +806,7 @@ class CDCLModel {
                     const int LITERAL_0 = clause.literals[0];
                     const int LITERAL_1 = clause.literals[1];
 
-                    if (is_literal_satisfied(LITERAL_0)) {
+                    if (this->is_literal_satisfied(LITERAL_0)) {
                         watch_list[j++] =
                             CDCLWatcher{CONSTRAINT_INDEX, LITERAL_0};
                         i++;
@@ -816,7 +818,7 @@ class CDCLModel {
                         static_cast<int>(clause.literals.size());
                     for (int k = 2; k < CLAUSE_SIZE; k++) {
                         const int CANDIDATE_LITERAL = clause.literals[k];
-                        if (!is_literal_falsified(CANDIDATE_LITERAL)) {
+                        if (!this->is_literal_falsified(CANDIDATE_LITERAL)) {
                             clause.literals[1] = CANDIDATE_LITERAL;
                             clause.literals[k] = LITERAL_1;
                             m_watches[CANDIDATE_LITERAL].push_back(
@@ -831,11 +833,10 @@ class CDCLModel {
                         continue;
                     }
 
-                    watch_list[j++] =
-                        CDCLWatcher{CONSTRAINT_INDEX, LITERAL_0};
+                    watch_list[j++] = CDCLWatcher{CONSTRAINT_INDEX, LITERAL_0};
                     i++;
 
-                    if (is_literal_falsified(LITERAL_0)) {
+                    if (this->is_literal_falsified(LITERAL_0)) {
                         while (i < WATCH_SIZE) {
                             watch_list[j++] = watch_list[i++];
                         }
@@ -873,16 +874,16 @@ class CDCLModel {
                 if (MAX_SUM == CARDINALITY_CONSTRAINT.rhs &&
                     CARDINALITY_CONSTRAINT.current_lhs_sum <
                         CARDINALITY_CONSTRAINT.rhs) {
-                    for (int v_idx :
+                    for (int variable_index :
                          CARDINALITY_CONSTRAINT.positive_variable_indices) {
-                        if (!m_variables[v_idx].is_assigned()) {
-                            a_ASSIGN_CALLBACK(v_idx, 1, reference);
+                        if (!m_variables[variable_index].is_assigned()) {
+                            a_ASSIGN_CALLBACK(variable_index, 1, reference);
                         }
                     }
-                    for (int v_idx :
+                    for (int variable_index :
                          CARDINALITY_CONSTRAINT.negative_variable_indices) {
-                        if (!m_variables[v_idx].is_assigned()) {
-                            a_ASSIGN_CALLBACK(v_idx, 0, reference);
+                        if (!m_variables[variable_index].is_assigned()) {
+                            a_ASSIGN_CALLBACK(variable_index, 0, reference);
                         }
                     }
                 }
@@ -933,15 +934,14 @@ class CDCLModel {
         const T_AssignCallback& a_ASSIGN_CALLBACK) {
         static const std::vector<int> EMPTY_TRAIL;
         int                           dummy_propagation_queue_head = 0;
-        return propagate(EMPTY_TRAIL, dummy_propagation_queue_head,
-                         a_ASSIGN_CALLBACK);
+        return this->propagate(EMPTY_TRAIL, dummy_propagation_queue_head,
+                               a_ASSIGN_CALLBACK);
     }
 
     /*************************************************************************/
     inline CDCLConstraintReference add_learned_constraint(
         CardinalityConstraint&& a_CONSTRAINT) {
-        const int LEARNED_CONSTRAINT_INDEX =
-            static_cast<int>(m_clauses.size());
+        const int LEARNED_CONSTRAINT_INDEX = static_cast<int>(m_clauses.size());
 
         std::vector<int> literals;
         literals.reserve(a_CONSTRAINT.positive_variable_indices.size() +
@@ -1033,8 +1033,7 @@ class CDCLModel {
             if (!is_locked[i] && !m_clauses[i].is_deleted &&
                 m_clauses[i].literal_block_distance >
                     a_LITERAL_BLOCK_DISTANCE_PROTECTION_THRESHOLD) {
-                candidates.push_back(
-                    {m_clauses[i].literal_block_distance, i});
+                candidates.push_back({m_clauses[i].literal_block_distance, i});
             }
         }
         std::sort(candidates.rbegin(), candidates.rend());
@@ -1061,11 +1060,11 @@ class CDCLModel {
         for (auto& variable : m_variables) {
             if (variable.reason_constraint.type ==
                 CDCLConstraintType::LEARNED) {
-                const int old_idx = variable.reason_constraint.index;
-                if (old_idx >= 0 && old_idx < TOTAL_CLAUSES) {
-                    const int new_idx = old_to_new[old_idx];
-                    if (new_idx >= 0) {
-                        variable.reason_constraint.index = new_idx;
+                const int OLD_INDEX = variable.reason_constraint.index;
+                if (OLD_INDEX >= 0 && OLD_INDEX < TOTAL_CLAUSES) {
+                    const int NEW_INDEX = old_to_new[OLD_INDEX];
+                    if (NEW_INDEX >= 0) {
+                        variable.reason_constraint.index = NEW_INDEX;
                     } else {
                         variable.reason_constraint.type =
                             CDCLConstraintType::NONE;
@@ -1076,8 +1075,8 @@ class CDCLModel {
             }
         }
 
-        for (auto& wlist : m_watches) {
-            wlist.clear();
+        for (auto& watch_list : m_watches) {
+            watch_list.clear();
         }
         const int NEW_COUNT = static_cast<int>(m_clauses.size());
         for (int i = 0; i < NEW_COUNT; i++) {
@@ -1097,10 +1096,10 @@ class CDCLModel {
     inline void clear_propagation_queue(void) {
         m_pseudo_boolean_propagation_queue.clear();
         m_in_pseudo_boolean_propagation_queue.assign(
-            number_of_pseudo_boolean_constraints(), false);
+            this->number_of_pseudo_boolean_constraints(), false);
         m_cardinality_propagation_queue.clear();
         m_in_cardinality_propagation_queue.assign(
-            number_of_cardinality_constraints(), false);
+            this->number_of_cardinality_constraints(), false);
     }
 
     /*************************************************************************/
@@ -1140,6 +1139,7 @@ class CDCLModel {
         return m_clauses[a_INDEX];
     }
 
+    /*****************************************************************************/
     inline const CDCLLearnedClause& learned_clause(
         const int a_INDEX) const noexcept {
         return m_clauses[a_INDEX];
@@ -1175,14 +1175,17 @@ class CDCLModel {
         return static_cast<int>(m_clauses.size());
     }
 
+    /*****************************************************************************/
     inline int number_of_initial_clauses(void) const noexcept {
         return 0;
     }
 
+    /*****************************************************************************/
     inline int number_of_learned_clauses(void) const noexcept {
         return static_cast<int>(m_clauses.size());
     }
 
+    /*****************************************************************************/
     inline int number_of_pseudo_boolean_constraints(void) const noexcept {
         return static_cast<int>(m_pseudo_boolean_constraints.size());
     }
@@ -1194,14 +1197,14 @@ class CDCLModel {
 
     /*************************************************************************/
     inline int number_of_learned_constraints(void) const noexcept {
-        return number_of_learned_clauses();
+        return this->number_of_learned_clauses();
     }
 
     /*************************************************************************/
     inline int number_of_constraints(void) const noexcept {
-        return number_of_pseudo_boolean_constraints() +
-               number_of_cardinality_constraints() +
-               number_of_clauses();
+        return this->number_of_pseudo_boolean_constraints() +
+               this->number_of_cardinality_constraints() +
+               this->number_of_clauses();
     }
 
     /*************************************************************************/
@@ -1222,22 +1225,24 @@ class CDCLModel {
 
     /*************************************************************************/
     inline std::vector<int> extract_current_solution(void) const {
-        const int        N = static_cast<int>(m_variables.size());
-        std::vector<int> solution(N);
-        for (int i = 0; i < N; ++i) {
+        const int NUMBER_OF_VARIABLES = static_cast<int>(m_variables.size());
+        std::vector<int> solution(NUMBER_OF_VARIABLES);
+        for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             solution[i] = m_variables[i].is_assigned() ? m_variables[i].value
                                                        : m_variables[i].phase;
         }
 
-        // Strictly enforce that each Selection constraint has exactly one variable = 1
-        const bool HAS_ACT = !m_initial_activities.empty();
-        for (const auto& sel_indices : m_selection_variable_indices) {
-            if (sel_indices.empty()) {
+        // Strictly enforce that each Selection constraint has exactly one
+        // variable = 1
+        const bool HAS_INITIAL_ACTIVITIES = !m_initial_activities.empty();
+        for (const auto& selection_variable_indices :
+             m_selection_variable_indices) {
+            if (selection_variable_indices.empty()) {
                 continue;
             }
             int count = 0;
-            for (int var_idx : sel_indices) {
-                if (solution[var_idx] == 1) {
+            for (int variable_index : selection_variable_indices) {
+                if (solution[variable_index] == 1) {
                     count++;
                 }
             }
@@ -1246,58 +1251,70 @@ class CDCLModel {
                 continue;
             }
 
-            int best_var_idx = -1;
+            int best_variable_index = -1;
             if (count > 1) {
-                // Multiple variables are 1: pick the best one among those currently 1
-                for (int var_idx : sel_indices) {
-                    if (solution[var_idx] != 1) {
+                // Multiple variables are 1: pick the best one among those
+                // currently 1
+                for (int variable_index : selection_variable_indices) {
+                    if (solution[variable_index] != 1) {
                         continue;
                     }
-                    if (best_var_idx == -1) {
-                        best_var_idx = var_idx;
+                    if (best_variable_index == -1) {
+                        best_variable_index = variable_index;
                         continue;
                     }
-                    const auto& cur  = m_variables[var_idx];
-                    const auto& best = m_variables[best_var_idx];
-                    if (cur.is_assigned() && !best.is_assigned()) {
-                        best_var_idx = var_idx;
-                    } else if (cur.is_assigned() && best.is_assigned()) {
-                        if (cur.decision_level == 0 &&
-                            best.decision_level > 0) {
-                            best_var_idx = var_idx;
-                        } else if (best.decision_level != 0 &&
-                                   cur.decision_level > best.decision_level) {
-                            best_var_idx = var_idx;
-                        } else if (cur.decision_level == best.decision_level &&
-                                   HAS_ACT &&
-                                   m_initial_activities[var_idx] >
-                                       m_initial_activities[best_var_idx]) {
-                            best_var_idx = var_idx;
+                    const auto& current_variable = m_variables[variable_index];
+                    const auto& best_variable =
+                        m_variables[best_variable_index];
+                    if (current_variable.is_assigned() &&
+                        !best_variable.is_assigned()) {
+                        best_variable_index = variable_index;
+                    } else if (current_variable.is_assigned() &&
+                               best_variable.is_assigned()) {
+                        if (current_variable.decision_level == 0 &&
+                            best_variable.decision_level > 0) {
+                            best_variable_index = variable_index;
+                        } else if (best_variable.decision_level != 0 &&
+                                   current_variable.decision_level >
+                                       best_variable.decision_level) {
+                            best_variable_index = variable_index;
+                        } else if (current_variable.decision_level ==
+                                       best_variable.decision_level &&
+                                   HAS_INITIAL_ACTIVITIES &&
+                                   m_initial_activities[variable_index] >
+                                       m_initial_activities
+                                           [best_variable_index]) {
+                            best_variable_index = variable_index;
                         }
-                    } else if (!cur.is_assigned() && !best.is_assigned()) {
-                        if (HAS_ACT && m_initial_activities[var_idx] >
-                                           m_initial_activities[best_var_idx]) {
-                            best_var_idx = var_idx;
+                    } else if (!current_variable.is_assigned() &&
+                               !best_variable.is_assigned()) {
+                        if (HAS_INITIAL_ACTIVITIES &&
+                            m_initial_activities[variable_index] >
+                                m_initial_activities[best_variable_index]) {
+                            best_variable_index = variable_index;
                         }
                     }
                 }
             } else {
                 // count == 0: no variable is 1 in this selection!
-                // Pick the best variable in sel_indices to set to 1
-                for (int var_idx : sel_indices) {
-                    if (best_var_idx == -1) {
-                        best_var_idx = var_idx;
+                // Pick the best variable in selection_variable_indices to set
+                // to 1
+                for (int variable_index : selection_variable_indices) {
+                    if (best_variable_index == -1) {
+                        best_variable_index = variable_index;
                         continue;
                     }
-                    if (HAS_ACT && m_initial_activities[var_idx] >
-                                       m_initial_activities[best_var_idx]) {
-                        best_var_idx = var_idx;
+                    if (HAS_INITIAL_ACTIVITIES &&
+                        m_initial_activities[variable_index] >
+                            m_initial_activities[best_variable_index]) {
+                        best_variable_index = variable_index;
                     }
                 }
             }
 
-            for (int var_idx : sel_indices) {
-                solution[var_idx] = (var_idx == best_var_idx) ? 1 : 0;
+            for (int variable_index : selection_variable_indices) {
+                solution[variable_index] =
+                    (variable_index == best_variable_index) ? 1 : 0;
             }
         }
 
@@ -1315,10 +1332,10 @@ class CDCLModel {
             m_instance_ptr->constraint_lower_bounds.values;
         const auto& UPPER_BOUNDS =
             m_instance_ptr->constraint_upper_bounds.values;
-        const int M = m_instance_ptr->number_of_constraints;
+        const int NUMBER_OF_CONSTRAINTS = m_instance_ptr->number_of_constraints;
 
         double total_violation = 0.0;
-        for (int i = 0; i < M; ++i) {
+        for (int i = 0; i < NUMBER_OF_CONSTRAINTS; i++) {
             const int PTR_BEGIN = MATRIX.row_ptrs[i];
             const int PTR_END   = MATRIX.row_ptrs[i + 1];
 
@@ -1329,14 +1346,14 @@ class CDCLModel {
                 }
             }
 
-            const double lb = LOWER_BOUNDS[i];
-            const double ub = UPPER_BOUNDS[i];
+            const double LOWER_BOUND = LOWER_BOUNDS[i];
+            const double UPPER_BOUND = UPPER_BOUNDS[i];
 
-            if (std::isfinite(lb) && lhs < lb) {
-                total_violation += (lb - lhs);
+            if (std::isfinite(LOWER_BOUND) && lhs < LOWER_BOUND) {
+                total_violation += (LOWER_BOUND - lhs);
             }
-            if (std::isfinite(ub) && lhs > ub) {
-                total_violation += (lhs - ub);
+            if (std::isfinite(UPPER_BOUND) && lhs > UPPER_BOUND) {
+                total_violation += (lhs - UPPER_BOUND);
             }
         }
         return total_violation;

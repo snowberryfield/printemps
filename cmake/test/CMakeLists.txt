@@ -58,7 +58,7 @@ foreach(group ${TEST_GROUP_DIRS})
         continue()
     endif()
 
-    file(GLOB TEST_SOURCES CONFIGURE_DEPENDS
+    file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS
         ${TOP_DIR}/test/${group}/*.cpp
     )
     if(NOT TEST_SOURCES)
