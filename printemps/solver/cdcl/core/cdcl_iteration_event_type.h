@@ -8,7 +8,7 @@
 
 namespace printemps::solver::cdcl::core {
 /*****************************************************************************/
-enum class CDCLIterationEventType {
+enum class CDCLIterationEventType : uint8_t {
     None,
     Backjump,
     Restart,

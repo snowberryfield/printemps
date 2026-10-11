@@ -112,17 +112,21 @@ class CDCLVariableHeap {
     /*************************************************************************/
     inline void sift_up(const int                  a_POSITION,
                         const std::vector<double>& a_ACTIVITY) noexcept {
-        int position = a_POSITION;
+        int       position        = a_POSITION;
+        const int TARGET_VARIABLE = m_heap_array[position];
         while (position > 0) {
-            const int PARENT = (position - 1) / 2;
-            if (greater_than(m_heap_array[position], m_heap_array[PARENT],
-                             a_ACTIVITY)) {
-                swap_nodes(position, PARENT);
-                position = PARENT;
+            const int PARENT          = (position - 1) / 2;
+            const int PARENT_VARIABLE = m_heap_array[PARENT];
+            if (greater_than(TARGET_VARIABLE, PARENT_VARIABLE, a_ACTIVITY)) {
+                m_heap_array[position]       = PARENT_VARIABLE;
+                m_positions[PARENT_VARIABLE] = position;
+                position                     = PARENT;
             } else {
                 break;
             }
         }
+        m_heap_array[position]       = TARGET_VARIABLE;
+        m_positions[TARGET_VARIABLE] = position;
     }
 
     /*************************************************************************/
@@ -130,26 +134,33 @@ class CDCLVariableHeap {
                           const std::vector<double>& a_ACTIVITY) noexcept {
         int       position            = a_POSITION;
         const int NUMBER_OF_VARIABLES = static_cast<int>(m_heap_array.size());
+        const int TARGET_VARIABLE     = m_heap_array[position];
         while (true) {
-            int       largest = position;
-            const int LEFT    = 2 * position + 1;
-            const int RIGHT   = 2 * position + 2;
+            int       largest          = position;
+            int       largest_variable = TARGET_VARIABLE;
+            const int LEFT             = 2 * position + 1;
+            const int RIGHT            = 2 * position + 2;
             if (LEFT < NUMBER_OF_VARIABLES &&
-                greater_than(m_heap_array[LEFT], m_heap_array[largest],
+                greater_than(m_heap_array[LEFT], largest_variable,
                              a_ACTIVITY)) {
-                largest = LEFT;
+                largest          = LEFT;
+                largest_variable = m_heap_array[LEFT];
             }
             if (RIGHT < NUMBER_OF_VARIABLES &&
-                greater_than(m_heap_array[RIGHT], m_heap_array[largest],
+                greater_than(m_heap_array[RIGHT], largest_variable,
                              a_ACTIVITY)) {
-                largest = RIGHT;
+                largest          = RIGHT;
+                largest_variable = m_heap_array[RIGHT];
             }
             if (largest == position) {
                 break;
             }
-            swap_nodes(position, largest);
-            position = largest;
+            m_heap_array[position]          = largest_variable;
+            m_positions[largest_variable]   = position;
+            position                        = largest;
         }
+        m_heap_array[position]       = TARGET_VARIABLE;
+        m_positions[TARGET_VARIABLE] = position;
     }
 
     /*************************************************************************/
@@ -181,15 +192,17 @@ class CDCLVariableHeap {
         if (m_heap_array.empty()) {
             return CDCLCoreConstant::NO_VARIABLE;
         }
-        const int VARIABLE_INDEX = m_heap_array[0];
-        const int LAST_POSITION  = static_cast<int>(m_heap_array.size()) - 1;
-        swap_nodes(0, LAST_POSITION);
+        const int VARIABLE_INDEX    = m_heap_array[0];
         m_positions[VARIABLE_INDEX] = NOT_IN_HEAP;
-        m_heap_array.pop_back();
-
-        if (!m_heap_array.empty()) {
-            sift_down(0, a_ACTIVITY);
+        if (m_heap_array.size() == 1) {
+            m_heap_array.pop_back();
+            return VARIABLE_INDEX;
         }
+        const int LAST_VARIABLE = m_heap_array.back();
+        m_heap_array.pop_back();
+        m_heap_array[0]            = LAST_VARIABLE;
+        m_positions[LAST_VARIABLE] = 0;
+        sift_down(0, a_ACTIVITY);
         return VARIABLE_INDEX;
     }
 
@@ -206,9 +219,11 @@ class CDCLVariableHeap {
             m_heap_array.pop_back();
             return;
         }
-        swap_nodes(POSITION, LAST_POSITION);
-        m_positions[a_VARIABLE_INDEX] = NOT_IN_HEAP;
+        const int LAST_VARIABLE = m_heap_array.back();
         m_heap_array.pop_back();
+        m_positions[a_VARIABLE_INDEX] = NOT_IN_HEAP;
+        m_heap_array[POSITION]        = LAST_VARIABLE;
+        m_positions[LAST_VARIABLE]    = POSITION;
         sift_down(POSITION, a_ACTIVITY);
         sift_up(POSITION, a_ACTIVITY);
     }

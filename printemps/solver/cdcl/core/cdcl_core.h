@@ -47,6 +47,9 @@ class CDCLCore {
     CDCLCoreStateManager m_state_manager;
     CDCLCoreResult       m_result;
 
+    std::vector<int> m_analyze_stack;
+    std::vector<int> m_analyze_toclear;
+
     /*************************************************************************/
     inline void preprocess(void) {
         m_state_manager.reset_iteration();
@@ -224,32 +227,29 @@ class CDCLCore {
 
         // Recursive clause minimization (MiniSat-style)
         if (m_option.cdcl.is_enabled_clause_minimization) {
-            std::vector<int> analyze_stack;
-            std::vector<int> analyze_toclear;
-
             auto is_redundant = [&](const int a_var_index) -> bool {
-                analyze_stack.clear();
-                analyze_toclear.clear();
-                analyze_stack.push_back(a_var_index);
+                m_analyze_stack.clear();
+                m_analyze_toclear.clear();
+                m_analyze_stack.push_back(a_var_index);
 
                 int           steps     = 0;
                 constexpr int MAX_STEPS = 50;
 
-                while (!analyze_stack.empty()) {
+                while (!m_analyze_stack.empty()) {
                     if (++steps > MAX_STEPS) {
-                        for (const int cleared_var : analyze_toclear) {
+                        for (const int cleared_var : m_analyze_toclear) {
                             m_state_manager.mark_seen(cleared_var, 0);
                         }
                         return false;
                     }
 
-                    const int curr_var = analyze_stack.back();
-                    analyze_stack.pop_back();
+                    const int curr_var = m_analyze_stack.back();
+                    m_analyze_stack.pop_back();
 
                     const auto reason =
                         MODEL.variable(curr_var).reason_constraint;
                     if (reason.type == CDCLConstraintType::NONE) {
-                        for (const int cleared_var : analyze_toclear) {
+                        for (const int cleared_var : m_analyze_toclear) {
                             m_state_manager.mark_seen(cleared_var, 0);
                         }
                         return false;
@@ -271,15 +271,15 @@ class CDCLCore {
                         }
                         if (ant_v.reason_constraint.type ==
                             CDCLConstraintType::NONE) {
-                            for (const int cleared_var : analyze_toclear) {
+                            for (const int cleared_var : m_analyze_toclear) {
                                 m_state_manager.mark_seen(cleared_var, 0);
                             }
                             return false;
                         }
 
                         m_state_manager.mark_seen(ant_var, -1);
-                        analyze_toclear.push_back(ant_var);
-                        analyze_stack.push_back(ant_var);
+                        m_analyze_toclear.push_back(ant_var);
+                        m_analyze_stack.push_back(ant_var);
                     }
 
                     const auto& neg_vars =
@@ -298,19 +298,19 @@ class CDCLCore {
                         }
                         if (ant_v.reason_constraint.type ==
                             CDCLConstraintType::NONE) {
-                            for (const int cleared_var : analyze_toclear) {
+                            for (const int cleared_var : m_analyze_toclear) {
                                 m_state_manager.mark_seen(cleared_var, 0);
                             }
                             return false;
                         }
 
                         m_state_manager.mark_seen(ant_var, -1);
-                        analyze_toclear.push_back(ant_var);
-                        analyze_stack.push_back(ant_var);
+                        m_analyze_toclear.push_back(ant_var);
+                        m_analyze_stack.push_back(ant_var);
                     }
                 }
 
-                for (const int CLEARED_VARIABLE : analyze_toclear) {
+                for (const int CLEARED_VARIABLE : m_analyze_toclear) {
                     m_state_manager.mark_seen(CLEARED_VARIABLE, 0);
                 }
                 return true;
@@ -849,6 +849,12 @@ class CDCLCore {
         time_keeper.set_start_time();
 
         preprocess();
+        if (m_state_manager.termination_status() !=
+            CDCLCoreTerminationStatus::NOT_SOLVED) {
+            m_state_manager.set_elapsed_time(time_keeper.clock());
+            postprocess();
+            return;
+        }
 
         const bool IS_ENABLED_PRINT_TABLE =
             m_option.output.verbose >= option::verbose::Inner;
@@ -857,20 +863,22 @@ class CDCLCore {
         print_table_initial(IS_ENABLED_PRINT_TABLE);
 
         while (true) {
-            m_state_manager.set_elapsed_time(time_keeper.clock());
+            if ((m_state_manager.iteration() & 1023) == 0) {
+                m_state_manager.set_elapsed_time(time_keeper.clock());
 
-            /**
-             * Terminate the loop if interrupted
-             */
-            if (satisfy_interrupted_terminate_condition()) {
-                break;
-            }
+                /**
+                 * Terminate the loop if interrupted
+                 */
+                if (satisfy_interrupted_terminate_condition()) {
+                    break;
+                }
 
-            /**
-             * Terminate the loop if the time is over.
-             */
-            if (satisfy_time_over_terminate_condition()) {
-                break;
+                /**
+                 * Terminate the loop if the time is over.
+                 */
+                if (satisfy_time_over_terminate_condition()) {
+                    break;
+                }
             }
 
             /**

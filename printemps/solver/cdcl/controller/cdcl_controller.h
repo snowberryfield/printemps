@@ -426,6 +426,17 @@ class CDCLController
                 ").",
             this->m_option.output.verbose >= option::verbose::Outer);
 
+        utility::print_info(
+            " -- CDCL elapsed time: " +
+                utility::to_string(cdcl_result.elapsed_time, "%.3f") +
+                "sec, Conflicts: " +
+                std::to_string(cdcl_result.number_of_conflicts) +
+                ", Decisions: " +
+                std::to_string(cdcl_result.number_of_decisions) +
+                ", Propagations: " +
+                std::to_string(cdcl_result.number_of_propagations),
+            this->m_option.output.verbose >= option::verbose::Outer);
+
         if (NUMBER_OF_THREADS > 1) {
             const bool IS_ENABLED_PRINT =
                 this->m_option.output.verbose >= option::verbose::Outer;

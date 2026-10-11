@@ -24,6 +24,7 @@ struct CDCLCoreResult {
     int    total_learned_count;
     double average_learned_literal_block_distance;
     double average_learned_length;
+    double elapsed_time;
 
     /*************************************************************************/
     CDCLCoreResult(void) {
@@ -49,6 +50,7 @@ struct CDCLCoreResult {
         this->total_learned_count                    = 0;
         this->average_learned_literal_block_distance = 0.0;
         this->average_learned_length                 = 0.0;
+        this->elapsed_time                           = 0.0;
     }
 
     /*************************************************************************/
@@ -61,6 +63,7 @@ struct CDCLCoreResult {
         this->number_of_decisions    = a_STATE.number_of_decisions;
         this->number_of_propagations = a_STATE.number_of_propagations;
         this->total_learned_count    = a_STATE.total_learned_count;
+        this->elapsed_time           = a_STATE.elapsed_time;
 
         this->average_learned_literal_block_distance =
             (a_STATE.total_learned_count > 0)

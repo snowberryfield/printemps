@@ -8,7 +8,7 @@
 
 namespace printemps::solver::cdcl::core {
 /*****************************************************************************/
-enum class CDCLCoreTerminationStatus {
+enum class CDCLCoreTerminationStatus : uint8_t {
     INTERRUPTION,
     TIME_OVER,
     ITERATION_OVER,

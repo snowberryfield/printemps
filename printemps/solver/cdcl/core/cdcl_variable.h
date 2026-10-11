@@ -12,37 +12,27 @@ namespace printemps::solver::cdcl::core {
 
 /*****************************************************************************/
 struct CDCLVariable {
-    int index;
-    int value;
-    int decision_level;
-    int phase;
-
+    int                     index;
+    int                     decision_level;
     CDCLConstraintReference reason_constraint;
-
-    std::vector<int> related_cardinality_positive_constraint_indices;
-    std::vector<int> related_cardinality_negative_constraint_indices;
-    std::vector<int> related_learned_positive_constraint_indices;
-    std::vector<int> related_learned_negative_constraint_indices;
+    int8_t                  value;
+    int8_t                  phase;
+    int8_t                  pad;
 
     /*************************************************************************/
-    CDCLVariable(void) {
+    CDCLVariable(void) noexcept {
         this->initialize();
     }
 
     /*************************************************************************/
-    inline void initialize(void) {
-        this->index          = CDCLCoreConstant::NO_VARIABLE;
-        this->value          = CDCLCoreConstant::UNASSIGNED;
-        this->decision_level = CDCLCoreConstant::UNASSIGNED_LEVEL;
-        this->phase          = CDCLCoreConstant::NO_PHASE;
-
-        this->reason_constraint.type  = CDCLConstraintType::NONE;
+    inline void initialize(void) noexcept {
+        this->index                   = CDCLCoreConstant::NO_VARIABLE;
+        this->decision_level          = CDCLCoreConstant::UNASSIGNED_LEVEL;
         this->reason_constraint.index = CDCLCoreConstant::NO_CONSTRAINT;
-
-        this->related_cardinality_positive_constraint_indices.clear();
-        this->related_cardinality_negative_constraint_indices.clear();
-        this->related_learned_positive_constraint_indices.clear();
-        this->related_learned_negative_constraint_indices.clear();
+        this->reason_constraint.type  = CDCLConstraintType::NONE;
+        this->value                   = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
+        this->phase                   = static_cast<int8_t>(CDCLCoreConstant::NO_PHASE);
+        this->pad                     = 0;
     }
 
     /*************************************************************************/
@@ -53,18 +43,18 @@ struct CDCLVariable {
     /*************************************************************************/
     inline void assign(const int a_VALUE, const int a_DECISION_LEVEL,
                        const CDCLConstraintReference& a_REASON) noexcept {
-        this->value             = a_VALUE;
+        this->value             = static_cast<int8_t>(a_VALUE);
         this->decision_level    = a_DECISION_LEVEL;
-        this->phase             = a_VALUE;
+        this->phase             = static_cast<int8_t>(a_VALUE);
         this->reason_constraint = a_REASON;
     }
 
     /*************************************************************************/
     inline void remove(void) noexcept {
-        this->value                   = CDCLCoreConstant::UNASSIGNED;
+        this->value                   = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
         this->decision_level          = CDCLCoreConstant::UNASSIGNED_LEVEL;
-        this->reason_constraint.type  = CDCLConstraintType::NONE;
         this->reason_constraint.index = CDCLCoreConstant::NO_CONSTRAINT;
+        this->reason_constraint.type  = CDCLConstraintType::NONE;
 
         /**
          * NOTE: The phase is not reset to preserve the last assigned value for
@@ -72,6 +62,8 @@ struct CDCLVariable {
          */
     }
 };
+static_assert(sizeof(CDCLVariable) == 16,
+              "CDCLVariable must be exactly 16 bytes");
 }  // namespace printemps::solver::cdcl::core
 #endif
 /*****************************************************************************/

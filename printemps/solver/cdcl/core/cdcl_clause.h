@@ -51,35 +51,52 @@ struct CDCLWatcher {
  * Learned Clause structure for Two-Watched Literals (2WL).
  * literals[0] and literals[1] are the two watched literals.
  */
-struct CDCLLearnedClause {
+struct CDCLClause {
     int              index;
     int              literal_block_distance;
     bool             is_deleted;
+    bool             is_learned;
     std::vector<int> literals;
     std::vector<int> positive_variable_indices;
     std::vector<int> negative_variable_indices;
 
     /*************************************************************************/
-    CDCLLearnedClause(void)
+    CDCLClause(void)
         : index(-1),
           literal_block_distance(0),
           is_deleted(false),
+          is_learned(false),
           literals(),
           positive_variable_indices(),
           negative_variable_indices() {
     }
 
     /*************************************************************************/
-    CDCLLearnedClause(const int a_INDEX, const int a_LITERAL_BLOCK_DISTANCE,
-                      std::vector<int>&& a_LITERALS,
-                      std::vector<int>&& a_POSITIVE_VARIABLE_INDICES,
-                      std::vector<int>&& a_NEGATIVE_VARIABLE_INDICES)
+    CDCLClause(const int a_INDEX, const int a_LITERAL_BLOCK_DISTANCE,
+               const bool a_IS_LEARNED, std::vector<int>&& a_LITERALS)
         : index(a_INDEX),
           literal_block_distance(a_LITERAL_BLOCK_DISTANCE),
           is_deleted(false),
+          is_learned(a_IS_LEARNED),
           literals(std::move(a_LITERALS)),
-          positive_variable_indices(std::move(a_POSITIVE_VARIABLE_INDICES)),
-          negative_variable_indices(std::move(a_NEGATIVE_VARIABLE_INDICES)) {
+          positive_variable_indices(),
+          negative_variable_indices() {
+    }
+
+    /*************************************************************************/
+    CDCLClause(const int a_INDEX, const int a_LITERAL_BLOCK_DISTANCE,
+               const bool a_IS_LEARNED, std::vector<int>&& a_LITERALS,
+               std::vector<int>&& a_POSITIVE_VARIABLE_INDICES,
+               std::vector<int>&& a_NEGATIVE_VARIABLE_INDICES)
+        : index(a_INDEX),
+          literal_block_distance(a_LITERAL_BLOCK_DISTANCE),
+          is_deleted(false),
+          is_learned(a_IS_LEARNED),
+          literals(std::move(a_LITERALS)),
+          positive_variable_indices(
+              std::move(a_POSITIVE_VARIABLE_INDICES)),
+          negative_variable_indices(
+              std::move(a_NEGATIVE_VARIABLE_INDICES)) {
     }
 
     /*************************************************************************/
@@ -92,6 +109,8 @@ struct CDCLLearnedClause {
         return this->literals.empty();
     }
 };
+
+using CDCLLearnedClause = CDCLClause;
 
 }  // namespace printemps::solver::cdcl::core
 

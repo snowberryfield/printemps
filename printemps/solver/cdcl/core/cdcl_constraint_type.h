@@ -8,11 +8,11 @@
 
 namespace printemps::solver::cdcl::core {
 /*****************************************************************************/
-enum class CDCLConstraintType {
-    NONE,
-    PSEUDO_BOOLEAN,
-    CARDINALITY,
-    LEARNED,
+enum class CDCLConstraintType : uint8_t {
+    NONE = 0,
+    PSEUDO_BOOLEAN = 1,
+    CARDINALITY = 2,
+    LEARNED = 3,
 };
 
 /*****************************************************************************/

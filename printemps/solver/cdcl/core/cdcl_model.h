@@ -18,18 +18,24 @@ class CDCLModel {
    private:
     matrix_model::MatrixModel* m_instance_ptr;
 
-    std::vector<CDCLVariable> m_variables;
+    std::vector<CDCLVariable>     m_variables;
+    std::vector<int8_t>           m_values;
     std::vector<std::vector<int>> m_selection_variable_indices;
 
     std::vector<PseudoBooleanConstraint>  m_pseudo_boolean_constraints;
     std::vector<CardinalityConstraint>    m_cardinality_constraints;
-    std::vector<CDCLLearnedClause>        m_learned_clauses;
+    std::vector<CDCLClause>               m_clauses;
     std::vector<std::vector<CDCLWatcher>> m_watches;
 
     std::vector<std::vector<std::pair<int, int>>>
         m_variable_to_pseudo_boolean_positive_constraints;
     std::vector<std::vector<std::pair<int, int>>>
         m_variable_to_pseudo_boolean_negative_constraints;
+
+    std::vector<std::vector<int>>
+        m_variable_to_cardinality_positive_constraints;
+    std::vector<std::vector<int>>
+        m_variable_to_cardinality_negative_constraints;
 
     std::vector<int>     m_pseudo_boolean_propagation_queue;
     std::vector<uint8_t> m_in_pseudo_boolean_propagation_queue;
@@ -41,16 +47,15 @@ class CDCLModel {
 
     /*************************************************************************/
     inline bool is_literal_satisfied(const int a_LITERAL) const noexcept {
-        const auto& variable = m_variables[literal_variable(a_LITERAL)];
-        return variable.is_assigned() &&
-               (variable.value == (literal_sign(a_LITERAL) ^ 1));
+        return m_values[literal_variable(a_LITERAL)] ==
+               (literal_sign(a_LITERAL) ^ 1);
     }
 
     inline bool is_literal_falsified(const int a_LITERAL) const noexcept {
-        const auto& variable = m_variables[literal_variable(a_LITERAL)];
-        return variable.is_assigned() &&
-               (variable.value == literal_sign(a_LITERAL));
+        return m_values[literal_variable(a_LITERAL)] ==
+               literal_sign(a_LITERAL);
     }
+
 
     /*************************************************************************/
     inline void build_constraint(const std::vector<int>&    a_VARIABLE_INDICES,
@@ -92,9 +97,9 @@ class CDCLModel {
 
             const int INDEX =
                 static_cast<int>(m_cardinality_constraints.size());
-            m_cardinality_constraints.emplace_back(INDEX, rhs,
-                                                   positive_variable_indices,
-                                                   negative_variable_indices);
+            m_cardinality_constraints.emplace_back(
+                INDEX, rhs, std::move(positive_variable_indices),
+                std::move(negative_variable_indices));
             return;
         }
 
@@ -182,9 +187,9 @@ class CDCLModel {
 
             const int INDEX =
                 static_cast<int>(m_cardinality_constraints.size());
-            m_cardinality_constraints.emplace_back(INDEX, rhs,
-                                                   positive_variable_indices,
-                                                   negative_variable_indices);
+            m_cardinality_constraints.emplace_back(
+                INDEX, rhs, std::move(positive_variable_indices),
+                std::move(negative_variable_indices));
         } else {
             std::vector<std::pair<int, int64_t>> positive_terms;
             std::vector<std::pair<int, int64_t>> negative_terms;
@@ -230,13 +235,17 @@ class CDCLModel {
         m_instance_ptr = nullptr;
 
         m_variables.clear();
+        m_values.clear();
         m_pseudo_boolean_constraints.clear();
         m_cardinality_constraints.clear();
-        m_learned_clauses.clear();
+        m_clauses.clear();
         m_watches.clear();
 
         m_variable_to_pseudo_boolean_positive_constraints.clear();
         m_variable_to_pseudo_boolean_negative_constraints.clear();
+
+        m_variable_to_cardinality_positive_constraints.clear();
+        m_variable_to_cardinality_negative_constraints.clear();
 
         m_pseudo_boolean_propagation_queue.clear();
         m_in_pseudo_boolean_propagation_queue.clear();
@@ -264,11 +273,14 @@ class CDCLModel {
     inline void setup_variables(void) {
         const int N = m_instance_ptr->number_of_variables;
         m_variables.resize(N);
+        m_values.assign(N, -1);
         for (int i = 0; i < N; i++) {
             m_variables[i].index = i;
         }
         m_variable_to_pseudo_boolean_positive_constraints.assign(N, {});
         m_variable_to_pseudo_boolean_negative_constraints.assign(N, {});
+        m_variable_to_cardinality_positive_constraints.assign(N, {});
+        m_variable_to_cardinality_negative_constraints.assign(N, {});
         m_watches.assign(2 * N, {});
     }
 
@@ -372,17 +384,16 @@ class CDCLModel {
                 m_cardinality_constraints[constraint_index];
             for (int variable_index :
                  CARDINALITY_CONSTRAINT.positive_variable_indices) {
-                m_variables[variable_index]
-                    .related_cardinality_positive_constraint_indices.push_back(
-                        constraint_index);
+                m_variable_to_cardinality_positive_constraints[variable_index]
+                    .push_back(constraint_index);
             }
             for (int variable_index :
                  CARDINALITY_CONSTRAINT.negative_variable_indices) {
-                m_variables[variable_index]
-                    .related_cardinality_negative_constraint_indices.push_back(
-                        constraint_index);
+                m_variable_to_cardinality_negative_constraints[variable_index]
+                    .push_back(constraint_index);
             }
         }
+
     }
 
     /*************************************************************************/
@@ -523,6 +534,7 @@ class CDCLModel {
             }
         }
 
+
         for (int i = 0; i < NUMBER_OF_VARIABLES; i++) {
             const bool ANY_MUST_COVER = (must_cover_count[i] > 0);
             const bool ANY_PACKING    = (packing_count[i] > 0);
@@ -530,8 +542,6 @@ class CDCLModel {
             if (ANY_MUST_COVER && !ANY_PACKING) {
                 m_variables[i].phase = 1;
             } else {
-                // If packing is present (with or without must-cover), prefer
-                // phase = 0 to avoid immediate conflict on packing constraints.
                 m_variables[i].phase = 0;
             }
         }
@@ -594,6 +604,7 @@ class CDCLModel {
                        const CDCLConstraintReference& a_REASON) {
         auto& variable = m_variables[a_VARIABLE_INDEX];
         variable.assign(a_VALUE, a_DECISION_LEVEL, a_REASON);
+        m_values[a_VARIABLE_INDEX] = static_cast<int8_t>(a_VALUE);
 
         if (a_VALUE == 1) {
             for (const auto& [constraint_index, coefficient] :
@@ -618,13 +629,15 @@ class CDCLModel {
             }
 
             for (int constraint_index :
-                 variable.related_cardinality_positive_constraint_indices) {
+                 m_variable_to_cardinality_positive_constraints
+                     [a_VARIABLE_INDEX]) {
                 m_cardinality_constraints[constraint_index]
                     .on_variable_assigned(true);
             }
 
             for (int constraint_index :
-                 variable.related_cardinality_negative_constraint_indices) {
+                 m_variable_to_cardinality_negative_constraints
+                     [a_VARIABLE_INDEX]) {
                 auto& cardinality_constraint =
                     m_cardinality_constraints[constraint_index];
                 cardinality_constraint.on_variable_assigned(false);
@@ -657,7 +670,8 @@ class CDCLModel {
             }
 
             for (int constraint_index :
-                 variable.related_cardinality_positive_constraint_indices) {
+                 m_variable_to_cardinality_positive_constraints
+                     [a_VARIABLE_INDEX]) {
                 auto& cardinality_constraint =
                     m_cardinality_constraints[constraint_index];
                 cardinality_constraint.on_variable_assigned(false);
@@ -669,7 +683,8 @@ class CDCLModel {
             }
 
             for (int constraint_index :
-                 variable.related_cardinality_negative_constraint_indices) {
+                 m_variable_to_cardinality_negative_constraints
+                     [a_VARIABLE_INDEX]) {
                 m_cardinality_constraints[constraint_index]
                     .on_variable_assigned(true);
             }
@@ -679,34 +694,67 @@ class CDCLModel {
     /*************************************************************************/
     inline void rollback(const int a_VARIABLE_INDEX) {
         auto&     variable = m_variables[a_VARIABLE_INDEX];
-        const int VALUE    = variable.value;
+        const int VALUE    = m_values[a_VARIABLE_INDEX];
 
-        for (const auto& [constraint_index, coefficient] :
-             m_variable_to_pseudo_boolean_positive_constraints
-                 [a_VARIABLE_INDEX]) {
-            m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                VALUE == 1, coefficient);
+        if (VALUE == 1) {
+            for (const auto& [constraint_index, coefficient] :
+                 m_variable_to_pseudo_boolean_positive_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
+                    true, coefficient);
+            }
+
+            for (const auto& [constraint_index, coefficient] :
+                 m_variable_to_pseudo_boolean_negative_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
+                    false, coefficient);
+            }
+
+            for (int constraint_index :
+                 m_variable_to_cardinality_positive_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_cardinality_constraints[constraint_index].on_variable_removed(
+                    true);
+            }
+
+            for (int constraint_index :
+                 m_variable_to_cardinality_negative_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_cardinality_constraints[constraint_index].on_variable_removed(
+                    false);
+            }
+        } else {
+            for (const auto& [constraint_index, coefficient] :
+                 m_variable_to_pseudo_boolean_positive_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
+                    false, coefficient);
+            }
+
+            for (const auto& [constraint_index, coefficient] :
+                 m_variable_to_pseudo_boolean_negative_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
+                    true, coefficient);
+            }
+
+            for (int constraint_index :
+                 m_variable_to_cardinality_positive_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_cardinality_constraints[constraint_index].on_variable_removed(
+                    false);
+            }
+
+            for (int constraint_index :
+                 m_variable_to_cardinality_negative_constraints
+                     [a_VARIABLE_INDEX]) {
+                m_cardinality_constraints[constraint_index].on_variable_removed(
+                    true);
+            }
         }
 
-        for (const auto& [constraint_index, coefficient] :
-             m_variable_to_pseudo_boolean_negative_constraints
-                 [a_VARIABLE_INDEX]) {
-            m_pseudo_boolean_constraints[constraint_index].on_variable_removed(
-                VALUE == 0, coefficient);
-        }
-
-        for (int constraint_index :
-             variable.related_cardinality_positive_constraint_indices) {
-            m_cardinality_constraints[constraint_index].on_variable_removed(
-                VALUE == 1);
-        }
-
-        for (int constraint_index :
-             variable.related_cardinality_negative_constraint_indices) {
-            m_cardinality_constraints[constraint_index].on_variable_removed(
-                VALUE == 0);
-        }
-
+        m_values[a_VARIABLE_INDEX] = -1;
         variable.remove();
     }
 
@@ -724,7 +772,7 @@ class CDCLModel {
             if (a_propagation_queue_head < static_cast<int>(a_TRAIL.size())) {
                 const int VARIABLE_INDEX =
                     a_TRAIL[a_propagation_queue_head++];
-                const int VARIABLE_VALUE = m_variables[VARIABLE_INDEX].value;
+                const int VARIABLE_VALUE = m_values[VARIABLE_INDEX];
 
                 // Two-Watched Literals: literal falsified by this assignment
                 const int FALSIFIED_LITERAL =
@@ -737,7 +785,7 @@ class CDCLModel {
                 while (i < WATCH_SIZE) {
                     const auto WATCHER = watch_list[i];
                     const int  CONSTRAINT_INDEX = WATCHER.constraint_index;
-                    auto&      clause = m_learned_clauses[CONSTRAINT_INDEX];
+                    auto&      clause = m_clauses[CONSTRAINT_INDEX];
                     if (clause.is_deleted) {
                         i++;
                         continue;
@@ -893,7 +941,7 @@ class CDCLModel {
     inline CDCLConstraintReference add_learned_constraint(
         CardinalityConstraint&& a_CONSTRAINT) {
         const int LEARNED_CONSTRAINT_INDEX =
-            static_cast<int>(m_learned_clauses.size());
+            static_cast<int>(m_clauses.size());
 
         std::vector<int> literals;
         literals.reserve(a_CONSTRAINT.positive_variable_indices.size() +
@@ -946,8 +994,8 @@ class CDCLModel {
                 CDCLWatcher{LEARNED_CONSTRAINT_INDEX, literals[0]});
         }
 
-        m_learned_clauses.emplace_back(
-            LEARNED_CONSTRAINT_INDEX, a_CONSTRAINT.literal_block_distance,
+        m_clauses.emplace_back(
+            LEARNED_CONSTRAINT_INDEX, a_CONSTRAINT.literal_block_distance, true,
             std::move(literals),
             std::move(a_CONSTRAINT.positive_variable_indices),
             std::move(a_CONSTRAINT.negative_variable_indices));
@@ -961,30 +1009,32 @@ class CDCLModel {
         const double a_REDUCTION_RATE                              = 0.5,
         const int    a_LITERAL_BLOCK_DISTANCE_PROTECTION_THRESHOLD = 2) {
         const int NUMBER_OF_LEARNED_CONSTRAINTS =
-            static_cast<int>(m_learned_clauses.size());
+            static_cast<int>(m_clauses.size());
         if (NUMBER_OF_LEARNED_CONSTRAINTS == 0) {
             return 0;
         }
 
-        std::vector<uint8_t> is_locked(NUMBER_OF_LEARNED_CONSTRAINTS, 0);
+        const int TOTAL_CLAUSES = NUMBER_OF_LEARNED_CONSTRAINTS;
+
+        std::vector<uint8_t> is_locked(TOTAL_CLAUSES, 0);
 
         for (const auto& variable : m_variables) {
             if (variable.is_assigned() && variable.reason_constraint.type ==
                                               CDCLConstraintType::LEARNED) {
                 const int INDEX = variable.reason_constraint.index;
-                if (INDEX >= 0 && INDEX < NUMBER_OF_LEARNED_CONSTRAINTS) {
+                if (INDEX >= 0 && INDEX < TOTAL_CLAUSES) {
                     is_locked[INDEX] = 1;
                 }
             }
         }
 
         std::vector<std::pair<int, int>> candidates;
-        for (int i = 0; i < NUMBER_OF_LEARNED_CONSTRAINTS; i++) {
-            if (!is_locked[i] && !m_learned_clauses[i].is_deleted &&
-                m_learned_clauses[i].literal_block_distance >
+        for (int i = 0; i < TOTAL_CLAUSES; i++) {
+            if (!is_locked[i] && !m_clauses[i].is_deleted &&
+                m_clauses[i].literal_block_distance >
                     a_LITERAL_BLOCK_DISTANCE_PROTECTION_THRESHOLD) {
                 candidates.push_back(
-                    {m_learned_clauses[i].literal_block_distance, i});
+                    {m_clauses[i].literal_block_distance, i});
             }
         }
         std::sort(candidates.rbegin(), candidates.rend());
@@ -992,28 +1042,27 @@ class CDCLModel {
             static_cast<int>(candidates.size() * a_REDUCTION_RATE);
 
         for (int i = 0; i < NUMBER_OF_CONSTRAINTS_TO_REMOVE; i++) {
-            m_learned_clauses[candidates[i].second].is_deleted = true;
+            m_clauses[candidates[i].second].is_deleted = true;
         }
 
-        std::vector<CDCLLearnedClause> new_clauses;
-        std::vector<int> old_to_new(NUMBER_OF_LEARNED_CONSTRAINTS, -1);
-        new_clauses.reserve(NUMBER_OF_LEARNED_CONSTRAINTS -
-                            NUMBER_OF_CONSTRAINTS_TO_REMOVE);
+        std::vector<CDCLClause> new_clauses;
+        std::vector<int>        old_to_new(TOTAL_CLAUSES, -1);
+        new_clauses.reserve(TOTAL_CLAUSES - NUMBER_OF_CONSTRAINTS_TO_REMOVE);
 
-        for (int i = 0; i < NUMBER_OF_LEARNED_CONSTRAINTS; i++) {
-            if (!m_learned_clauses[i].is_deleted) {
+        for (int i = 0; i < TOTAL_CLAUSES; i++) {
+            if (!m_clauses[i].is_deleted) {
                 old_to_new[i] = static_cast<int>(new_clauses.size());
-                new_clauses.push_back(std::move(m_learned_clauses[i]));
+                new_clauses.push_back(std::move(m_clauses[i]));
                 new_clauses.back().index = old_to_new[i];
             }
         }
-        m_learned_clauses = std::move(new_clauses);
+        m_clauses = std::move(new_clauses);
 
         for (auto& variable : m_variables) {
             if (variable.reason_constraint.type ==
                 CDCLConstraintType::LEARNED) {
                 const int old_idx = variable.reason_constraint.index;
-                if (old_idx >= 0 && old_idx < NUMBER_OF_LEARNED_CONSTRAINTS) {
+                if (old_idx >= 0 && old_idx < TOTAL_CLAUSES) {
                     const int new_idx = old_to_new[old_idx];
                     if (new_idx >= 0) {
                         variable.reason_constraint.index = new_idx;
@@ -1030,9 +1079,9 @@ class CDCLModel {
         for (auto& wlist : m_watches) {
             wlist.clear();
         }
-        const int NEW_COUNT = static_cast<int>(m_learned_clauses.size());
+        const int NEW_COUNT = static_cast<int>(m_clauses.size());
         for (int i = 0; i < NEW_COUNT; i++) {
-            auto& c = m_learned_clauses[i];
+            auto& c = m_clauses[i];
             if (c.literals.size() >= 2) {
                 m_watches[c.literals[0]].push_back(
                     CDCLWatcher{i, c.literals[1]});
@@ -1064,8 +1113,7 @@ class CDCLModel {
             return m_cardinality_constraints[a_REFERENCE.index]
                 .positive_variable_indices;
         } else if (a_REFERENCE.type == CDCLConstraintType::LEARNED) {
-            return m_learned_clauses[a_REFERENCE.index]
-                .positive_variable_indices;
+            return m_clauses[a_REFERENCE.index].positive_variable_indices;
         }
         static const std::vector<int> EMPTY_INDICES;
         return EMPTY_INDICES;
@@ -1081,17 +1129,20 @@ class CDCLModel {
             return m_cardinality_constraints[a_REFERENCE.index]
                 .negative_variable_indices;
         } else if (a_REFERENCE.type == CDCLConstraintType::LEARNED) {
-            return m_learned_clauses[a_REFERENCE.index]
-                .negative_variable_indices;
+            return m_clauses[a_REFERENCE.index].negative_variable_indices;
         }
         static const std::vector<int> EMPTY_INDICES;
         return EMPTY_INDICES;
     }
 
     /*************************************************************************/
+    inline const CDCLClause& clause(const int a_INDEX) const noexcept {
+        return m_clauses[a_INDEX];
+    }
+
     inline const CDCLLearnedClause& learned_clause(
         const int a_INDEX) const noexcept {
-        return m_learned_clauses[a_INDEX];
+        return m_clauses[a_INDEX];
     }
 
     /*************************************************************************/
@@ -1120,6 +1171,18 @@ class CDCLModel {
     }
 
     /*************************************************************************/
+    inline int number_of_clauses(void) const noexcept {
+        return static_cast<int>(m_clauses.size());
+    }
+
+    inline int number_of_initial_clauses(void) const noexcept {
+        return 0;
+    }
+
+    inline int number_of_learned_clauses(void) const noexcept {
+        return static_cast<int>(m_clauses.size());
+    }
+
     inline int number_of_pseudo_boolean_constraints(void) const noexcept {
         return static_cast<int>(m_pseudo_boolean_constraints.size());
     }
@@ -1131,14 +1194,14 @@ class CDCLModel {
 
     /*************************************************************************/
     inline int number_of_learned_constraints(void) const noexcept {
-        return static_cast<int>(m_learned_clauses.size());
+        return number_of_learned_clauses();
     }
 
     /*************************************************************************/
     inline int number_of_constraints(void) const noexcept {
         return number_of_pseudo_boolean_constraints() +
                number_of_cardinality_constraints() +
-               static_cast<int>(m_learned_clauses.size());
+               number_of_clauses();
     }
 
     /*************************************************************************/

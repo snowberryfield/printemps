@@ -17,6 +17,7 @@
 !/doxygen/Doxyfile
 
 obsolete/
+bench_compare/
 
 result.json
 miplib/
