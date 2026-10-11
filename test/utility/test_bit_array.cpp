@@ -33,7 +33,7 @@ TEST_F(TestBitArray, initialize) {
     EXPECT_EQ(SIZE, array_sized.size());
     EXPECT_FALSE(array_sized.empty());
     EXPECT_EQ(3u, array_sized.words().size());
-    for (int i = 0; i < SIZE; ++i) {
+    for (int i = 0; i < SIZE; i++) {
         EXPECT_FALSE(array_sized.get(i));
     }
 

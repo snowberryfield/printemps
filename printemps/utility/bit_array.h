@@ -72,42 +72,42 @@ class BitArray {
     }
 
     /*************************************************************************/
-    static inline void set_bit_to_word(std::uint64_t *a_word,
-                                       const int       a_OFFSET,
-                                       const bool      a_VALUE = true) noexcept {
+    static inline void set_bit_to_word(std::uint64_t *a_word_ptr,
+                                       const int      a_OFFSET,
+                                       const bool     a_VALUE = true) noexcept {
         if (a_VALUE) {
-            *a_word |= (1ULL << a_OFFSET);
+            *a_word_ptr |= (1ULL << a_OFFSET);
         } else {
-            *a_word &= ~(1ULL << a_OFFSET);
+            *a_word_ptr &= ~(1ULL << a_OFFSET);
         }
     }
 
     /*************************************************************************/
-    static inline void set_bits_to_word(
-        std::uint64_t *a_word, const int a_OFFSET,
-        const std::uint64_t a_BITS) noexcept {
-        *a_word |= (a_BITS << a_OFFSET);
+    static inline void set_bits_to_word(std::uint64_t      *a_word_ptr,
+                                        const int           a_OFFSET,
+                                        const std::uint64_t a_BITS) noexcept {
+        *a_word_ptr |= (a_BITS << a_OFFSET);
     }
 
     /*************************************************************************/
     inline void set_bit_in_word(const int  a_WORD_INDEX,  //
                                 const int  a_OFFSET,      //
                                 const bool a_VALUE = true) noexcept {
-        set_bit_to_word(&m_words[a_WORD_INDEX], a_OFFSET, a_VALUE);
+        this->set_bit_to_word(&m_words[a_WORD_INDEX], a_OFFSET, a_VALUE);
     }
 
     /*************************************************************************/
     inline void set_bits_in_word(const int           a_WORD_INDEX,  //
                                  const int           a_OFFSET,      //
                                  const std::uint64_t a_BITS) noexcept {
-        set_bits_to_word(&m_words[a_WORD_INDEX], a_OFFSET, a_BITS);
+        this->set_bits_to_word(&m_words[a_WORD_INDEX], a_OFFSET, a_BITS);
     }
 
     /*************************************************************************/
     inline void set(const int a_INDEX, const bool a_VALUE) noexcept {
         const int WORD_INDEX = a_INDEX >> WORD_SHIFT;
         const int BIT_OFFSET = a_INDEX & BIT_MASK;
-        set_bit_to_word(&m_words[WORD_INDEX], BIT_OFFSET, a_VALUE);
+        this->set_bit_to_word(&m_words[WORD_INDEX], BIT_OFFSET, a_VALUE);
     }
 
     /*************************************************************************/
@@ -125,7 +125,7 @@ class BitArray {
     inline BitArray &operator=(const std::vector<short> &a_FLAGS) {
         const int SIZE = static_cast<int>(a_FLAGS.size());
         this->resize(SIZE);
-        for (int i = 0; i < SIZE; ++i) {
+        for (int i = 0; i < SIZE; i++) {
             if (a_FLAGS[i]) {
                 this->set(i, true);
             }

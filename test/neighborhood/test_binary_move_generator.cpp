@@ -41,7 +41,7 @@ TEST_F(TestBinaryMoveGenerator, setup) {
     EXPECT_EQ(9, static_cast<int>(moves.size()));
     EXPECT_EQ(9, static_cast<int>(flags.size()));
 
-    for (int i = 0; i < flags.size(); ++i) {
+    for (int i = 0; i < flags.size(); i++) {
         EXPECT_EQ(1, flags[i]);
     }
 
