@@ -128,7 +128,9 @@ struct Status {
                    a_solver_ptr->time_keeper().elapsed_time() >=
                        this->option.general.time_max) {
             this->termination_status = TerminationStatus::TIME_OVER;
-        } else if (this->option.general.iteration_max >= 0) {
+        } else if (this->option.general.iteration_max >= 0 &&
+                   TABU_SEARCH_RESULT.state.iteration >=
+                       this->option.general.iteration_max) {
             this->termination_status = TerminationStatus::ITERATION_OVER;
         } else {
             this->termination_status = TerminationStatus::UNKNOWN;

@@ -105,12 +105,21 @@ class SolutionArchive {
             }
         }
 
-        solutions.erase(std::unique(solutions.begin(), solutions.end(),
-                                    [](const auto& a_LHS, const auto& a_RHS) {
-                                        return a_LHS.variables ==
-                                               a_RHS.variables;
-                                    }),
-                        solutions.end());
+        std::vector<SparseSolution<T_Variable, T_Expression>> unique_solutions;
+        unique_solutions.reserve(solutions.size());
+        for (auto&& sol : solutions) {
+            bool is_duplicate = false;
+            for (const auto& existing : unique_solutions) {
+                if (existing.variables == sol.variables) {
+                    is_duplicate = true;
+                    break;
+                }
+            }
+            if (!is_duplicate) {
+                unique_solutions.push_back(std::move(sol));
+            }
+        }
+        solutions = std::move(unique_solutions);
 
         const int SOLUTIONS_SIZE = static_cast<int>(solutions.size());
         if (m_max_size > 0 && SOLUTIONS_SIZE > m_max_size) {

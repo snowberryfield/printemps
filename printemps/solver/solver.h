@@ -514,11 +514,13 @@ class Solver {
         }
 
         /**
-         * If PDLP proved the LP relaxation infeasible, skip remaining phases.
+         * If PDLP proved the LP relaxation infeasible or terminated early, skip
+         * remaining phases.
          */
-        if (m_global_state.is_proven_infeasible()) {
+        if (m_global_state.is_proven_infeasible() ||
+            m_global_state.termination_status != TerminationStatus::UNKNOWN) {
             utility::print_message(
-                "PDLP proved infeasibility. Skipping remaining phases.",
+                "PDLP terminated early. Skipping remaining phases.",
                 m_option.output.verbose >= option::verbose::Outer);
             auto result = this->postprocess();
             return result;
@@ -532,12 +534,13 @@ class Solver {
         }
 
         /**
-         * If CDCL proved the problem infeasible, skip remaining phases to
-         * avoid wasting the time budget on a search that cannot succeed.
+         * If CDCL proved the problem infeasible or terminated early, skip
+         * remaining phases.
          */
-        if (m_global_state.is_proven_infeasible()) {
+        if (m_global_state.is_proven_infeasible() ||
+            m_global_state.termination_status != TerminationStatus::UNKNOWN) {
             utility::print_message(
-                "CDCL proved infeasibility. Skipping remaining phases.",
+                "CDCL terminated early. Skipping remaining phases.",
                 m_option.output.verbose >= option::verbose::Outer);
             auto result = this->postprocess();
             return result;

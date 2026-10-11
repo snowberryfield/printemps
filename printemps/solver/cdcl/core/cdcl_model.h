@@ -1080,8 +1080,25 @@ class CDCLModel {
         }
         const int NEW_COUNT = static_cast<int>(m_clauses.size());
         for (int i = 0; i < NEW_COUNT; i++) {
-            auto& c = m_clauses[i];
-            if (c.literals.size() >= 2) {
+            auto&     c           = m_clauses[i];
+            const int CLAUSE_SIZE = static_cast<int>(c.literals.size());
+            if (CLAUSE_SIZE >= 2) {
+                if (this->is_literal_falsified(c.literals[0])) {
+                    for (int k = 1; k < CLAUSE_SIZE; k++) {
+                        if (!this->is_literal_falsified(c.literals[k])) {
+                            std::swap(c.literals[0], c.literals[k]);
+                            break;
+                        }
+                    }
+                }
+                if (this->is_literal_falsified(c.literals[1])) {
+                    for (int k = 2; k < CLAUSE_SIZE; k++) {
+                        if (!this->is_literal_falsified(c.literals[k])) {
+                            std::swap(c.literals[1], c.literals[k]);
+                            break;
+                        }
+                    }
+                }
                 m_watches[c.literals[0]].push_back(
                     CDCLWatcher{i, c.literals[1]});
                 m_watches[c.literals[1]].push_back(

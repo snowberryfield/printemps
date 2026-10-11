@@ -125,6 +125,15 @@ PYBIND11_MODULE(_printemps, m) {
         .value("Independent", pp::option::selection_mode::Independent)
         .value("UserDefined", pp::option::selection_mode::UserDefined);
 
+    py::enum_<pp::option::restart_mode::RestartMode>(m, "RestartMode")
+        .value("Simple", pp::option::restart_mode::Simple)
+        .value("Smart", pp::option::restart_mode::Smart);
+
+    py::enum_<pp::option::cdcl_restart_mode::CDCLRestartMode>(m, "CDCLRestartMode")
+        .value("Geometric", pp::option::cdcl_restart_mode::Geometric)
+        .value("Luby", pp::option::cdcl_restart_mode::Luby)
+        .value("Adaptive", pp::option::cdcl_restart_mode::Adaptive);
+
     py::enum_<pp::solver::TerminationStatus>(m, "TerminationStatus")
         .value("UNKNOWN", pp::solver::TerminationStatus::UNKNOWN)
         .value("OPTIMAL", pp::solver::TerminationStatus::OPTIMAL)
@@ -690,13 +699,179 @@ PYBIND11_MODULE(_printemps, m) {
                        &pp::option::TabuSearchOption::initial_tabu_tenure)
         .def_readwrite("tabu_mode", &pp::option::TabuSearchOption::tabu_mode);
 
+    py::class_<pp::option::ParallelOption>(m, "ParallelOption")
+        .def_readwrite("is_enabled_move_update_parallelization",
+                       &pp::option::ParallelOption::is_enabled_move_update_parallelization)
+        .def_readwrite("is_enabled_move_evaluation_parallelization",
+                       &pp::option::ParallelOption::is_enabled_move_evaluation_parallelization)
+        .def_readwrite("is_enabled_cdcl_parallelization",
+                       &pp::option::ParallelOption::is_enabled_cdcl_parallelization)
+        .def_readwrite("number_of_threads_move_update",
+                       &pp::option::ParallelOption::number_of_threads_move_update)
+        .def_readwrite("number_of_threads_move_evaluation",
+                       &pp::option::ParallelOption::number_of_threads_move_evaluation)
+        .def_readwrite("number_of_threads_cdcl",
+                       &pp::option::ParallelOption::number_of_threads_cdcl)
+        .def_readwrite("is_enabled_thread_count_optimization",
+                       &pp::option::ParallelOption::is_enabled_thread_count_optimization)
+        .def_readwrite("thread_count_optimization_decay_factor",
+                       &pp::option::ParallelOption::thread_count_optimization_decay_factor);
+
+    py::class_<pp::option::PenaltyOption>(m, "PenaltyOption")
+        .def_readwrite("penalty_coefficient_relaxing_rate",
+                       &pp::option::PenaltyOption::penalty_coefficient_relaxing_rate)
+        .def_readwrite("penalty_coefficient_tightening_rate",
+                       &pp::option::PenaltyOption::penalty_coefficient_tightening_rate)
+        .def_readwrite("penalty_coefficient_pullback_rate",
+                       &pp::option::PenaltyOption::penalty_coefficient_pullback_rate)
+        .def_readwrite("penalty_coefficient_updating_balance",
+                       &pp::option::PenaltyOption::penalty_coefficient_updating_balance)
+        .def_readwrite("initial_penalty_coefficient",
+                       &pp::option::PenaltyOption::initial_penalty_coefficient)
+        .def_readwrite("penalty_coefficient_relaxing_rate_min",
+                       &pp::option::PenaltyOption::penalty_coefficient_relaxing_rate_min)
+        .def_readwrite("penalty_coefficient_relaxing_rate_max",
+                       &pp::option::PenaltyOption::penalty_coefficient_relaxing_rate_max)
+        .def_readwrite("inner_stagnation_threshold",
+                       &pp::option::PenaltyOption::inner_stagnation_threshold)
+        .def_readwrite("outer_stagnation_threshold",
+                       &pp::option::PenaltyOption::outer_stagnation_threshold)
+        .def_readwrite("is_enabled_inner_stagnation_breaker",
+                       &pp::option::PenaltyOption::is_enabled_inner_stagnation_breaker)
+        .def_readwrite("is_enabled_outer_stagnation_breaker",
+                       &pp::option::PenaltyOption::is_enabled_outer_stagnation_breaker)
+        .def_readwrite("is_enabled_group_penalty_coefficient",
+                       &pp::option::PenaltyOption::is_enabled_group_penalty_coefficient)
+        .def_readwrite("is_enabled_shrink_penalty_coefficient",
+                       &pp::option::PenaltyOption::is_enabled_shrink_penalty_coefficient);
+
+    py::class_<pp::option::PreprocessOption>(m, "PreprocessOption")
+        .def_readwrite("is_enabled_presolve",
+                       &pp::option::PreprocessOption::is_enabled_presolve)
+        .def_readwrite("is_enabled_remove_duplicated_constraints",
+                       &pp::option::PreprocessOption::is_enabled_remove_duplicated_constraints)
+        .def_readwrite("is_enabled_remove_implicit_fixed_variables",
+                       &pp::option::PreprocessOption::is_enabled_remove_implicit_fixed_variables)
+        .def_readwrite("is_enabled_remove_redundant_set_variables",
+                       &pp::option::PreprocessOption::is_enabled_remove_redundant_set_variables)
+        .def_readwrite("is_enabled_remove_redundant_set_constraints",
+                       &pp::option::PreprocessOption::is_enabled_remove_redundant_set_constraints)
+        .def_readwrite("is_enabled_extract_implicit_equality_constraints",
+                       &pp::option::PreprocessOption::is_enabled_extract_implicit_equality_constraints)
+        .def_readwrite("is_enabled_online_bounding",
+                       &pp::option::PreprocessOption::is_enabled_online_bounding)
+        .def_readwrite("is_enabled_initial_value_correction",
+                       &pp::option::PreprocessOption::is_enabled_initial_value_correction)
+        .def_readwrite("is_enabled_partial_feasible_enumeration",
+                       &pp::option::PreprocessOption::is_enabled_partial_feasible_enumeration);
+
+    py::class_<pp::option::RestartOption>(m, "RestartOption")
+        .def_readwrite("restart_mode",
+                       &pp::option::RestartOption::restart_mode);
+
+    py::class_<pp::option::CDCLOption>(m, "CDCLOption")
+        .def_readwrite("is_enabled",
+                       &pp::option::CDCLOption::is_enabled)
+        .def_readwrite("iteration_max",
+                       &pp::option::CDCLOption::iteration_max)
+        .def_readwrite("time_max",
+                       &pp::option::CDCLOption::time_max)
+        .def_readwrite("time_offset",
+                       &pp::option::CDCLOption::time_offset)
+        .def_readwrite("log_interval",
+                       &pp::option::CDCLOption::log_interval)
+        .def_readwrite("conflict_max",
+                       &pp::option::CDCLOption::conflict_max)
+        .def_readwrite("seed",
+                       &pp::option::CDCLOption::seed)
+        .def_readwrite("is_enabled_restart",
+                       &pp::option::CDCLOption::is_enabled_restart)
+        .def_readwrite("restart_mode",
+                       &pp::option::CDCLOption::restart_mode)
+        .def_readwrite("initial_conflict_limit",
+                       &pp::option::CDCLOption::initial_conflict_limit)
+        .def_readwrite("restart_exponential_increase_rate",
+                       &pp::option::CDCLOption::restart_exponential_increase_rate)
+        .def_readwrite("restart_adaptive_window",
+                       &pp::option::CDCLOption::restart_adaptive_window)
+        .def_readwrite("restart_adaptive_literal_block_distance_ratio_threshold",
+                       &pp::option::CDCLOption::restart_adaptive_literal_block_distance_ratio_threshold)
+        .def_readwrite("is_enabled_learned_constraint_reduction",
+                       &pp::option::CDCLOption::is_enabled_learned_constraint_reduction)
+        .def_readwrite("learned_constraint_capacity",
+                       &pp::option::CDCLOption::learned_constraint_capacity)
+        .def_readwrite("learned_constraint_reduction_rate",
+                       &pp::option::CDCLOption::learned_constraint_reduction_rate)
+        .def_readwrite("literal_block_distance_protection_threshold",
+                       &pp::option::CDCLOption::literal_block_distance_protection_threshold)
+        .def_readwrite("variable_activity_decay_rate",
+                       &pp::option::CDCLOption::variable_activity_decay_rate)
+        .def_readwrite("variable_activity_feedback_rate",
+                       &pp::option::CDCLOption::variable_activity_feedback_rate)
+        .def_readwrite("is_enabled_phase_saving",
+                       &pp::option::CDCLOption::is_enabled_phase_saving)
+        .def_readwrite("is_enabled_clause_minimization",
+                       &pp::option::CDCLOption::is_enabled_clause_minimization)
+        .def_readwrite("random_variable_selection_rate",
+                       &pp::option::CDCLOption::random_variable_selection_rate)
+        .def_readwrite("initial_activity_noise_ratio",
+                       &pp::option::CDCLOption::initial_activity_noise_ratio)
+        .def_readwrite("initial_phase_perturbation_rate",
+                       &pp::option::CDCLOption::initial_phase_perturbation_rate)
+        .def_readwrite("is_enabled_evaluate_full_solutions",
+                       &pp::option::CDCLOption::is_enabled_evaluate_full_solutions);
+
+    py::class_<pp::option::PDLPOption>(m, "PDLPOption")
+        .def_readwrite("is_enabled",
+                       &pp::option::PDLPOption::is_enabled)
+        .def_readwrite("iteration_max",
+                       &pp::option::PDLPOption::iteration_max)
+        .def_readwrite("time_max",
+                       &pp::option::PDLPOption::time_max)
+        .def_readwrite("time_offset",
+                       &pp::option::PDLPOption::time_offset)
+        .def_readwrite("log_interval",
+                       &pp::option::PDLPOption::log_interval);
+
+    py::class_<pp::option::LagrangeDualOption>(m, "LagrangeDualOption")
+        .def_readwrite("is_enabled",
+                       &pp::option::LagrangeDualOption::is_enabled)
+        .def_readwrite("iteration_max",
+                       &pp::option::LagrangeDualOption::iteration_max)
+        .def_readwrite("time_max",
+                       &pp::option::LagrangeDualOption::time_max)
+        .def_readwrite("time_offset",
+                       &pp::option::LagrangeDualOption::time_offset)
+        .def_readwrite("log_interval",
+                       &pp::option::LagrangeDualOption::log_interval);
+
+    py::class_<pp::option::LocalSearchOption>(m, "LocalSearchOption")
+        .def_readwrite("is_enabled",
+                       &pp::option::LocalSearchOption::is_enabled)
+        .def_readwrite("iteration_max",
+                       &pp::option::LocalSearchOption::iteration_max)
+        .def_readwrite("time_max",
+                       &pp::option::LocalSearchOption::time_max)
+        .def_readwrite("time_offset",
+                       &pp::option::LocalSearchOption::time_offset)
+        .def_readwrite("log_interval",
+                       &pp::option::LocalSearchOption::log_interval);
+
     py::class_<pp::option::Option>(m, "Option")
         .def(py::init<>())
         .def(py::init<const std::string &>(), py::arg("json_path"))
         .def("setup", &pp::option::Option::setup, py::arg("json_path"))
         .def_readwrite("general", &pp::option::Option::general)
-        .def_readwrite("output", &pp::option::Option::output)
+        .def_readwrite("penalty", &pp::option::Option::penalty)
+        .def_readwrite("parallel", &pp::option::Option::parallel)
+        .def_readwrite("preprocess", &pp::option::Option::preprocess)
+        .def_readwrite("restart", &pp::option::Option::restart)
         .def_readwrite("neighborhood", &pp::option::Option::neighborhood)
+        .def_readwrite("output", &pp::option::Option::output)
+        .def_readwrite("cdcl", &pp::option::Option::cdcl)
+        .def_readwrite("pdlp", &pp::option::Option::pdlp)
+        .def_readwrite("lagrange_dual", &pp::option::Option::lagrange_dual)
+        .def_readwrite("local_search", &pp::option::Option::local_search)
         .def_readwrite("tabu_search", &pp::option::Option::tabu_search);
 
     // ----- NamedSolution / Status / Result -------------------------------
