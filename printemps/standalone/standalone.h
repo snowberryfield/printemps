@@ -140,6 +140,20 @@ class Standalone {
         if (m_argparser.is_specified_time_max) {
             m_option.general.time_max = m_argparser.time_max;
         }
+
+        /**
+         * When no option file is specified, if only one of iteration_max or
+         * time_max is specified, make the other unlimited (-1).
+         */
+        if (m_argparser.option_file_name.empty()) {
+            if (m_argparser.is_specified_iteration_max &&
+                !m_argparser.is_specified_time_max) {
+                m_option.general.time_max = -1.0;
+            } else if (!m_argparser.is_specified_iteration_max &&
+                       m_argparser.is_specified_time_max) {
+                m_option.general.iteration_max = -1;
+            }
+        }
         if (m_argparser.is_specified_verbose) {
             m_option.output.verbose = m_argparser.verbose;
         }
@@ -311,6 +325,16 @@ class Standalone {
         } else {
             this->extract_flippable_variable_pairs();
         }
+    }
+
+    /*************************************************************************/
+    inline const option::Option &option(void) const {
+        return m_option;
+    }
+
+    /*************************************************************************/
+    inline const Argparser &argparser(void) const {
+        return m_argparser;
     }
 };
 }  // namespace printemps::standalone

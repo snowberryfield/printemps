@@ -153,13 +153,17 @@ struct Argparser {
             << "  -k ITERATION_MAX: Specify the allowed maximum number of "
                "outer loop iterations. (default: "
             << option::GeneralOptionConstant::DEFAULT_ITERATION_MAX
-            << "; negative value indicates no limit)" << std::endl;
+            << "; negative value indicates no limit; if only -t is specified "
+               "without -p, this is set to no limit)"
+            << std::endl;
         std::cout  //
             << "  -t TIME_MAX: Specify the allowed maximum computational "
                "time for optimization calculation (specified in seconds). "
                "(default: "
             << option::GeneralOptionConstant::DEFAULT_TIME_MAX
-            << "; negative value indicates no limit)" << std::endl;
+            << "; negative value indicates no limit; if only -k is specified "
+               "without -p, this is set to no limit)"
+            << std::endl;
         std::cout  //
             << "  -v VERBOSE: Specify the log level of standard output (Off, "
                "Warning, Outer, Inner, or Full). (default: "
