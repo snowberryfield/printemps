@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -18,10 +18,10 @@ inline void interrupt_handler([[maybe_unused]] int signum) {
 class PBCompetitionSolver {
    private:
     PBCompetitionSolverArgparser m_argparser;
-    opb::OPB                         m_opb;
-    model::IPModel                   m_model;
-    option::Option                   m_option;
-    utility::TimeKeeper              m_time_keeper;
+    opb::OPB                     m_opb;
+    model::IPModel               m_model;
+    option::Option               m_option;
+    utility::TimeKeeper          m_time_keeper;
 
     /*************************************************************************/
     inline void print_program_name(void) const {
@@ -137,8 +137,8 @@ class PBCompetitionSolver {
          * Check the metadata of the specified OPB file.
          */
         auto metadata = opb::OPB::check_metadata(m_argparser.pb_file_name);
-        bool is_wbo = (metadata.number_of_soft_constraints > 0);
-        int max_allowed_intsize = is_wbo ? 52 : 53;
+        bool is_wbo   = (metadata.number_of_soft_constraints > 0);
+        int  max_allowed_intsize = is_wbo ? 52 : 53;
 
         if (metadata.intsize > max_allowed_intsize) {
             std::cout << "s UNSUPPORTED" << std::endl;
@@ -147,7 +147,8 @@ class PBCompetitionSolver {
 
         if (is_wbo) {
             int64_t max_original_objective = (1LL << metadata.intsize);
-            if (max_original_objective + metadata.sumcost > 9007199254740992LL) {
+            if (max_original_objective + metadata.sumcost >
+                9007199254740992LL) {
                 std::cout << "s UNSUPPORTED" << std::endl;
                 exit(0);
             }
@@ -184,7 +185,8 @@ class PBCompetitionSolver {
                 printemps::helper::read_names_and_values(
                     m_argparser.fixed_variable_file_name);
             m_opb.augment_solution(&fixed_variables_and_values);
-            m_model.initial_solution_handler().fix_variables(fixed_variables_and_values);
+            m_model.initial_solution_handler().fix_variables(
+                fixed_variables_and_values);
         }
 
         if (m_argparser.is_specified_iteration_max) {

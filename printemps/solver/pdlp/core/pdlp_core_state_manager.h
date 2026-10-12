@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -60,8 +60,7 @@ class PDLPCoreStateManager {
         m_state.primal.objective_lower_bound = 0.0;
         m_state.primal.objective_upper_bound = 0.0;
         for (int i = 0; i < NUMBER_OF_COLUMNS; i++) {
-            const auto COEFFICIENT =
-                m_instance_ptr->objective_coefficients[i];
+            const auto COEFFICIENT = m_instance_ptr->objective_coefficients[i];
             if (COEFFICIENT > 0) {
                 m_state.primal.objective_upper_bound +=
                     COEFFICIENT * m_instance_ptr->variable_upper_bounds[i];
@@ -183,8 +182,8 @@ class PDLPCoreStateManager {
         utility::sparse::linear_combination(
             &m_state.primal.lagrangian_coefficients,  //
             -1.0, m_instance_ptr->dual_constraint_coefficients,
-            a_DUAL_CENTER,                           //
-            1.0, INSTANCE.objective_coefficients     //
+            a_DUAL_CENTER,                        //
+            1.0, INSTANCE.objective_coefficients  //
         );
 
         utility::sparse::linear_combination(
@@ -275,11 +274,11 @@ class PDLPCoreStateManager {
             const double PRIMAL_STEP_SIZE =
                 step_size_trial / m_state.primal_weight;
 
-            utility::sparse::linear_combination(                         //
-                &m_state.primal.solution_trial,                          //
-                1.0, m_state.primal.solution,                            //
-                -PRIMAL_STEP_SIZE, INSTANCE.objective_coefficients,      //
-                PRIMAL_STEP_SIZE, m_state.primal.lhs                     //
+            utility::sparse::linear_combination(                     //
+                &m_state.primal.solution_trial,                      //
+                1.0, m_state.primal.solution,                        //
+                -PRIMAL_STEP_SIZE, INSTANCE.objective_coefficients,  //
+                PRIMAL_STEP_SIZE, m_state.primal.lhs                 //
             );
 
             m_state.primal.solution_trial.clamp(INSTANCE.variable_lower_bounds,
@@ -503,10 +502,9 @@ class PDLPCoreStateManager {
             }
         }
 
-        m_state.primal.objective =
-            m_state.primal.solution_average.dot(
-                m_instance_ptr->objective_coefficients) +
-            m_instance_ptr->objective_offset;
+        m_state.primal.objective = m_state.primal.solution_average.dot(
+                                       m_instance_ptr->objective_coefficients) +
+                                   m_instance_ptr->objective_offset;
 
         m_state.dual.objective =
             m_state.dual.solution_average.dot(
@@ -517,8 +515,7 @@ class PDLPCoreStateManager {
     /*************************************************************************/
     inline void update_violation(void) {
         utility::sparse::linear_combination(
-            &m_state.dual.buffer, -1.0,
-            m_instance_ptr->constraint_coefficients,
+            &m_state.dual.buffer, -1.0, m_instance_ptr->constraint_coefficients,
             m_state.primal.solution_average, 1.0,
             m_instance_ptr->dual_objective_coefficients);
 

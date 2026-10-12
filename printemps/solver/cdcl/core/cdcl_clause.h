@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -41,8 +41,8 @@ inline constexpr int make_literal(const int a_VARIABLE,
 /**
  * Watcher: represents a clause watching a literal.
  * blocker_literal is another literal in the clause that is frequently already
- * satisfied. If blocker_literal is satisfied, we can skip fetching the full clause
- * from memory.
+ * satisfied. If blocker_literal is satisfied, we can skip fetching the full
+ * clause from memory.
  */
 struct CDCLWatcher {
     int constraint_index;
@@ -96,10 +96,8 @@ struct CDCLClause {
           is_deleted(false),
           is_learned(a_IS_LEARNED),
           literals(std::move(a_LITERALS)),
-          positive_variable_indices(
-              std::move(a_POSITIVE_VARIABLE_INDICES)),
-          negative_variable_indices(
-              std::move(a_NEGATIVE_VARIABLE_INDICES)) {
+          positive_variable_indices(std::move(a_POSITIVE_VARIABLE_INDICES)),
+          negative_variable_indices(std::move(a_NEGATIVE_VARIABLE_INDICES)) {
     }
 
     /*************************************************************************/

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -187,8 +187,8 @@ TEST_F(TestMaxSATEvaluationSolver, solve_test_00e_precision) {
 /*****************************************************************************/
 TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_safe) {
     std::string captured;
-    const int   EXIT_CODE =
-        run_and_capture("./dat/wcnf/test_wcnf_supported_safe.wcnf", "2", &captured);
+    const int   EXIT_CODE = run_and_capture(
+        "./dat/wcnf/test_wcnf_supported_safe.wcnf", "2", &captured);
 
     EXPECT_EQ(10, EXIT_CODE);
     EXPECT_NE(std::string::npos, captured.find("s SATISFIABLE"));
@@ -197,8 +197,8 @@ TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_safe) {
 /*****************************************************************************/
 TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_precision_border) {
     std::string captured;
-    const int   EXIT_CODE =
-        run_and_capture("./dat/wcnf/test_wcnf_supported_precision_border.wcnf", "2", &captured);
+    const int   EXIT_CODE = run_and_capture(
+        "./dat/wcnf/test_wcnf_supported_precision_border.wcnf", "2", &captured);
 
     EXPECT_EQ(10, EXIT_CODE);
     EXPECT_NE(std::string::npos, captured.find("s SATISFIABLE"));
@@ -208,12 +208,13 @@ TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_precision_border) {
 TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_precision_overflow) {
     /**
      * test_wcnf_supported_precision_overflow.wcnf: precision stress.
-     * Weights ~2^60. The exact uint64_t recomputation must print 1152921504606846977
-     * when x1 = 1 is violated.
+     * Weights ~2^60. The exact uint64_t recomputation must print
+     * 1152921504606846977 when x1 = 1 is violated.
      */
     std::string captured;
-    const int   EXIT_CODE =
-        run_and_capture("./dat/wcnf/test_wcnf_supported_precision_overflow.wcnf", "2", &captured);
+    const int   EXIT_CODE = run_and_capture(
+        "./dat/wcnf/test_wcnf_supported_precision_overflow.wcnf", "2",
+        &captured);
 
     EXPECT_EQ(10, EXIT_CODE);
     EXPECT_NE(std::string::npos, captured.find("s SATISFIABLE"));
@@ -266,4 +267,3 @@ TEST_F(TestMaxSATEvaluationSolver, solve_supported_wcnf_precision_overflow) {
 /*****************************************************************************/
 // END
 /*****************************************************************************/
-

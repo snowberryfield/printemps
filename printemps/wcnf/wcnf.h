@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -181,8 +181,8 @@ struct WCNF {
              * Detect overflow of the weight sum. The MSE rules require
              * weight_sum < 2^64 - 1.
              */
-            if (weight_sum > std::numeric_limits<uint64_t>::max() -
-                                 clause.weight - 1) {
+            if (weight_sum >
+                std::numeric_limits<uint64_t>::max() - clause.weight - 1) {
                 throw std::runtime_error(utility::format_error_location(
                     __FILE__, __LINE__, __func__,
                     "The sum of soft clause weights overflows uint64_t."));

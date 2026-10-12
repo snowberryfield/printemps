@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -193,7 +193,8 @@ class DependentVariableEliminator {
                 model_component::Expression<T_Variable, T_Expression> *>>
             variable_to_expression_ptrs;
 
-        std::unordered_set<model_component::Variable<T_Variable, T_Expression> *>
+        std::unordered_set<
+            model_component::Variable<T_Variable, T_Expression> *>
             dependent_variable_set(a_DEPENDENT_VARIABLE_PTRS.begin(),
                                    a_DEPENDENT_VARIABLE_PTRS.end());
 
@@ -202,8 +203,8 @@ class DependentVariableEliminator {
                 for (auto &&sensitivity : expression.sensitivities()) {
                     if (dependent_variable_set.find(sensitivity.first) !=
                         dependent_variable_set.end()) {
-                        variable_to_expression_ptrs[sensitivity.first].push_back(
-                            &expression);
+                        variable_to_expression_ptrs[sensitivity.first]
+                            .push_back(&expression);
                     }
                 }
             }

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -20,8 +20,7 @@ class StateExporter {
     }
 
     /*************************************************************************/
-    StateExporter(
-        const model::Model<T_Variable, T_Expression> *a_model_ptr) {
+    StateExporter(const model::Model<T_Variable, T_Expression> *a_model_ptr) {
         this->setup(a_model_ptr);
     }
 

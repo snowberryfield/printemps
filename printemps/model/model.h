@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -690,14 +690,14 @@ class Model {
     }
 
     /*************************************************************************/
-    inline model_handler::Inspector<T_Variable, T_Expression> &
-    inspector(void) noexcept {
+    inline model_handler::Inspector<T_Variable, T_Expression> &inspector(
+        void) noexcept {
         return m_inspector;
     }
 
     /*************************************************************************/
-    inline const model_handler::Inspector<T_Variable, T_Expression> &
-    inspector(void) const noexcept {
+    inline const model_handler::Inspector<T_Variable, T_Expression> &inspector(
+        void) const noexcept {
         return m_inspector;
     }
 };

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -464,10 +464,8 @@ TEST_F(TestCDCLBehavior, simple_feasible) {
 /*****************************************************************************/
 TEST_F(TestCDCLBehavior, variable_activity_feedback) {
     /**
-     * Problem with conflicts to trigger conflict analysis and variable activity feedback:
-     * x0 + x1 + x2 + x3 >= 3
-     * x0 + x1 <= 1
-     * x2 + x3 <= 1
+     * Problem with conflicts to trigger conflict analysis and variable activity
+     * feedback: x0 + x1 + x2 + x3 >= 3 x0 + x1 <= 1 x2 + x3 <= 1
      *
      * Infeasible problem that requires branching and learning.
      */
@@ -479,8 +477,10 @@ TEST_F(TestCDCLBehavior, variable_activity_feedback) {
     // Row 1: x0 + x1 <= 1
     // Row 2: x2 + x3 <= 1
     matrix_model.constraint_coefficients.row_ptrs       = {0, 4, 6, 8};
-    matrix_model.constraint_coefficients.column_indices = {0, 1, 2, 3, 0, 1, 2, 3};
-    matrix_model.constraint_coefficients.values         = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+    matrix_model.constraint_coefficients.column_indices = {0, 1, 2, 3,
+                                                           0, 1, 2, 3};
+    matrix_model.constraint_coefficients.values         = {1.0, 1.0, 1.0, 1.0,
+                                                           1.0, 1.0, 1.0, 1.0};
 
     matrix_model.constraint_lower_bounds.values = {3.0, 0.0, 0.0};
     matrix_model.constraint_upper_bounds.values = {4.0, 1.0, 1.0};
@@ -498,10 +498,10 @@ TEST_F(TestCDCLBehavior, variable_activity_feedback) {
     // Test with variable activity feedback (rate = 0.8)
     {
         option::Option option;
-        option.cdcl.time_max                           = 10.0;
-        option.cdcl.iteration_max                      = 1000;
-        option.cdcl.variable_activity_feedback_rate   = 0.8;
-        option.output.verbose                          = option::verbose::Off;
+        option.cdcl.time_max                        = 10.0;
+        option.cdcl.iteration_max                   = 1000;
+        option.cdcl.variable_activity_feedback_rate = 0.8;
+        option.output.verbose                       = option::verbose::Off;
 
         CDCLCore solver(&matrix_model, std::nullopt, option);
         solver.run();
@@ -514,10 +514,10 @@ TEST_F(TestCDCLBehavior, variable_activity_feedback) {
     // Test with no feedback (rate = 0.0)
     {
         option::Option option;
-        option.cdcl.time_max                           = 10.0;
-        option.cdcl.iteration_max                      = 1000;
-        option.cdcl.variable_activity_feedback_rate   = 0.0;
-        option.output.verbose                          = option::verbose::Off;
+        option.cdcl.time_max                        = 10.0;
+        option.cdcl.iteration_max                   = 1000;
+        option.cdcl.variable_activity_feedback_rate = 0.0;
+        option.output.verbose                       = option::verbose::Off;
 
         CDCLCore solver(&matrix_model, std::nullopt, option);
         solver.run();
@@ -530,10 +530,10 @@ TEST_F(TestCDCLBehavior, variable_activity_feedback) {
     // Test with custom feedback rate (0.5)
     {
         option::Option option;
-        option.cdcl.time_max                           = 10.0;
-        option.cdcl.iteration_max                      = 1000;
-        option.cdcl.variable_activity_feedback_rate   = 0.5;
-        option.output.verbose                          = option::verbose::Off;
+        option.cdcl.time_max                        = 10.0;
+        option.cdcl.iteration_max                   = 1000;
+        option.cdcl.variable_activity_feedback_rate = 0.5;
+        option.output.verbose                       = option::verbose::Off;
 
         CDCLCore solver(&matrix_model, std::nullopt, option);
         solver.run();

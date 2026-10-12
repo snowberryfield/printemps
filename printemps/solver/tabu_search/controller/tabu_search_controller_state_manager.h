@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -115,9 +115,8 @@ class TabuSearchControllerStateManager {
                 if (m_state.max_number_of_threads_move_update <= 0) {
                     m_state.max_number_of_threads_move_update = MAX_THREADS;
                 } else {
-                    m_state.max_number_of_threads_move_update =
-                        std::min(m_state.max_number_of_threads_move_update,
-                                 MAX_THREADS);
+                    m_state.max_number_of_threads_move_update = std::min(
+                        m_state.max_number_of_threads_move_update, MAX_THREADS);
                 }
 
                 if (m_state.max_number_of_threads_move_evaluation <= 0) {

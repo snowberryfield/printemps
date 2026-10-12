@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -33,9 +33,8 @@ TEST_F(TestParallelOption, initialize) {
             DEFAULT_IS_ENABLED_MOVE_EVALUATION_PARALLELIZATION,  //
         option.is_enabled_move_evaluation_parallelization);
 
-    EXPECT_EQ(  //
-        ParallelOptionConstant::
-            DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION,  //
+    EXPECT_EQ(                                                            //
+        ParallelOptionConstant::DEFAULT_IS_ENABLED_CDCL_PARALLELIZATION,  //
         option.is_enabled_cdcl_parallelization);
 
     EXPECT_EQ(                                                          //
@@ -46,8 +45,8 @@ TEST_F(TestParallelOption, initialize) {
         ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_MOVE_EVALUATION,  //
         option.number_of_threads_move_evaluation);
 
-    EXPECT_EQ(                                                      //
-        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_CDCL,     //
+    EXPECT_EQ(                                                   //
+        ParallelOptionConstant::DEFAULT_NUMBER_OF_THREADS_CDCL,  //
         option.number_of_threads_cdcl);
 
     EXPECT_EQ(  //

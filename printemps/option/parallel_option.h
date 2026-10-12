@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -21,7 +21,7 @@ struct ParallelOptionConstant {
     static constexpr int                                 //
         DEFAULT_NUMBER_OF_THREADS_MOVE_UPDATE = -1;      // Adjust to max
     static constexpr int                                 //
-        DEFAULT_NUMBER_OF_THREADS_CDCL = 4;              // Max 4, clipped to max
+        DEFAULT_NUMBER_OF_THREADS_CDCL = 4;  // Max 4, clipped to max
 
     static constexpr bool  //
         DEFAULT_IS_ENABLED_THREAD_COUNT_OPTIMIZATION = true;

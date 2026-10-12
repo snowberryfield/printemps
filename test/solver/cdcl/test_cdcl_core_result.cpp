@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -47,18 +47,18 @@ TEST_F(TestCDCLCoreResult, initialize) {
 /*****************************************************************************/
 TEST_F(TestCDCLCoreResult, constructor) {
     CDCLCoreState state;
-    state.termination_status                  = CDCLCoreTerminationStatus::FEASIBLE;
-    state.solution                            = {1, 0, 1};
-    state.best_solution                       = {1, 0, 1};
-    state.best_total_violation                = 0.0;
-    state.number_of_conflicts                 = 10;
-    state.number_of_restarts                  = 2;
-    state.number_of_decisions                 = 50;
-    state.number_of_propagations              = 100;
-    state.total_learned_count                 = 5;
+    state.termination_status     = CDCLCoreTerminationStatus::FEASIBLE;
+    state.solution               = {1, 0, 1};
+    state.best_solution          = {1, 0, 1};
+    state.best_total_violation   = 0.0;
+    state.number_of_conflicts    = 10;
+    state.number_of_restarts     = 2;
+    state.number_of_decisions    = 50;
+    state.number_of_propagations = 100;
+    state.total_learned_count    = 5;
     state.total_learned_literal_block_distance = 15;
     state.total_learned_length                 = 25;
-    state.repeated_conflict_constraints_count = 3;
+    state.repeated_conflict_constraints_count  = 3;
     state.elapsed_time                         = 1.5;
 
     CDCLCoreResult result(state);

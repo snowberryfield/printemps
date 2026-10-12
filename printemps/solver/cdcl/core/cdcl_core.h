@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -54,7 +54,8 @@ class CDCLCore {
         inline size_t operator()(
             const CDCLConstraintReference& a_REFERENCE) const noexcept {
             return (static_cast<size_t>(a_REFERENCE.type) << 32) ^
-                   static_cast<size_t>(static_cast<uint32_t>(a_REFERENCE.index));
+                   static_cast<size_t>(
+                       static_cast<uint32_t>(a_REFERENCE.index));
         }
     };
     utility::Intensity<CDCLConstraintReference, ConstraintReferenceHash>
@@ -872,13 +873,14 @@ class CDCLCore {
         }
 #endif
 
-        const auto  LAST_CONFLICT   = m_state_manager.last_conflict_constraint();
+        const auto  LAST_CONFLICT = m_state_manager.last_conflict_constraint();
         std::string constraint_name = "-";
         int64_t     hits            = -1;
         if (LAST_CONFLICT.type != CDCLConstraintType::NONE &&
             LAST_CONFLICT.index != CDCLCoreConstant::NO_CONSTRAINT) {
-            hits            = m_conflict_intensity.count(LAST_CONFLICT);
-            constraint_name = this->format_constraint_reference(LAST_CONFLICT, 8);
+            hits = m_conflict_intensity.count(LAST_CONFLICT);
+            constraint_name =
+                this->format_constraint_reference(LAST_CONFLICT, 8);
         }
 
         char assigned_buffer[64];
@@ -919,13 +921,13 @@ class CDCLCore {
             suffix,                                                       //
             (utility::int_format(m_state_manager.current_decision_level(), 6) +
              " ")
-                .c_str(),      //
-            assigned_buffer,   //
+                .c_str(),     //
+            assigned_buffer,  //
             (utility::int_format(m_state_manager.number_of_conflicts(), 6) +
              " ")
-                .c_str(),        //
-            intensity_buffer,   //
-            conflict_buffer,    //
+                .c_str(),      //
+            intensity_buffer,  //
+            conflict_buffer,   //
             hits_buffer);
     }
 

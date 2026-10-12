@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -36,22 +36,22 @@ struct CDCLCoreResult {
     }
 
     /*************************************************************************/
-    CDCLCoreResult(const CDCLCoreState   &a_STATE,  //
-                   const option::Option  &a_OPTION = {}) {
+    CDCLCoreResult(const CDCLCoreState  &a_STATE,  //
+                   const option::Option &a_OPTION = {}) {
         this->setup(a_STATE, a_OPTION);
     }
 
     /*************************************************************************/
     inline void initialize(void) {
-        this->termination_status                     = CDCLCoreTerminationStatus::NOT_SOLVED;
+        this->termination_status = CDCLCoreTerminationStatus::NOT_SOLVED;
         this->solution.clear();
         this->best_solution.clear();
-        this->best_total_violation                   = std::numeric_limits<double>::infinity();
-        this->number_of_conflicts                    = 0;
-        this->number_of_restarts                     = 0;
-        this->number_of_decisions                    = 0;
-        this->number_of_propagations                 = 0;
-        this->total_learned_count                    = 0;
+        this->best_total_violation   = std::numeric_limits<double>::infinity();
+        this->number_of_conflicts    = 0;
+        this->number_of_restarts     = 0;
+        this->number_of_decisions    = 0;
+        this->number_of_propagations = 0;
+        this->total_learned_count    = 0;
         this->unique_conflict_constraints_count      = 0;
         this->repeated_conflict_constraints_count    = 0;
         this->average_learned_literal_block_distance = 0.0;
@@ -62,17 +62,18 @@ struct CDCLCoreResult {
     }
 
     /*************************************************************************/
-    inline void setup(const CDCLCoreState   &a_STATE,  //
+    inline void setup(const CDCLCoreState                   &a_STATE,  //
                       [[maybe_unused]] const option::Option &a_OPTION = {}) {
         this->initialize();
-        this->termination_status                  = a_STATE.termination_status;
-        this->number_of_conflicts                 = a_STATE.number_of_conflicts;
-        this->number_of_restarts                  = a_STATE.number_of_restarts;
-        this->number_of_decisions                 = a_STATE.number_of_decisions;
-        this->number_of_propagations              = a_STATE.number_of_propagations;
-        this->total_learned_count                 = a_STATE.total_learned_count;
-        this->repeated_conflict_constraints_count = a_STATE.repeated_conflict_constraints_count;
-        this->elapsed_time                        = a_STATE.elapsed_time;
+        this->termination_status     = a_STATE.termination_status;
+        this->number_of_conflicts    = a_STATE.number_of_conflicts;
+        this->number_of_restarts     = a_STATE.number_of_restarts;
+        this->number_of_decisions    = a_STATE.number_of_decisions;
+        this->number_of_propagations = a_STATE.number_of_propagations;
+        this->total_learned_count    = a_STATE.total_learned_count;
+        this->repeated_conflict_constraints_count =
+            a_STATE.repeated_conflict_constraints_count;
+        this->elapsed_time = a_STATE.elapsed_time;
 
         this->average_learned_literal_block_distance =
             (a_STATE.total_learned_count > 0)

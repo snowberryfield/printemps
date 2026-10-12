@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -84,8 +84,7 @@ struct PBCompetitionSolverArgparser {
         std::cout  //
             << "  -j NUMBER_OF_THREADS: Specify the number of threads for "
                "parallelization. (default: "
-            << PBCompetitionSolverArgparserConstant::
-                   DEFAULT_NUMBER_OF_THREADS
+            << PBCompetitionSolverArgparserConstant::DEFAULT_NUMBER_OF_THREADS
             << ", maximum value avaiable)" << std::endl;
         std::cout  //
             << "  -r SEED: Specify the random seed. (default: "

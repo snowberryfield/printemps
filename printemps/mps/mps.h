@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -362,8 +362,9 @@ struct MPS {
                 continue;
             }
 
-            const int CONSTRAINT_ID     = it->second;
-            const int NEW_CONSTRAINT_ID = static_cast<int>(this->constraints.size());
+            const int CONSTRAINT_ID = it->second;
+            const int NEW_CONSTRAINT_ID =
+                static_cast<int>(this->constraints.size());
             this->constraints.emplace_back();
             auto &constraint     = this->constraints[CONSTRAINT_ID];
             auto &constraint_new = this->constraints.back();

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -9,10 +9,10 @@
 namespace printemps::solver::cdcl::core {
 /*****************************************************************************/
 enum class CDCLConstraintType : uint8_t {
-    NONE = 0,
+    NONE           = 0,
     PSEUDO_BOOLEAN = 1,
-    CARDINALITY = 2,
-    LEARNED = 3,
+    CARDINALITY    = 2,
+    LEARNED        = 3,
 };
 
 /*****************************************************************************/

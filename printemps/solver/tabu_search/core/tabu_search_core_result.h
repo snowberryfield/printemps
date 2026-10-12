@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -44,7 +44,7 @@ struct TabuSearchCoreResult {
     /*************************************************************************/
     TabuSearchCoreResult(
         const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE,
-        const option::Option &                               a_OPTION) {
+        const option::Option                                &a_OPTION) {
         this->setup(a_STATE, a_OPTION);
     }
 
@@ -81,7 +81,7 @@ struct TabuSearchCoreResult {
     /*************************************************************************/
     inline void setup(
         const TabuSearchCoreState<T_Variable, T_Expression> &a_STATE,
-        const option::Option &                               a_OPTION) {
+        const option::Option                                &a_OPTION) {
         this->total_update_status  = a_STATE.total_update_status;
         this->number_of_iterations = a_STATE.iteration;
         this->elapsed_time         = a_STATE.elapsed_time;

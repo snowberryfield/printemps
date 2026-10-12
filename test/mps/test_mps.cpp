@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -223,8 +223,7 @@ TEST_F(TestMPS, parse_rows) {
         std::vector<std::string_view> items = {"G", "c3"};
         mps.parse_rows(items);
         EXPECT_EQ("c3", mps.constraint("c3").name);
-        EXPECT_EQ(mps::MPSConstraintSense::Greater,
-                  mps.constraint("c3").sense);
+        EXPECT_EQ(mps::MPSConstraintSense::Greater, mps.constraint("c3").sense);
         EXPECT_TRUE(mps.objective.name.empty());
     }
 
@@ -598,8 +597,7 @@ TEST_F(TestMPS, read_mps_00) {
             const std::string                         &a_variable_name) {
             const int TARGET_VARIABLE_INDEX =
                 mps.variable_name_to_index_map.at(a_variable_name);
-            for (const auto &[variable_index, sensitivity] :
-                 a_sensitivities) {
+            for (const auto &[variable_index, sensitivity] : a_sensitivities) {
                 if (variable_index == TARGET_VARIABLE_INDEX) {
                     return sensitivity;
                 }

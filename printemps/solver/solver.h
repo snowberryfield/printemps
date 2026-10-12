@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -83,8 +83,6 @@ class Solver {
             }
         }
     }
-
-
 
     /*************************************************************************/
     inline Result<T_Variable, T_Expression> postprocess(void) {
@@ -331,18 +329,19 @@ class Solver {
          * Build the model.
          */
         try {
-            m_model_ptr->build(m_option,
-                               m_option.output.verbose >= option::verbose::Outer);
-        } catch (const error_handler::InfeasibleError &e) {
+            m_model_ptr->build(
+                m_option, m_option.output.verbose >= option::verbose::Outer);
+        } catch (const error_handler::InfeasibleError& e) {
             m_global_state.termination_status = TerminationStatus::INFEASIBLE;
             m_global_state.model_ptr          = m_model_ptr;
-            m_global_state.solver_ptr           = this;
+            m_global_state.solver_ptr         = this;
             m_global_state.feasible_solution_archive.setup(
                 m_option.output.feasible_solutions_capacity,  //
-                m_model_ptr->is_minimization() ? solution::SortMode::Ascending
-                                               : solution::SortMode::Descending,  //
-                m_model_ptr->name(),                                              //
-                m_model_ptr->reference().number_of_variables(),                   //
+                m_model_ptr->is_minimization()
+                    ? solution::SortMode::Ascending
+                    : solution::SortMode::Descending,            //
+                m_model_ptr->name(),                             //
+                m_model_ptr->reference().number_of_variables(),  //
                 m_model_ptr->reference().number_of_constraints());
             m_global_state.incumbent_solution_archive.setup(
                 -1,  //
@@ -490,7 +489,8 @@ class Solver {
          */
         if (m_global_state.is_proven_infeasible()) {
             utility::print_message(
-                "Preprocessing proved infeasibility. Skipping remaining phases.",
+                "Preprocessing proved infeasibility. Skipping remaining "
+                "phases.",
                 m_option.output.verbose >= option::verbose::Outer);
             auto result = this->postprocess();
             return result;
@@ -607,7 +607,8 @@ class Solver {
          */
         if (m_global_state.is_proven_infeasible()) {
             utility::print_message(
-                "Preprocessing proved infeasibility. Skipping remaining phases.",
+                "Preprocessing proved infeasibility. Skipping remaining "
+                "phases.",
                 m_option.output.verbose >= option::verbose::Outer);
             return;
         }

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -121,7 +121,7 @@ inline auto operator/(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator+(
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.copy() + a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION.copy() + a_EXPRESSION_LIKE.to_expression();
@@ -132,7 +132,7 @@ template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator+(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() + a_EXPRESSION.copy()) {
     return a_EXPRESSION_LIKE.to_expression() + a_EXPRESSION.copy();
 }
@@ -141,7 +141,7 @@ inline auto operator+(
 template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator-(
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION,
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION,
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE)
     -> decltype(a_EXPRESSION.copy() - a_EXPRESSION_LIKE.to_expression()) {
     return a_EXPRESSION.copy() - a_EXPRESSION_LIKE.to_expression();
@@ -152,7 +152,7 @@ template <class T_Variable, class T_Expression,
           template <class, class> class T_ExpressionLike>
 inline auto operator-(
     const T_ExpressionLike<T_Variable, T_Expression> &a_EXPRESSION_LIKE,
-    const Expression<T_Variable, T_Expression> &      a_EXPRESSION)
+    const Expression<T_Variable, T_Expression>       &a_EXPRESSION)
     -> decltype(a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.copy()) {
     return a_EXPRESSION_LIKE.to_expression() - a_EXPRESSION.copy();
 }
@@ -193,7 +193,7 @@ inline Expression<T_Variable, T_Expression> operator+(
 template <class T_Variable, class T_Expression, class T_Value>
 inline Expression<T_Variable, T_Expression> operator-(
     const Expression<T_Variable, T_Expression> &a_EXPRESSION,
-    const T_Value &                             a_VALUE) {
+    const T_Value                              &a_VALUE) {
     auto result = a_EXPRESSION.copy();
     result -= a_VALUE;
     return result;

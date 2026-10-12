@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -22,7 +22,7 @@ struct Action;
 /*****************************************************************************/
 template <class T_StateBody, class T_ActionBody>
 struct State {
-    Learner<T_StateBody, T_ActionBody> *           learner_ptr;
+    Learner<T_StateBody, T_ActionBody>            *learner_ptr;
     std::vector<Action<T_StateBody, T_ActionBody>> actions;
     T_StateBody                                    body;
 
@@ -69,9 +69,9 @@ struct State {
     }
 
     /**************************************************************************/
-    inline Action<T_StateBody, T_ActionBody>
-        *epsilon_greedy_selected_action_ptr(const double  a_RATIO,
-                                            std::mt19937 *a_get_rand_mt) {
+    inline Action<T_StateBody, T_ActionBody> *
+    epsilon_greedy_selected_action_ptr(const double  a_RATIO,
+                                       std::mt19937 *a_get_rand_mt) {
         constexpr std::uint_fast32_t RAND_MAX_UINT_32 =
             std::numeric_limits<std::uint_fast32_t>::max();
         if (static_cast<double>((*a_get_rand_mt)()) / RAND_MAX_UINT_32 <

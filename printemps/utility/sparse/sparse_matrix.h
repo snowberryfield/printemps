@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -92,9 +92,9 @@ struct SparseMatrix {
             norm_infty = std::max(norm_infty, VALUE);
         }
         if (this->number_of_columns > 0) {
-            this->norm_one   = *std::max_element(c_temp.begin(), c_temp.end());
+            this->norm_one = *std::max_element(c_temp.begin(), c_temp.end());
         } else {
-            this->norm_one   = 0.0;
+            this->norm_one = 0.0;
         }
         this->norm_infty = norm_infty;
     }

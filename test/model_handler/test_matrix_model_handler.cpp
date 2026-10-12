@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -114,18 +114,25 @@ TEST_F(TestMatrixModelHandler, import_solution_exceptions) {
     option.preprocess.is_enabled_presolve = false;
     model.builder().build(option, false);
 
-    // Case 1: Calling import_solution before export_matrix_model should throw std::runtime_error
+    // Case 1: Calling import_solution before export_matrix_model should throw
+    // std::runtime_error
     std::vector<int> solution = {1, 2, 3, 4};
-    EXPECT_THROW(model.matrix_model_handler().import_solution(solution), std::runtime_error);
+    EXPECT_THROW(model.matrix_model_handler().import_solution(solution),
+                 std::runtime_error);
 
-    // Case 2: After export, calling with mismatched size should throw std::runtime_error
+    // Case 2: After export, calling with mismatched size should throw
+    // std::runtime_error
     auto mm_instance = model.matrix_model_handler().export_matrix_model();
     std::vector<int> mismatched_solution = {1, 2, 3};
-    EXPECT_THROW(model.matrix_model_handler().import_solution(mismatched_solution), std::runtime_error);
+    EXPECT_THROW(
+        model.matrix_model_handler().import_solution(mismatched_solution),
+        std::runtime_error);
 
-    // Case 3: After export, calling with correct size should not throw and should update values
+    // Case 3: After export, calling with correct size should not throw and
+    // should update values
     std::vector<int> correct_solution = {2, 3, 4, 5};
-    EXPECT_NO_THROW(model.matrix_model_handler().import_solution(correct_solution));
+    EXPECT_NO_THROW(
+        model.matrix_model_handler().import_solution(correct_solution));
     EXPECT_EQ(2, x[0].value());
     EXPECT_EQ(3, x[1].value());
     EXPECT_EQ(4, x[2].value());

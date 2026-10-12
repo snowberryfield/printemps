@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -227,13 +227,13 @@ class PDLPCore {
             utility::int_format(state.total_iteration, 8).c_str(),  //
             mark_restart,                                           //
             state.step_size_current,                                //
-            mark_primal_feasible,                    //
-            state.primal.objective * SIGN,           //
-            state.primal.relative_violation_norm,    //
-            mark_dual_feasible,                      //
-            state.dual.objective * SIGN,             //
-            corrected_dual_relative_violation_norm,  //
-            mark_converge,                           //
+            mark_primal_feasible,                                   //
+            state.primal.objective * SIGN,                          //
+            state.primal.relative_violation_norm,                   //
+            mark_dual_feasible,                                     //
+            state.dual.objective * SIGN,                            //
+            corrected_dual_relative_violation_norm,                 //
+            mark_converge,                                          //
             state.relative_gap);
     }
 

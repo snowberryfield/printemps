@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -38,8 +38,8 @@ struct CDCLOptionConstant {
     static constexpr bool   DEFAULT_IS_ENABLED_PHASE_SAVING         = true;
     static constexpr bool   DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION  = true;
 
-    static constexpr double DEFAULT_RANDOM_VARIABLE_SELECTION_RATE = 0.0;
-    static constexpr double DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO   = 0.0;
+    static constexpr double DEFAULT_RANDOM_VARIABLE_SELECTION_RATE  = 0.0;
+    static constexpr double DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO    = 0.0;
     static constexpr double DEFAULT_INITIAL_PHASE_PERTURBATION_RATE = 0.0;
 
     static constexpr bool DEFAULT_IS_ENABLED_EVALUATE_FULL_SOLUTIONS = false;
@@ -197,9 +197,9 @@ struct CDCLOption {
             utility::to_string(                               //
                 this->restart_exponential_increase_rate, "%f"));
 
-        utility::print(                            //
+        utility::print(                             //
             " -- cdcl.restart_adaptive_window: " +  //
-            utility::to_string(                    //
+            utility::to_string(                     //
                 this->restart_adaptive_window, "%d"));
 
         utility::print(  //
@@ -244,29 +244,29 @@ struct CDCLOption {
             utility::to_true_or_false(              //
                 this->is_enabled_phase_saving));
 
-        utility::print(                                     //
+        utility::print(                                    //
             " -- cdcl.is_enabled_clause_minimization: " +  //
-            utility::to_true_or_false(                      //
+            utility::to_true_or_false(                     //
                 this->is_enabled_clause_minimization));
 
-        utility::print(                                         //
-            " -- cdcl.random_variable_selection_rate: " +       //
-            utility::to_string(                                 //
+        utility::print(                                    //
+            " -- cdcl.random_variable_selection_rate: " +  //
+            utility::to_string(                            //
                 this->random_variable_selection_rate, "%f"));
 
-        utility::print(                                      //
-            " -- cdcl.initial_activity_noise_ratio: " +      //
-            utility::to_string(                              //
+        utility::print(                                  //
+            " -- cdcl.initial_activity_noise_ratio: " +  //
+            utility::to_string(                          //
                 this->initial_activity_noise_ratio, "%f"));
 
-        utility::print(                                          //
-            " -- cdcl.initial_phase_perturbation_rate: " +       //
-            utility::to_string(                                  //
+        utility::print(                                     //
+            " -- cdcl.initial_phase_perturbation_rate: " +  //
+            utility::to_string(                             //
                 this->initial_phase_perturbation_rate, "%f"));
 
-        utility::print(                                          //
-            " -- cdcl.is_enabled_evaluate_full_solutions: " +    //
-            utility::to_true_or_false(                           //
+        utility::print(                                        //
+            " -- cdcl.is_enabled_evaluate_full_solutions: " +  //
+            utility::to_true_or_false(                         //
                 this->is_enabled_evaluate_full_solutions));
     }
 

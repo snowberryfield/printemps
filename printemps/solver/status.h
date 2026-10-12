@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -20,9 +20,9 @@ struct Status {
     model::Model<T_Variable, T_Expression>   *model_ptr;
     option::Option                            option;
 
-    T_Expression objective;
-    T_Expression total_violation;
-    bool         is_found_feasible_solution;
+    T_Expression      objective;
+    T_Expression      total_violation;
+    bool              is_found_feasible_solution;
     TerminationStatus termination_status;
 
     /*************************************************************************/

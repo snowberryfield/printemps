@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -45,8 +45,8 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_without_option_file) {
      * Both should remain default.
      */
     {
-        const char *argv[] = {"printemps", "--accept-continuous",
-                              mps_file.c_str()};
+        const char            *argv[] = {"printemps", "--accept-continuous",
+                                         mps_file.c_str()};
         standalone::Standalone standalone(3, argv);
         EXPECT_EQ(option::GeneralOptionConstant::DEFAULT_ITERATION_MAX,
                   standalone.option().general.iteration_max);
@@ -56,7 +56,8 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_without_option_file) {
 
     /**
      * Case 2: Only iteration_max (-k) is specified.
-     * iteration_max should be the specified value, and time_max should be unlimited (-1).
+     * iteration_max should be the specified value, and time_max should be
+     * unlimited (-1).
      */
     {
         const char *argv[] = {"printemps", "--accept-continuous", "-k", "50",
@@ -68,7 +69,8 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_without_option_file) {
 
     /**
      * Case 3: Only time_max (-t) is specified.
-     * iteration_max should be unlimited (-1), and time_max should be the specified value.
+     * iteration_max should be unlimited (-1), and time_max should be the
+     * specified value.
      */
     {
         const char *argv[] = {"printemps", "--accept-continuous", "-t", "30.0",
@@ -83,8 +85,9 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_without_option_file) {
      * Both should be the specified values.
      */
     {
-        const char *argv[] = {"printemps", "--accept-continuous", "-k", "50",
-                              "-t",        "30.0",               mps_file.c_str()};
+        const char *argv[] = {
+            "printemps", "--accept-continuous", "-k", "50", "-t",
+            "30.0",      mps_file.c_str()};
         standalone::Standalone standalone(7, argv);
         EXPECT_EQ(50, standalone.option().general.iteration_max);
         EXPECT_FLOAT_EQ(30.0, standalone.option().general.time_max);
@@ -111,11 +114,13 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_with_option_file) {
 
     /**
      * Case 2: Option file is specified with only -k.
-     * iteration_max is overwritten, and time_max remains the value from option file.
+     * iteration_max is overwritten, and time_max remains the value from option
+     * file.
      */
     {
-        const char *argv[] = {"printemps", "--accept-continuous", "-p",
-                              option_file.c_str(), "-k", "50", mps_file.c_str()};
+        const char *argv[] = {
+            "printemps", "--accept-continuous", "-p", option_file.c_str(), "-k",
+            "50",        mps_file.c_str()};
         standalone::Standalone standalone(7, argv);
         EXPECT_EQ(50, standalone.option().general.iteration_max);
         EXPECT_FLOAT_EQ(0.1, standalone.option().general.time_max);
@@ -123,11 +128,13 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_with_option_file) {
 
     /**
      * Case 3: Option file is specified with only -t.
-     * time_max is overwritten, and iteration_max remains the value from option file.
+     * time_max is overwritten, and iteration_max remains the value from option
+     * file.
      */
     {
-        const char *argv[] = {"printemps", "--accept-continuous", "-p",
-                              option_file.c_str(), "-t", "30.0", mps_file.c_str()};
+        const char *argv[] = {
+            "printemps", "--accept-continuous", "-p", option_file.c_str(), "-t",
+            "30.0",      mps_file.c_str()};
         standalone::Standalone standalone(7, argv);
         EXPECT_EQ(1, standalone.option().general.iteration_max);
         EXPECT_FLOAT_EQ(30.0, standalone.option().general.time_max);
@@ -138,9 +145,15 @@ TEST_F(TestStandalone, option_iteration_and_time_limits_with_option_file) {
      * Both should be overwritten.
      */
     {
-        const char *argv[] = {"printemps", "--accept-continuous", "-p",
-                              option_file.c_str(), "-k", "50", "-t", "30.0",
-                              mps_file.c_str()};
+        const char            *argv[] = {"printemps",
+                                         "--accept-continuous",
+                                         "-p",
+                                         option_file.c_str(),
+                                         "-k",
+                                         "50",
+                                         "-t",
+                                         "30.0",
+                                         mps_file.c_str()};
         standalone::Standalone standalone(9, argv);
         EXPECT_EQ(50, standalone.option().general.iteration_max);
         EXPECT_FLOAT_EQ(30.0, standalone.option().general.time_max);

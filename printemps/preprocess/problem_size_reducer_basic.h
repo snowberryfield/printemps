@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -385,8 +385,8 @@ class ProblemSizeReducerBasic {
                 __FILE__, __LINE__, __func__,
                 "The constraint " + a_constraint_ptr->name() +
                     " cannot be satisfied. lower bound: " +
-                    std::to_string(constraint_lower_bound) +
-                    ", upper bound: " + std::to_string(constraint_upper_bound)));
+                    std::to_string(constraint_lower_bound) + ", upper bound: " +
+                    std::to_string(constraint_upper_bound)));
         }
 
         /**

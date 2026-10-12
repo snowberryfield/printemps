@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -30,12 +30,14 @@ struct CDCLConstraintReference {
     }
 
     /*************************************************************************/
-    inline bool operator==(const CDCLConstraintReference& a_OTHER) const noexcept {
+    inline bool operator==(
+        const CDCLConstraintReference& a_OTHER) const noexcept {
         return this->index == a_OTHER.index && this->type == a_OTHER.type;
     }
 
     /*************************************************************************/
-    inline bool operator!=(const CDCLConstraintReference& a_OTHER) const noexcept {
+    inline bool operator!=(
+        const CDCLConstraintReference& a_OTHER) const noexcept {
         return !(*this == a_OTHER);
     }
 };

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -84,8 +84,9 @@ class LagrangeDualCoreStateManager {
         /**
          * Initialize the dual solution as lagrange multipliers.
          */
-        m_state.dual = m_model_ptr->state_exporter()
-                           .generate_constraint_parameter_proxies(0.0);
+        m_state.dual =
+            m_model_ptr->state_exporter().generate_constraint_parameter_proxies(
+                0.0);
         this->bound_dual();
         m_state.dual_incumbent = m_state.dual;
 

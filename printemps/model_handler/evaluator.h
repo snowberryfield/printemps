@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -188,13 +188,12 @@ class Evaluator {
             }
         }
 
-        const double OBJECTIVE =
-            MODEL.m_is_defined_objective
-                ? (MODEL.m_objective.value() +
-                   variable_ptr->objective_sensitivity() *
-                       variable_value_diff) *
-                      MODEL.sign()
-                : 0.0;
+        const double OBJECTIVE = MODEL.m_is_defined_objective
+                                     ? (MODEL.m_objective.value() +
+                                        variable_ptr->objective_sensitivity() *
+                                            variable_value_diff) *
+                                           MODEL.sign()
+                                     : 0.0;
 
         const double OBJECTIVE_IMPROVEMENT =
             MODEL.m_objective.value() * MODEL.sign() - OBJECTIVE;
@@ -276,13 +275,12 @@ class Evaluator {
                     constraint_compact.local_penalty_coefficient_greater;
             }
         }
-        const double OBJECTIVE =
-            MODEL.m_is_defined_objective
-                ? (MODEL.m_objective.value() +
-                   variable_ptr->objective_sensitivity() *
-                       variable_value_diff) *
-                      MODEL.sign()
-                : 0.0;
+        const double OBJECTIVE = MODEL.m_is_defined_objective
+                                     ? (MODEL.m_objective.value() +
+                                        variable_ptr->objective_sensitivity() *
+                                            variable_value_diff) *
+                                           MODEL.sign()
+                                     : 0.0;
 
         const double OBJECTIVE_IMPROVEMENT =
             MODEL.m_objective.value() * MODEL.sign() - OBJECTIVE;

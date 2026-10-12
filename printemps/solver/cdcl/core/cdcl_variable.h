@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -30,9 +30,9 @@ struct CDCLVariable {
         this->decision_level          = CDCLCoreConstant::UNASSIGNED_LEVEL;
         this->reason_constraint.index = CDCLCoreConstant::NO_CONSTRAINT;
         this->reason_constraint.type  = CDCLConstraintType::NONE;
-        this->value                   = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
-        this->phase                   = static_cast<int8_t>(CDCLCoreConstant::NO_PHASE);
-        this->pad                     = 0;
+        this->value = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
+        this->phase = static_cast<int8_t>(CDCLCoreConstant::NO_PHASE);
+        this->pad   = 0;
     }
 
     /*************************************************************************/
@@ -51,7 +51,7 @@ struct CDCLVariable {
 
     /*************************************************************************/
     inline void remove(void) noexcept {
-        this->value                   = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
+        this->value = static_cast<int8_t>(CDCLCoreConstant::UNASSIGNED);
         this->decision_level          = CDCLCoreConstant::UNASSIGNED_LEVEL;
         this->reason_constraint.index = CDCLCoreConstant::NO_CONSTRAINT;
         this->reason_constraint.type  = CDCLConstraintType::NONE;

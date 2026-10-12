@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -20,8 +20,8 @@ enum class TerminationStatus {
 };
 
 /*****************************************************************************/
-static std::unordered_map<std::string, TerminationStatus>
-    TerminationStatusMap = {  //
+static std::unordered_map<std::string, TerminationStatus> TerminationStatusMap =
+    {  //
         {"UNKNOWN", TerminationStatus::UNKNOWN},
         {"OPTIMAL", TerminationStatus::OPTIMAL},
         {"FEASIBLE", TerminationStatus::FEASIBLE},

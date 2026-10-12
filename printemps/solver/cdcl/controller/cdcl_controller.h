@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 // CDCLController class definition
@@ -140,7 +140,7 @@ class CDCLController
 
     /*************************************************************************/
     inline double compute_portfolio_feedback_rate(
-        const int a_THREAD_INDEX,
+        const int    a_THREAD_INDEX,
         const double a_MAX_FEEDBACK_RATE = 0.90) const {
         if (a_THREAD_INDEX <= 0) {
             return 0.0;
@@ -176,7 +176,8 @@ class CDCLController
                                               : option::verbose::Off;
             portfolio[i].cdcl.seed      = a_BASE_OPTION.cdcl.seed + i;
 
-            // Disable random perturbations (differentiate portfolio purely by feedback rate)
+            // Disable random perturbations (differentiate portfolio purely by
+            // feedback rate)
             portfolio[i].cdcl.random_variable_selection_rate  = 0.0;
             portfolio[i].cdcl.initial_activity_noise_ratio    = 0.0;
             portfolio[i].cdcl.initial_phase_perturbation_rate = 0.0;

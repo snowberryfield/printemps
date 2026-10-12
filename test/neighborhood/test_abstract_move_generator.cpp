@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -86,11 +86,11 @@ TEST_F(TestAbstractMoveGenerator, reset_availability) {
 
     move_generator.set_moves(moves);
 
-    for (auto &&move : move_generator.moves()) {
+    for (auto&& move : move_generator.moves()) {
         move.is_available = false;
     }
     move_generator.reset_availability();
-    for (const auto &move : move_generator.moves()) {
+    for (const auto& move : move_generator.moves()) {
         EXPECT_TRUE(move.is_available);
     }
 }
@@ -114,7 +114,7 @@ TEST_F(TestNeighborhood, enable_default_moves) {
     [[maybe_unused]] auto& y = model.create_variables("y", 5, 0, 10);
     [[maybe_unused]] auto& z = model.create_variables("z", 5, 0, 1);
     [[maybe_unused]] auto& f = model.create_constraint("f", x.selection());
-    x(0) = 1;
+    x(0)                     = 1;
 
     model.builder().setup_unique_names();
     model.builder().update_derived_components();

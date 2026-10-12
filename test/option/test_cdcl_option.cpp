@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -105,20 +105,20 @@ TEST_F(TestCDCLOption, initialize) {
         CDCLOptionConstant::DEFAULT_IS_ENABLED_PHASE_SAVING,  //
         option.is_enabled_phase_saving);
 
-    EXPECT_EQ(                                                      //
+    EXPECT_EQ(                                                       //
         CDCLOptionConstant::DEFAULT_IS_ENABLED_CLAUSE_MINIMIZATION,  //
         option.is_enabled_clause_minimization);
 
-    EXPECT_FLOAT_EQ(                                                    //
-        CDCLOptionConstant::DEFAULT_RANDOM_VARIABLE_SELECTION_RATE,     //
+    EXPECT_FLOAT_EQ(                                                 //
+        CDCLOptionConstant::DEFAULT_RANDOM_VARIABLE_SELECTION_RATE,  //
         option.random_variable_selection_rate);
 
-    EXPECT_FLOAT_EQ(                                                 //
-        CDCLOptionConstant::DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO,    //
+    EXPECT_FLOAT_EQ(                                               //
+        CDCLOptionConstant::DEFAULT_INITIAL_ACTIVITY_NOISE_RATIO,  //
         option.initial_activity_noise_ratio);
 
-    EXPECT_FLOAT_EQ(                                                    //
-        CDCLOptionConstant::DEFAULT_INITIAL_PHASE_PERTURBATION_RATE,   //
+    EXPECT_FLOAT_EQ(                                                  //
+        CDCLOptionConstant::DEFAULT_INITIAL_PHASE_PERTURBATION_RATE,  //
         option.initial_phase_perturbation_rate);
 
     EXPECT_EQ(  //

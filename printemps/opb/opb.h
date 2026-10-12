@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -625,8 +625,10 @@ struct OPB {
         // augment negated variables
         for (const auto &variable_name : this->negated_variable_names) {
             const auto &negated_variable_name = "~" + variable_name;
-            if (a_variables_ptr->find(negated_variable_name) == a_variables_ptr->end() &&
-                a_variables_ptr->find(variable_name) != a_variables_ptr->end()) {
+            if (a_variables_ptr->find(negated_variable_name) ==
+                    a_variables_ptr->end() &&
+                a_variables_ptr->find(variable_name) !=
+                    a_variables_ptr->end()) {
                 (*a_variables_ptr)[negated_variable_name] =
                     1 - (*a_variables_ptr)[variable_name];
             }
@@ -642,7 +644,8 @@ struct OPB {
             int  value     = 1;
             bool not_found = false;
             for (const auto &variable_name : product_variable_name.second) {
-                if (a_variables_ptr->find(variable_name) == a_variables_ptr->end()) {
+                if (a_variables_ptr->find(variable_name) ==
+                    a_variables_ptr->end()) {
                     not_found = true;
                     break;
                 } else {

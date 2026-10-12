@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -26,7 +26,7 @@ struct LocalSearchCoreResult {
     /*************************************************************************/
     LocalSearchCoreResult(
         const LocalSearchCoreState<T_Variable, T_Expression> &a_STATE,
-        const option::Option &                                a_OPTION)
+        const option::Option                                 &a_OPTION)
         : total_update_status(a_STATE.total_update_status),
           number_of_iterations(a_STATE.iteration),
           elapsed_time(a_STATE.elapsed_time),

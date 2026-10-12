@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -518,7 +518,8 @@ class TabuSearchCore {
 
             if (chain_move.overlap_rate >
                     static_cast<float>(
-                        m_option.neighborhood.chain_move_overlap_rate_threshold) &&
+                        m_option.neighborhood
+                            .chain_move_overlap_rate_threshold) &&
                 !chain_move.has_duplicate_variable()) {
                 auto back_chain_move = chain_move;
                 for (auto&& alteration : back_chain_move.alterations) {

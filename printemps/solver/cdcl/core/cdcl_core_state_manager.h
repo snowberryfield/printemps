@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -92,13 +92,11 @@ class CDCLCoreStateManager {
         if (m_option.cdcl.restart_mode ==
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count = 1;
-            m_state.conflict_limit =
-                this->compute_luby_value(1) *
-                m_option.cdcl.initial_conflict_limit;
+            m_state.conflict_limit     = this->compute_luby_value(1) *
+                                     m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
                    option::cdcl_restart_mode::CDCLRestartMode::Geometric) {
-            m_state.conflict_limit =
-                m_option.cdcl.initial_conflict_limit;
+            m_state.conflict_limit = m_option.cdcl.initial_conflict_limit;
         }
         m_state.literal_block_distance_queue.setup(
             m_option.cdcl.restart_adaptive_window);
@@ -226,8 +224,7 @@ class CDCLCoreStateManager {
     }
 
     /*************************************************************************/
-    inline void increment_repeated_conflict_constraints_count(
-        void) noexcept {
+    inline void increment_repeated_conflict_constraints_count(void) noexcept {
         m_state.repeated_conflict_constraints_count++;
     }
 
@@ -261,8 +258,7 @@ class CDCLCoreStateManager {
         if (m_state.activities[a_VARIABLE_INDEX] > 1e20) {
             this->rescale_activities();
         }
-        m_heap.update_after_bump(a_VARIABLE_INDEX,
-                                 m_state.activities);
+        m_heap.update_after_bump(a_VARIABLE_INDEX, m_state.activities);
     }
 
     /*************************************************************************/
@@ -274,8 +270,7 @@ class CDCLCoreStateManager {
     /*************************************************************************/
     inline int pop_max_unassigned_variable(void) {
         while (!m_heap.empty()) {
-            const int VARIABLE_INDEX =
-                m_heap.pop(m_state.activities);
+            const int VARIABLE_INDEX = m_heap.pop(m_state.activities);
             if (!m_model.variable(VARIABLE_INDEX).is_assigned()) {
                 return VARIABLE_INDEX;
             }
@@ -352,9 +347,9 @@ class CDCLCoreStateManager {
         if (m_option.cdcl.restart_mode ==
             option::cdcl_restart_mode::CDCLRestartMode::Luby) {
             m_state.restart_luby_count++;
-            m_state.conflict_limit += this->compute_luby_value(
-                                          m_state.restart_luby_count) *
-                                      m_option.cdcl.initial_conflict_limit;
+            m_state.conflict_limit +=
+                this->compute_luby_value(m_state.restart_luby_count) *
+                m_option.cdcl.initial_conflict_limit;
         } else if (m_option.cdcl.restart_mode ==
                    option::cdcl_restart_mode::CDCLRestartMode::Geometric) {
             m_state.conflict_limit = static_cast<int>(

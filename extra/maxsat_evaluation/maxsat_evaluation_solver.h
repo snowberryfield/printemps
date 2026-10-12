@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -84,7 +84,7 @@ class MaxSATEvaluationSolver {
          * Force PRINTEMPS to be silent so that only c/o/v/s lines appear on
          * stdout. Force single-threaded execution per MSE rules.
          */
-        m_option.output.verbose                             = option::verbose::Off;
+        m_option.output.verbose = option::verbose::Off;
         m_option.parallel.number_of_threads_move_evaluation = 1;
         m_option.parallel.number_of_threads_move_update     = 1;
 #ifdef _OPENMP

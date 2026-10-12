@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -283,7 +283,7 @@ class LagrangeDualCore {
             "%s(%8.2e)%s\n",
             utility::int_format(STATE.iteration, 8).c_str(),  //
             STATE.lagrangian * SIGN,                          //
-            STATE.step_size,          //
+            STATE.step_size,                                  //
             color_incumbent_update_begin.c_str(),
             mark_current,  //
             CURRENT_SOLUTION_SCORE.objective * SIGN,

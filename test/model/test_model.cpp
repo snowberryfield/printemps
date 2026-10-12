@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -25,8 +25,8 @@ TEST_F(TestModel, initialize) {
 
     /// These declarations are for googletest constraint.
     /// http://opencv.jp/googletestdocs/FAQ.html#faq-the-compiler-complains-about-undefined-reference
-    auto max_number_of_variable_proxies = model_handler::
-        ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
+    auto max_number_of_variable_proxies =
+        model_handler::ComponentCreatorConstant::MAX_NUMBER_OF_VARIABLE_PROXIES;
     auto max_number_of_expression_proxies = model_handler::
         ComponentCreatorConstant::MAX_NUMBER_OF_EXPRESSION_PROXIES;
     auto max_number_of_constraint_proxies = model_handler::

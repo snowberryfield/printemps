@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -53,7 +53,7 @@ class PDLPController {
 
     /*************************************************************************/
     PDLPController(
-        model::Model<T_Variable, T_Expression>* a_model_ptr,  //
+        model::Model<T_Variable, T_Expression>* a_model_ptr,         //
         GlobalState<T_Variable, T_Expression>*  a_global_state_ptr,  //
         const solution::SparseSolution<T_Variable, T_Expression>&
                                                     a_INITIAL_SOLUTION,  //

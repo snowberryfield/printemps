@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -73,8 +73,7 @@ TEST_F(TestComponentCreator, create_variable_scalar_with_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestComponentCreator,
-       create_variable_one_dimensional_without_bound) {
+TEST_F(TestComponentCreator, create_variable_one_dimensional_without_bound) {
     {
         model::Model<int, double> model;
         for (auto i = 0; i < model_handler::ComponentCreatorConstant::
@@ -129,8 +128,7 @@ TEST_F(TestComponentCreator, create_variable_one_dimensional_with_bound) {
 }
 
 /*****************************************************************************/
-TEST_F(TestComponentCreator,
-       create_variable_two_dimensional_without_bound) {
+TEST_F(TestComponentCreator, create_variable_two_dimensional_without_bound) {
     {
         model::Model<int, double> model;
         for (auto i = 0; i < model_handler::ComponentCreatorConstant::

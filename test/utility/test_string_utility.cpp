@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -81,11 +81,14 @@ TEST_F(TestStringUtility, int_format) {
 
     // - width = 6
     EXPECT_EQ(" 99999", utility::int_format(99999, 6));
-    EXPECT_EQ("100000", utility::int_format(100000, 6));    // fits without abbreviation!
-    EXPECT_EQ("999999", utility::int_format(999999, 6));    // fits without abbreviation!
+    EXPECT_EQ("100000",
+              utility::int_format(100000, 6));  // fits without abbreviation!
+    EXPECT_EQ("999999",
+              utility::int_format(999999, 6));  // fits without abbreviation!
     EXPECT_EQ(" 1000k", utility::int_format(1000000, 6));   // uses k first!
     EXPECT_EQ("99999k", utility::int_format(99999999, 6));  // uses k first!
-    EXPECT_EQ("  100M", utility::int_format(100000000, 6)); // k exceeds 6, uses M!
+    EXPECT_EQ("  100M",
+              utility::int_format(100000000, 6));  // k exceeds 6, uses M!
 
     // - width = 8 (iteration column)
     EXPECT_EQ("       0", utility::int_format(0, 8));

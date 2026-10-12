@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -106,8 +106,8 @@ class CDCLVariableHeap {
         while (position > 0) {
             const int PARENT          = (position - 1) / 2;
             const int PARENT_VARIABLE = m_heap_array[PARENT];
-            if (this->greater_than(
-                    TARGET_VARIABLE, PARENT_VARIABLE, a_ACTIVITY)) {
+            if (this->greater_than(TARGET_VARIABLE, PARENT_VARIABLE,
+                                   a_ACTIVITY)) {
                 m_heap_array[position]       = PARENT_VARIABLE;
                 m_positions[PARENT_VARIABLE] = position;
                 position                     = PARENT;

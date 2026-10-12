@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -97,9 +97,10 @@ TEST_F(TestProblemSizeReducerSpecial, remove_redundant_set_constraints) {
         model.builder().update_derived_components();
 
         preprocess::ProblemSizeReducerSpecial<int, double>  //
-            problem_size_reducer_special(&model);
+             problem_size_reducer_special(&model);
         auto result =
-            problem_size_reducer_special.remove_redundant_set_constraints(false);
+            problem_size_reducer_special.remove_redundant_set_constraints(
+                false);
         EXPECT_EQ(8, result.number_of_fixed_variables);
         EXPECT_EQ(1, result.number_of_disabled_constraints);
         EXPECT_FALSE(x(0).is_fixed());
@@ -120,9 +121,10 @@ TEST_F(TestProblemSizeReducerSpecial, remove_redundant_set_constraints) {
         model.builder().update_derived_components();
 
         preprocess::ProblemSizeReducerSpecial<int, double>  //
-            problem_size_reducer_special(&model);
+             problem_size_reducer_special(&model);
         auto result =
-            problem_size_reducer_special.remove_redundant_set_constraints(false);
+            problem_size_reducer_special.remove_redundant_set_constraints(
+                false);
         EXPECT_EQ(7, result.number_of_fixed_variables);
         EXPECT_EQ(1, result.number_of_disabled_constraints);
         EXPECT_FALSE(x(0).is_fixed());
@@ -140,9 +142,10 @@ TEST_F(TestProblemSizeReducerSpecial, remove_redundant_set_constraints) {
         model.builder().update_derived_components();
 
         preprocess::ProblemSizeReducerSpecial<int, double>  //
-            problem_size_reducer_special(&model);
+             problem_size_reducer_special(&model);
         auto result =
-            problem_size_reducer_special.remove_redundant_set_constraints(false);
+            problem_size_reducer_special.remove_redundant_set_constraints(
+                false);
         EXPECT_EQ(0, result.number_of_fixed_variables);
         EXPECT_EQ(0, result.number_of_disabled_constraints);
     }

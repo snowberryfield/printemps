@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -61,7 +61,7 @@ class AbstractMultiArray {
     AbstractMultiArray(const int a_INDEX, const std::vector<int> &a_SHAPE) {
         m_index                = a_INDEX;
         m_number_of_elements   = std::accumulate(a_SHAPE.begin(), a_SHAPE.end(),
-                                               1, std::multiplies<int>());
+                                                 1, std::multiplies<int>());
         m_number_of_dimensions = (a_SHAPE.size());
         m_shape                = a_SHAPE;
         m_max_digits           = std::to_string(utility::max(a_SHAPE)).size();

@@ -1,5 +1,5 @@
 /*****************************************************************************/
-// Copyright (c) 2020-2025 Yuji KOGUMA
+// Copyright (c) 2020-2026 Yuji KOGUMA
 // Released under the MIT license
 // https://opensource.org/licenses/mit-license.php
 /*****************************************************************************/
@@ -71,11 +71,11 @@ struct CDCLCoreState {
 
         this->trail.clear();
         this->trail_level_offsets.clear();
-        this->propagation_queue_head    = 0;
-        this->conflict_constraint_index = {CDCLConstraintType::NONE,
-                                           CDCLCoreConstant::NO_CONFLICT};
-        this->last_conflict_constraint  = {CDCLConstraintType::NONE,
-                                          CDCLCoreConstant::NO_CONFLICT};
+        this->propagation_queue_head              = 0;
+        this->conflict_constraint_index           = {CDCLConstraintType::NONE,
+                                                     CDCLCoreConstant::NO_CONFLICT};
+        this->last_conflict_constraint            = {CDCLConstraintType::NONE,
+                                                     CDCLCoreConstant::NO_CONFLICT};
         this->repeated_conflict_constraints_count = 0;
 
         this->activities.clear();
