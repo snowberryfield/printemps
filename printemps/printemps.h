@@ -7,6 +7,7 @@
 #define PRINTEMPS_PRINTEMPS_H__
 
 #include "std.h"
+#include "assertion.h"
 
 #include "constant/constant.h"
 #include "error_handler/error_handler.h"

@@ -17,14 +17,14 @@ static const std::string VERSION      = "v2.10.0";
 static const std::string PROJECT_URL =
     "https://snowberryfield.github.io/printemps/";
 
-static const std::string NO_COLOR = "\e[0m";
-static const std::string RED      = "\e[0;31m";
-static const std::string GREEN    = "\e[0;32m";
-static const std::string YELLOW   = "\e[0;33m";
-static const std::string BlUE     = "\e[0;34m";
-static const std::string PURPLE   = "\e[0;35m";
-static const std::string CYAN     = "\e[0;36m";
-static const std::string WHITE    = "\e[0;36m";
+static const std::string NO_COLOR = "\033[0m";
+static const std::string RED      = "\033[0;31m";
+static const std::string GREEN    = "\033[0;32m";
+static const std::string YELLOW   = "\033[0;33m";
+static const std::string BlUE     = "\033[0;34m";
+static const std::string PURPLE   = "\033[0;35m";
+static const std::string CYAN     = "\033[0;36m";
+static const std::string WHITE    = "\033[0;36m";
 
 }  // namespace printemps::constant
 
