@@ -718,10 +718,16 @@ auto& h = model.create_constraints("h", {10, 10, 10});
 
 auto result = printemps::solver::solve(&model);
 
-// Print whether a feasible solution was obtained or not and the objective
-// function value of the final best solution.
-std::cout << result.solution.is_feasible() << std::endl;
-std::cout << result.solution.objective() << std::endl;
+// Print whether a feasible solution was obtained or not, termination status,
+// and objective function value of the final solution.
+std::cout << "is_feasible: " << result.solution.is_feasible() << std::endl;
+std::cout << "termination_status: " << result.solution.termination_status() << std::endl;
+std::cout << "is_proven_infeasible: " << result.solution.is_proven_infeasible() << std::endl;
+std::cout << "objective: " << result.solution.objective() << std::endl;
+std::cout << "total_violation: " << result.solution.total_violation() << std::endl;
+
+// Print solver run metrics from the status object.
+std::cout << "elapsed_time: " << result.status.elapsed_time << " s" << std::endl;
 
 // Print the value of the decision variables "x" and "y(0)" in the final
 // best solution.
@@ -740,11 +746,17 @@ std::cout << result.solution.violations("g").value() << std::endl;
 std::cout << result.solution.violations("h").values(0, 0, 0) << std::endl;
 ```
 
-For accessing the result, the following methods are provided by the member `solution` in the `Result` object.
+For accessing the result, the following methods are provided by the member `solution` in the `Result` object:
 
 -  __Methods for accessing the optimization status:__ 
     -  The method `is_feasible()` returns `true` if the final best solution is feasible, and returns `false` otherwise.
-    -  The method `objective()` returns the objective function value of the final best solution.                                                                            
+    -  The method `termination_status()` returns the termination condition as a string (`"OPTIMAL"`, `"FEASIBLE"`, `"INFEASIBLE"`, `"TIME_OVER"`, `"ITERATION_OVER"`, `"INTERRUPTION"`, `"REACH_TARGET"`, or `"UNKNOWN"`).
+    -  The method `is_proven_infeasible()` returns `true` if the problem was mathematically proven to have no feasible solution during presolving or CDCL search.
+    -  The method `objective()` returns the objective function value of the final best solution.
+    -  The method `total_violation()` returns the total penalty violation across all constraints.
+
+- __Accessing solver performance and metrics (`result.status`):__
+    - The `status` member of `Result` exposes run information including `status.elapsed_time`, `status.number_of_variables`, `status.number_of_constraints`, `status.number_of_tabu_search_iterations`, and `status.number_of_evaluated_moves`.
         
 - __Methods for accessing the values of decision variables:__ 
     - The method `variables(name).value()` returns the value of the scalar (non-indexed) decision variable named `name` in the final best solution. The string `name` must correspond to the name given in the declaration.
@@ -757,21 +769,11 @@ For accessing the result, the following methods are provided by the member `solu
 
 - __Methods for accessing the values and violations of constraints:__
     - The method `constraints(name).value()` returns the value of the scalar constraint named `name` in the final solution. The value obtained by this method is the left-hand side of the constraint when it is written in the form `g(x) <= 0`, `g(x) == 0`, or `g(x) >= 0`.
-    - The method `constraints(name).values(n_1, ..., n_m)`  returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
-    - The method `violations(name).value()` method returns the violation for the scalar (no-indexed) constraint named `name` in the final solution. The value of the violation is non-negative.
-    - The method `violations(name).values(n_1, ..., n_m)` method returns the violation for the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
+    - The method `constraints(name).values(n_1, ..., n_m)` returns the value of the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
+    - The method `violations(name).value()` returns the violation for the scalar (non-indexed) constraint named `name` in the final solution. The value of the violation is non-negative.
+    - The method `violations(name).values(n_1, ..., n_m)` returns the violation for the component indexed by `n_1, ..., n_m` of the multi-dimensional indexed constraint named `name` in the final solution.
 
-To make it easier to inspect the values, the utility functions `print_variable_values()`, `print_expression_values()`, `print_constraint_values()`, and `print_violation_values()` are provided.
-They respectively print the values of all variables, expressions,  constraints, and violations to the standard output. 
-Please refer to the example.
-
-## References
-
-- [1] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_, Vol.39, pp.131–151 (2001).
-
-- [2] Y.Koguma: [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), __IEEE Access__, Vol.12, pp.19059-19076 (2024).
-
-- [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).
+To make it easier to inspect or export solutions, the member methods `write_solution(filename)` and `write_json_by_name(filename)` are provided on `solution`, alongside utility functions `print_variable_values()`, `print_expression_values()`, `print_constraint_values()`, and `print_violation_values()`.
 
 ## Python Bindings
 Official Python bindings built with `pybind11` are supported from v2.9.0.
@@ -781,6 +783,7 @@ You can install the package from the repository root:
 ```bash
 pip install ./python
 ```
+Installing the package also registers a `printemps` console script for solving MPS files directly from the terminal.
 
 ### Quick Start
 The Python API mirrors the C++ API closely. Here is a simple example solving the same problem (P):
@@ -797,13 +800,26 @@ g[0] = 66 * x(0) + 14 * x(1) >= 1430
 g[1] = -82 * x(0) + 28 * x(1) >= 1306
 model.minimize(x(0) + 10 * x(1))
 
-# (2) Running Solver
-result = printemps.solve(model)
+# (2) Configuring Options (Optional)
+option = printemps.Option()
+option.output.verbose = printemps.Verbose.Full
+option.cdcl.is_enabled = True
+option.tabu_search.iteration_max = 1000
 
-# (3) Accessing the Result
+# Alternatively, load options directly from a JSON file:
+# option = printemps.Option("option.json")
+
+# (3) Running Solver
+result = printemps.solve(model, option)
+
+# (4) Accessing the Result
+print("is_feasible =", result.solution.is_feasible())
+print("termination_status =", result.solution.termination_status())
+print("is_proven_infeasible =", result.solution.is_proven_infeasible())
 print("objective =", result.solution.objective())
 print("x(0) =", result.solution.variables("x")(0))
 print("x(1) =", result.solution.variables("x")(1))
+print("elapsed_time =", result.status.elapsed_time)
 ```
 
 ### Key Differences from C++
@@ -818,6 +834,18 @@ The main syntax differences are summarised as follows:
 | `expression_block(i, j, k) += x(n, m, k)`   | `expression_block[i, j, k] += x(n, m, k)`     |
 | `x.selection({n, Range::All, k})`           | `x.selection([n, printemps.ALL, k])`          |
 | `option.output.verbose = verbose::Full`     | `option.output.verbose = printemps.Verbose.Full` |
+| `option.cdcl.is_enabled = true`             | `option.cdcl.is_enabled = True`               |
 | `result.solution.variables("x").values(n,m)`| `result.solution.variables("x")(n, m)`        |
+| `result.solution.termination_status()`      | `result.solution.termination_status()`        |
+| `result.solution.is_proven_infeasible()`    | `result.solution.is_proven_infeasible()`      |
 
 For details, please refer to the Python binding [README.md](https://github.com/snowberryfield/printemps/tree/master/python/README.md) in the repository.
+
+## References
+
+- [1] K.Nonobe and T.Ibaraki: [An improved tabu search method for the weighted constraint satisfaction problem](https://www.researchgate.net/publication/228737620_An_Improved_Tabu_Search_Method_For_The_Weighted_Constraint_Satisfaction_Problem), _INFOR_, Vol.39, pp.131–151 (2001).
+
+- [2] Y.Koguma: [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), __IEEE Access__, Vol.12, pp.19059-19076 (2024).
+
+- [3] R.Fletcher: [Practical Methods of Optimization, Second Edition](https://onlinelibrary.wiley.com/doi/book/10.1002/9781118723203), John Wiley & Sons (2000).
+

@@ -18,8 +18,8 @@ __PRINTEMPS__ (PoRtable INTEger Mathematical Programming Solver) is a C++ metahe
 ## News
 |     Date      | Update                                                                                            |
 |:-------------:|:--------------------------------------------------------------------------------------------------|
-| Aug. 18, 2026 | [New benchmark results](./contents/benchmark/index.md) were added.                                |
-| Jul. 21, 2026 | [PRINTEMPS v2.9.0](https://github.com/snowberryfield/printemps/releases/tag/v2.9.0) was released. |
+| Oct. 15, 2026 | [Constraint Types](./contents/constraint_types.md) was added.                                |
+| Oct. 15, 2026 | [PRINTEMPS v2.10.0](https://github.com/snowberryfield/printemps/releases/tag/v2.10.0) was released. |
 | Feb. 8, 2024  | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
@@ -118,13 +118,24 @@ where the options `CC` and `CXX` respectively designate the paths of C and C++ c
 
 The solver can be run by the following command:
 ```
-$./printemps mps_file [-p option_file] [--accept-continuous] 
+$./printemps [options] mps_file
 ```
-where the argument `mps_file` is the path to the MPS file. The argument `-p option_file` is optional, which specifies solver options and parameters via a JSON file. If the optional flag `--accept-continuous` is activated, the solver accepts an MPS file that includes continuous variables. Then the continuous variables will be treated as integer variables. An example of solver option JSON file is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
+where the argument `mps_file` is the path to the MPS file. Key options include:
+- `-p option_file`: Specify solver options and parameters via a JSON file. An example is provided as [`application/dat/option.json`](https://github.com/snowberryfield/printemps/blob/master/application/dat/option.json).
+- `-t time_limit`: Specify the allowed maximum computational time in seconds.
+- `-k iteration_limit`: Specify the allowed maximum number of outer loop iterations.
+- `-j number_of_threads`: Specify the number of threads for parallel computation.
+- `-v verbose`: Specify the log level of standard output (`Off`, `Warning`, `Outer`, `Inner`, or `Full`).
+- `-r seed`: Specify the random seed.
+- `--accept-continuous`: Accept an MPS file that includes continuous variables by treating them as integer variables.
+- `--minimization` / `--maximization`: Explicitly set optimization direction.
+- `-i solution_file`: Specify initial solution file.
+- `-m mutable_file` / `-f fixed_file`: Specify mutable or fixed variable files.
 
 ## Documents
 - [Starter Guide](./contents/starter_guide.md) covers the basic usage of PRINTEMPS, including modeling of optimization problems, running the solver, and accessing the optimization results.
-- [Solver Option Guide](./contents/solver_option_guide.md) gives a detailed description of the all options and their default values.
+- [Solver Option Guide](./contents/solver_option_guide.md) gives a detailed description of all solver options and their default values.
+- [Constraint Types](./contents/constraint_types.md) describes the classification of all 31 constraint types recognized by PRINTEMPS and their treatment in preprocessing and neighborhood generation.
 
 
 ## Benchmark
