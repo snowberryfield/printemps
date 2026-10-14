@@ -16,10 +16,9 @@ __PRINTEMPS__ (PoRtable INTEger Mathematical Programming Solver) is a C++ metahe
 - __Flexibility in defining neighborhoods.__ It automatically detects the neighborhood structure of the problem. In addition to this, PRINTEMPS also accepts user-defined neighborhoods.
 
 ## News
-|     Date      | Update                                                                                            |
-|:-------------:|:--------------------------------------------------------------------------------------------------|
-| Oct. 15, 2026 | [Constraint Types](./contents/constraint_types.md) was added.                                |
-| Oct. 15, 2026 | [PRINTEMPS v2.10.0](https://github.com/snowberryfield/printemps/releases/tag/v2.10.0) was released. |
+|     Date      | Update                                                                                                                                                                                        |
+| :-----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oct. 15, 2026 | [PRINTEMPS v2.10.0](https://github.com/snowberryfield/printemps/releases/tag/v2.10.0) was released.                                                                                           |
 | Feb. 8, 2024  | [Tabu Search-Based Heuristic Solver for General Integer Linear Programming Problems](https://ieeexplore.ieee.org/document/10418217), a paper on PRINTEMPS, has been published in IEEE Access. |
 
 ## Algorithm
@@ -99,13 +98,13 @@ The option `-fopenmp` is required to activate parallel computation. See [Solver 
 
 Following combinations of operating systems and compilers are confirmed compilation possible:
 
-|      Operating System     | Compiler (version)                                           |
-| :-----------------------: | :----------------------------------------------------------- |
-|          macOS 14         | gcc 12.4.0, 13.4.0, 14.3.0, 15.1.0                           |
-|          macOS 15         | gcc 12.4.0, 13.4.0, 14.3.0, 15.1.0                           |
-|        Ubuntu 22.04       | gcc 12.3.0 <br> clang 13.0.1, 14.0.0, 15.0.7         |
-|        Ubuntu 24.04       | gcc 12.3.0, 13.3.0, 14.2.0 <br> clang 16.0.6, 17.0.6, 18.1.3 |
-|        Windows 2022       | gcc 15.2.0 (MSYS2 / mingw64)                                 |
+| Operating System | Compiler (version)                                           |
+| :--------------: | :----------------------------------------------------------- |
+|     macOS 14     | gcc 12.4.0, 13.4.0, 14.3.0, 15.1.0                           |
+|     macOS 15     | gcc 12.4.0, 13.4.0, 14.3.0, 15.1.0                           |
+|   Ubuntu 22.04   | gcc 12.3.0 <br> clang 13.0.1, 14.0.0, 15.0.7                 |
+|   Ubuntu 24.04   | gcc 12.3.0, 13.3.0, 14.2.0 <br> clang 16.0.6, 17.0.6, 18.1.3 |
+|   Windows 2022   | gcc 15.2.0 (MSYS2 / mingw64)                                 |
 
 
 ## Standalone Solver
@@ -135,8 +134,6 @@ where the argument `mps_file` is the path to the MPS file. Key options include:
 ## Documents
 - [Starter Guide](./contents/starter_guide.md) covers the basic usage of PRINTEMPS, including modeling of optimization problems, running the solver, and accessing the optimization results.
 - [Solver Option Guide](./contents/solver_option_guide.md) gives a detailed description of all solver options and their default values.
-- [Constraint Types](./contents/constraint_types.md) describes the classification of all 31 constraint types recognized by PRINTEMPS and their treatment in preprocessing and neighborhood generation.
-
 
 ## Benchmark
 Optimization performance of PRINTEMPS has been evaluated using pure integer instances of [MIPLIB 2017](https://miplib.zib.de). Please refer to [Benchmark Results](./contents/benchmark/index.md) for detail.
